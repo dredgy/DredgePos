@@ -14,7 +14,7 @@ open FSharp.Reflection
 
 open Thoth.Json.Net
 
-let (|?) lhs rhs = (if lhs = null then rhs else lhs)
+let (|?) lhs rhs = if lhs = null then rhs else lhs
 
 let map list = list |> Map.ofList
 
