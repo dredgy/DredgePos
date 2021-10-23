@@ -1,0 +1,18 @@
+{
+    "compilerOptions":{
+        "lib":[
+            "esnext",
+            "dom"
+        ],
+        "noImplicitAny":true,
+        "removeComments":false,
+        "preserveConstEnums":true,
+        "outDir":"../js",
+        "target":"ES2016",
+        "sourceMap":true,
+        "moduleResolution": "node"
+    },
+    "include":[
+        "*"
+    ]
+}

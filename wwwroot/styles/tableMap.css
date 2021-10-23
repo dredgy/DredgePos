@@ -1,0 +1,92 @@
+#tableScreen{
+	height:100vh !important;
+}
+#decorator{
+	display:none;
+	position:absolute;
+	margin:auto;
+	top:0;
+	bottom:0;
+	right:0;
+	left:0;
+	width:30%;
+	height:50%;
+	background-color:#333;
+	border:solid 2px;
+	flex-direction:column;
+}
+
+.mobile #decorator{
+	width:90%;
+	height:90%;
+}
+
+.deleteDecoration{
+	display:none;
+}
+
+#decoratorHeader{
+	background-color:#666;
+	display:flex;
+	flex-basis:10%
+}
+
+#decoratorHeader *{
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+
+#decoratorHeader h2{
+	flex-basis:90%;
+}
+
+#decoratorHeader a{
+	flex-basis:10%;
+}
+
+#decoratorContent{
+	flex-basis:90%;
+	width:100%;
+	overflow-y:auto;
+	display:block;
+	margin:auto;
+}
+
+.decoratorRow{
+	display:flex;
+	height:30%;
+	width:100%;
+}
+
+.decoratorItem{
+	display:flex;
+	flex-direction:column;
+	height:100%;
+	flex-basis:25%;
+	text-align:center;
+}
+
+.decoratorRow:nth-child(odd) .decoratorItem:nth-child(even),
+.decoratorRow:nth-child(even) .decoratorItem:nth-child(odd){
+	background-color:#ccc;
+	color:#333;
+}
+
+.decoratorItem a{
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	font-weight:bold;
+}
+
+.decoratorItem a:first-of-type{
+	flex-basis:70%;
+	background-size:contain;
+	background-repeat:no-repeat;
+	background-position:center center;
+}
+
+.decoratorItem a:nth-of-type(2){
+	flex-basis:30%;
+}

@@ -1,0 +1,374 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="DredgeFramework.module.fs" />
+        <Compile Include="Browser.module.fs" />
+        <Compile Include="Database.module.fs" />
+        <Compile Include="Language.module.fs" />
+        <Compile Include="Theme.module.fs" />
+        <Compile Include="Reservations.module.fs" />
+        <Compile Include="Floorplan.module.fs" />
+        <Compile Include="Decorations.module.fs" />
+        <Compile Include="Clerk.module.fs" />
+        <Compile Include="Session.module.fs" />
+        <Compile Include="PageController.fs" />
+        <Compile Include="AjaxController.fs" />
+        <Compile Include="Program.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="tables\active\table47.table" />
+      <Content Include="tables\active\table1.table" />
+      <Content Include="tables\format.xslt" />
+      <Content Update="wwwroot\languages\english\keyboardLayout.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="wwwroot\languages\english\main.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Remove="node_modules\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Dapper" Version="2.0.78" />
+      <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
+      <PackageReference Include="Dapper.FSharp" Version="1.16.0" />
+      <PackageReference Include="FSharp.Data" Version="4.0.1" />
+      <PackageReference Include="Saturn" Version="0.15.0-preview03" />
+	  <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
+      <PackageReference Include="FSharp.Data.SqlClient" Version="2.1.0-beta1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-preview.2.21154.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-preview.2.21154.2">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="MySql.Data" Version="8.0.23" />
+      <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.22" />
+      <PackageReference Include="SQLProvider" Version="1.2.1" />
+      <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.5.21301.5" />
+      <PackageReference Include="Thoth.Json.Net" Version="5.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="languages\english" />
+      <Folder Include="tables\archived" />
+      <Content Include="xslt\orderXMLtoHTML.xslt" />
+      <Content Include="xslt\orderHtmltoXML.xslt" />
+      <Content Include="xslt\htmlToEscPos.xslt" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\themes\default\index.tpl.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\default\scripts\global.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\default\scripts\index.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\default\styles\global.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\themes\default\styles\index.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Animation.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Animation.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Canvas.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Canvas.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Container.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Container.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Context.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Context.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Core.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Core.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\DragAndDrop.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\DragAndDrop.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Factory.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Factory.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\FastLayer.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\FastLayer.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Blur.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Blur.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Brighten.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Brighten.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Contrast.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Contrast.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Emboss.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Emboss.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Enhance.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Enhance.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Grayscale.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Grayscale.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\HSL.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\HSL.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\HSV.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\HSV.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Invert.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Invert.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Kaleidoscope.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Kaleidoscope.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Mask.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Mask.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Noise.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Noise.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Pixelate.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Pixelate.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Posterize.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Posterize.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\RGB.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\RGB.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\RGBA.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\RGBA.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Sepia.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Sepia.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Solarize.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Solarize.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Threshold.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\filters\Threshold.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Global.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Global.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Group.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Group.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\index-node.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\index-node.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\index-types.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\index.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\index.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Layer.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Layer.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Animation.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Animation.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Canvas.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Canvas.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Container.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Container.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Context.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Context.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Core.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Core.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\DragAndDrop.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\DragAndDrop.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Factory.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Factory.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\FastLayer.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\FastLayer.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Blur.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Blur.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Brighten.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Brighten.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Contrast.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Contrast.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Emboss.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Emboss.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Enhance.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Enhance.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Grayscale.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Grayscale.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\HSL.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\HSL.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\HSV.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\HSV.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Invert.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Invert.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Kaleidoscope.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Kaleidoscope.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Mask.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Mask.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Noise.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Noise.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Pixelate.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Pixelate.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Posterize.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Posterize.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\RGB.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\RGB.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\RGBA.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\RGBA.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Sepia.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Sepia.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Solarize.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Solarize.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Threshold.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\filters\Threshold.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Global.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Global.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Group.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Group.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\index-node.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\index-node.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\index-types.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\index.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\index.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Layer.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Layer.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Node.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Node.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\PointerEvents.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\PointerEvents.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Shape.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Shape.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Arc.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Arc.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Arrow.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Arrow.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Circle.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Circle.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Ellipse.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Ellipse.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Image.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Image.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Label.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Label.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Line.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Line.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Path.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Path.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Rect.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Rect.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\RegularPolygon.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\RegularPolygon.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Ring.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Ring.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Sprite.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Sprite.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Star.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Star.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Text.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Text.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\TextPath.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\TextPath.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Transformer.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Transformer.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Wedge.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\shapes\Wedge.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Stage.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Stage.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Tween.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Tween.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\types.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\types.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Util.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Util.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Validators.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\Validators.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\_CoreInternals.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\_CoreInternals.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\_FullInternals.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\lib\_FullInternals.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Node.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Node.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\PointerEvents.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\PointerEvents.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Shape.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Shape.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Arc.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Arc.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Arrow.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Arrow.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Circle.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Circle.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Ellipse.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Ellipse.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Image.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Image.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Label.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Label.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Line.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Line.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Path.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Path.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Rect.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Rect.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\RegularPolygon.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\RegularPolygon.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Ring.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Ring.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Sprite.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Sprite.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Star.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Star.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Text.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Text.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\TextPath.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\TextPath.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Transformer.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Transformer.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Wedge.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\shapes\Wedge.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Stage.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Stage.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Tween.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Tween.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\types.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\types.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Util.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Util.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Validators.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\Validators.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\_CoreInternals.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\_CoreInternals.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\_FullInternals.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\konva\_FullInternals.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Animation.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Canvas.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Container.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Context.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Core.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\DragAndDrop.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Factory.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\FastLayer.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Blur.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Brighten.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Contrast.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Emboss.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Enhance.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Grayscale.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\HSL.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\HSV.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Invert.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Kaleidoscope.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Mask.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Noise.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Pixelate.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Posterize.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\RGB.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\RGBA.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Sepia.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Solarize.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\filters\Threshold.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Global.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Group.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\index-node.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\index-types.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\index.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Layer.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Node.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\PointerEvents.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Shape.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Arc.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Arrow.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Circle.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Ellipse.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Image.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Label.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Line.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Path.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Rect.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\RegularPolygon.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Ring.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Sprite.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Star.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Text.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\TextPath.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Transformer.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\shapes\Wedge.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Stage.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Tween.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\types.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Util.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\Validators.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\_CoreInternals.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\scripts\ts\typings\lib\_FullInternals.d.ts" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="node_modules\**" />
+    </ItemGroup>
+
+</Project>

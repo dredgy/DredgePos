@@ -1,0 +1,225 @@
+#pageContainer{
+	width:100% !important;
+	height:100vh !important;
+	overflow:hidden;
+	display:block !important
+}
+
+.mobile{
+	font-size:0.5em;
+}
+
+#flexWrapper{
+	display:flex;
+	height:100%;
+	flex-direction:column;
+}
+
+#header{
+	flex-basis:10%;
+	background-color:#333;
+	display:flex;
+	border-bottom:solid 1px #eee;
+}
+
+#header h1{
+	flex-basis:80%;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+
+#header a{
+	flex-basis:10%;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+
+#header a.exit{
+	font-size:3em;
+}
+
+#pageStructure{
+	flex-basis:90%;
+	display:flex;
+	flex-direction:row;
+	overflow:hidden;
+	
+}
+
+#leftColumn{
+	display:flex;
+	flex-basis:40%;
+	flex-direction:column;
+	background-color:#222;
+}
+
+#controlColumn{
+	flex-basis:4%;
+	display:flex;
+	height:100%;
+	align-items:center;
+	justify-content:center;
+	flex-direction:column;
+	background-color:#333;
+}
+
+#controlColumn .posButton{
+	flex-basis:40%;
+	width:100%;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	font-size:3em;
+}
+
+#centerColumn{
+	display:flex;
+	flex-direction:column;
+	overflow:hidden;
+	height:100%;
+	flex-basis:30%;
+	background-color:#222
+}
+
+#rightColumn{
+	flex-direction:column;
+	display:flex;
+	height:100%;
+	flex-basis:27%;
+}
+
+
+h2{
+	background-color:#666;
+	border-bottom:solid 2px #eee;
+	text-align:center;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	flex-basis:5%;
+}
+
+.tableWrapper{
+	flex-basis:80%;
+	overflow-y:auto;
+	width:100%;
+	display:flex;
+}
+
+.tableFooter{
+	flex-basis:15%;
+	background-color:#666;
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	justify-content:flex-end;
+}
+
+
+.controlRow, .totalsRow{
+	flex:1;
+	display:flex;
+	align-items:center;
+	width:100%;
+}
+
+.totalsRow h3, .totalRows p{
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	width:100%;
+}
+
+.totalsRow h3{
+	flex-basis:40%;
+}
+
+.totalRows p{
+	align-items:flex-start;
+	flex-basis:60%;
+}
+
+.totalsRow{
+	flex-direction:column;
+}
+
+.controlRow a{
+	flex:1;
+	height:100%;
+	display:flex;
+	justify-content:center;
+	align-items:center;
+}
+
+table{
+	width:100%;
+}
+
+th{
+	text-align:center;
+	font-weight:bold;
+}
+
+th, td{
+	height:3em;
+    vertical-align:middle;
+    text-align:center;
+	font-weight:bold;
+}
+
+.instructionRow td{
+    font-weight:lighter !important;
+   
+}
+
+.itemCell{
+    text-align:left !important;
+}
+
+.instructionRow .itemCell{
+    padding-left:2em;
+}
+
+.invisibleText{
+    color:rgba(0,0,0,0);
+}
+
+tr.selected{
+    background-color:#aaa !important;
+}
+
+tr.partially{
+    background-color:#ffeba1 !important;
+	color:#666 !important;
+}
+
+#rightColumnContainer{
+	display:flex;
+	justify-content:center;
+	flex-direction:column;
+	height:60%;
+}
+
+#rightColumnContainer .row{
+	flex:1;
+	display:flex;
+}
+
+#rightColumnContainer .row a{
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	flex:1;
+}
+
+.heading{
+	font-size:1.5em;
+	background-color:#000;
+}
+
+
+#second .clerkCell{
+	display:none;
+}

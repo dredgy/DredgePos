@@ -1,0 +1,591 @@
+body{
+	overflow:hidden;
+}
+
+#pageContainer{
+	display:flex;
+	overflow:hidden;
+	height:100vh !important;
+}
+
+#leftColumn{
+	display:flex;
+	flex-direction:column;
+	height:100%;
+	flex-basis:35%;
+}
+
+#tableDetails{
+	display:flex;
+	flex-basis:10%;
+	flex-direction:column;
+}
+
+#tableDetails h2{
+	flex-basis:50%;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	
+}
+
+#tableDetails div{
+	display:flex;
+	flex-basis:50%;
+}
+
+#tableDetails div a{
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	flex-basis:50%;
+	height:100%;
+}
+
+#orderBoxContainer{
+	flex-basis:80%;
+	background-color:#000;
+	overflow-y:auto;
+	scroll-behavior: smooth;
+}
+
+#leftColumnFooter{
+	display:flex;
+	flex-direction:column;
+	flex-basis:10%;
+	background-color:#777;
+}
+
+#leftColumnFooter .messageBox{
+	border-top:inset 3px #ccc;
+	border-bottom:inset 3px #ccc;
+	flex-basis:30%;
+	background-color:#FFF;
+	text-align:center;
+}
+
+
+#leftColumnFooter h2,
+#leftColumnFooter .selectedTotal{
+	flex-basis:30%;
+	padding-right:1em;
+	text-align:right;
+}
+
+#rightColumn{
+	display:flex;
+	flex-basis:65%;
+	flex-direction:column;
+	overflow:hidden;
+}
+
+#topBar{
+	flex-basis:10%;
+	display:flex;
+	background:#666;
+}
+
+#topBar .exit{
+	flex-basis:15%;
+	font-size:3em;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+
+
+#topBar a{
+	flex:1;
+	height:100%;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+
+
+#topHalf{
+	flex-basis:25%;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+
+#topHalf div{
+	display:flex;
+	height:100%;
+}
+
+.endFunctionColumn{
+	flex-basis:15%;
+	flex-direction:column;
+}
+
+.functionColumn{
+	flex:1;
+	flex-direction:column;
+}
+
+.functionColumn *{
+	display:flex;
+	flex:1;
+	justify-content:center;
+	align-items:center;
+}
+
+
+#middleHalf{
+	background-color:#666;
+	flex-basis:10%;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	overflow-x:auto;
+	overflow-y:hidden;
+}
+
+#middleHalf a{
+	height:100%;
+	flex:1;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+}
+
+#bottomHalf{
+	flex:1;
+	overflow-x:auto;
+	overflow-y:hidden;	
+	scroll-behavior: smooth;
+}
+
+.pageControls{
+	flex-basis:10%;
+	width:100%;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	text-align:center;
+}
+
+.pageControls a{
+	height:100%;
+	flex:1;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	text-align:center;
+}
+
+#bottomHalf::-webkit-scrollbar {
+  display: none;
+}
+
+#pageWrapper{
+	height:100%;
+	width:100%;
+	display:flex;
+}
+
+.itemPage{
+  flex-basis:100%;
+  height:100%;
+}
+
+
+.itemPage table{
+	table-layout:fixed;
+}
+
+.itemPage td{
+}
+
+td .itemCellWrapper{
+	position:relative;
+	height:100%;
+}
+
+
+td .posButton{
+	position:absolute;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	overflow:hidden;
+}
+
+
+td .posButton.normal{
+	font-size:0.9em;
+	gap:2%;
+	align-items:center;
+}
+
+td .posButton.normal a:first-of-type{
+	font-size:0.9em;
+	flex-basis:100%;
+	text-align:center;
+	align-items:center;
+}
+
+td .posButton.normal.hasImage a:first-of-type{
+	margin-left:2%;
+	height:100%;
+	flex-basis:24%;
+	background-size:contain;
+	background-repeat:no-repeat;
+	background-position:center;	
+	align-items:center;
+}
+
+td .posButton.normal.hasImage a:nth-of-type(2){
+	flex-basis:70%;
+}
+
+td .posButton.doubleHeight{
+	flex-direction:column;	
+}
+
+td .posButton.doubleHeight.hasImage a:first-of-type{
+	margin-top:5%;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	width:100%;
+	flex-basis:66%;
+	background-size:contain;
+	background-repeat:no-repeat;
+	background-position:center 20%;	
+}
+
+.mobile td .posButton.doubleHeight.hasImage a:first-of-type{
+	background-position:center bottom;
+}
+
+td .posButton.doubleHeight.hasImage a:nth-of-type(2){
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	flex-basis:33%;
+}
+
+td .posButton.doubleWidth.hasImage a:first-of-type{
+	margin-left:2%;
+	height:100%;
+	flex-basis:24%;
+	background-size:contain;
+	background-repeat:no-repeat;
+	background-position:0 center;	
+	display:flex;
+	align-items:center;
+}
+
+td .posButton.doubleWidth.hasImage a:nth-of-type(2){
+	flex-basis:74%;
+}
+
+td .posButton.doubleWidth.doubleHeight{
+	flex-direction:row;
+	gap:4%;
+}
+
+td .posButton.doubleWidth.doubleHeight.hasImage a:first-of-type{
+	margin-left:2%;
+	flex-basis:48%;
+	height:100%;
+	background-size:contain;
+	background-repeat:no-repeat;
+	background-position:center;	
+}
+
+td .posButton.doubleWidth.doubleHeight.hasImage a:nth-of-type(2){
+	flex-basis:48%;
+}
+
+#orderBoxItem{
+	width:50%;
+}
+
+#orderBox{
+	width:100%;
+}
+
+#orderBox th{
+	text-align:center;
+	font-weight:bold;
+}
+
+#orderBox th,
+#orderBox td{
+	height:3em;
+    vertical-align:middle;
+    text-align:center;
+	font-weight:bold;
+}
+
+
+.instructionRow td{
+    font-weight:lighter !important;
+    font-size:1em !important;
+   
+}
+
+td.itemCell{
+    text-align:left !important;
+}
+
+.rtl td.itemCell{
+	text-align:right !important;
+}
+
+.instructionRow .itemCell{
+    padding-left:2em;
+}
+
+.rtl .instructionRow .itemCell{
+	padding-right:2em !important;
+}
+
+#positions{
+	position:relative;
+	flex-wrap:wrap;
+	width: 306px;
+	height:max-content;
+	left:-100px;
+	top:0;
+	border:solid 2px #ccc;
+	background-color:#666;
+	z-index:1000 !important;
+	display:none !important;;
+}
+
+#positions .posButton{
+	float:left;
+	width:100px;
+	height:50px;
+	line-height:50px;
+}
+
+.instructionRow .invisibleText{
+    color:rgba(0,0,0,0);
+}
+
+#tableDetails{
+	text-align:center;
+	background-color:#ccc;
+	color:#444;
+}
+
+
+.qtyCell{
+	width:15%;
+}
+
+.totalPriceCell{
+	width:15%;
+}
+
+.printGroupCell{
+	width:15%;
+}
+
+.itemCell{
+	width:55%;
+}
+
+th.itemCell{
+	text-align:center;
+}
+
+.numPad{
+	width:260px;
+	padding-left:1em;
+}
+
+.numPad a{
+	float:left;
+	height:68px;
+	line-height:68px;
+	margin:2px;
+	width:80px;
+}
+
+.posHeader{
+	background-color:#666;
+	color:#ccc;
+
+}
+
+
+/*Begin Styling for Table Map Screen*/
+#areaMenu{
+	display:flex;
+}
+
+#areaMenu a{
+	height:80px;
+	padding:0 5px;
+	text-align:center;
+    line-height:80px;
+	width:140px;
+}
+
+#tableScreen{
+	overflow:hidden;
+	display:flex;
+	min-height: 100%;
+	width: 100%;
+	height: 100%; /* NEW */
+}
+
+#tablemapLeftColumn{
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	flex-basis:10%;
+	background-color:#333;
+}
+
+
+#tablemapRightColumn{
+	display:flex;
+	flex-basis:10%;
+	flex-direction:column;
+	background-color:#333;
+}
+
+
+.topCell{
+	display:flex;
+	flex-basis:10%;
+	width:100%;
+}
+
+.mobile #pageContainer{
+	font-size:0.5em !important;
+}
+
+.topCell a{
+	height:100%;
+	flex-basis:100%;
+}
+
+a.logOut{
+	font-size:3em;
+}
+
+.middleCell{
+	width:100%;
+	flex-basis:80%;
+	display:flex;
+	flex-direction:column;
+	align-items:center;
+	justify-content:center;
+}
+
+.middleCell a.editModeButton{
+	width:100%;
+	flex-basis:33%;
+}
+
+.bottomCell{
+	flex-basis:10%;
+	width:100%; 
+}
+
+
+
+#tablemapCenterColumn{
+	display:flex;
+	flex-direction:column;
+	flex-basis:80%;
+	
+}
+
+#tablemapLeftColumn a,
+#tablemapRightColumn a{
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	text-align:center;
+}
+
+
+#centerTopRow{
+	display:flex;
+	flex-basis:10%;
+	align-items:center;
+	justify-content:center;
+	background-color:#333;
+}
+
+#mapContainer{
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	flex-basis:80%;
+}
+
+#tableMap{
+	background-repeat:no-repeat;
+}
+
+#centerBottomRow{
+	display:flex;
+	flex-basis:10%;
+	background-color:#333;
+}
+
+#centerTopRow a{
+	height:100%;
+	display:flex;
+	flex:1;
+	align-items:center;
+	justify-content:center;
+}
+
+.editControls{
+	display:flex;
+	height:100%;
+	flex-basis:100%;
+	align-items:center;
+	justify-content:center;
+}
+
+.floorplanControls,
+.mergeControls{
+	visibility:hidden;
+	width:100%;
+	flex-basis:33%;
+	display:flex;
+	flex-direction:column;
+}
+
+.editControls a{
+	height:100%;
+	display:flex;
+	flex-wrap:wrap;
+	flex:1;
+	align-items:center;
+	justify-content:center;
+	text-align:center;
+}
+
+.editControls .posHeader{
+	flex-direction:column;
+}
+
+.floorplanControls a,
+.mergeControls a{
+	display:flex;
+	flex-basis:33%;
+	width:100%;
+	justify-content:center;
+	align-items:center;
+}
+
+
+#editControls{
+	display:none;
+	align-items:center;
+	justify-content:center;
+}
