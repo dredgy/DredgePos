@@ -1,11 +1,11 @@
 let Application = {
     keyboard: null,
-    mode: "default",
+    mode: [],
     languageVars: {}
 };
 /** Parses a language variable. */
 let lang = (key, replacements) => {
-    let finalValue = Application.languageVars[key];
+    let finalValue = Application.languageVars[key] || '';
     if (!replacements)
         return finalValue;
     if (typeof replacements === 'string')
@@ -28,16 +28,19 @@ let ajax = (endpoint, data, method = 'POST', successFunction, errorFunction, bef
         method: method,
         data: data,
         success: (response) => {
-            if (successFunction)
+            if (successFunction && response.status == 'success')
                 successFunction(JSON.parse(response.data));
+            else if (errorFunction && response.status != 'success') {
+                errorFunction(JSON.parse(response.data));
+            }
         },
-        error: errorFunction,
+        error: (error) => console.log(error.statusCode),
         beforeSend: beforeFunction
     });
 };
 /*
     For the flow of the app, synchronous is commonly preferred
-    though trying to keep it's usage as low as possible.
+    though trying to keep its usage as low as possible.
  */
 let ajaxSync = (endpoint, data, method = 'POST') => {
     let response = JSON.parse($.ajax({
@@ -56,11 +59,14 @@ let ajaxSync = (endpoint, data, method = 'POST') => {
 let redirect = (url) => {
     window.location.href = url;
 };
-let setLanguageVariables = () => {
-    Application.languageVars = ajaxSync('/ajax/languageVars', null, 'GET');
+let setupCore = (languageVars) => {
+    Application.languageVars = languageVars;
+    const doc = $(document);
+    doc.on('click', '#alertNo, #alertOk', hideAlerts);
+    setElementVisibilityByMode();
 };
 // @ts-ignore
-let alert = (message, title = 'Message') => {
+let posAlert = (message, title = 'Message') => {
     let alertBox = $('#alert');
     alertBox.css('display', 'flex');
     alertBox.data('value', '');
@@ -70,12 +76,11 @@ let alert = (message, title = 'Message') => {
     $('#alertYes').css('display', 'none');
     $('#alertNo').css('display', 'none');
 };
-// @ts-ignore
-let confirm = (message, data, title = 'Confirm', submitFunction = (data) => { hideAlerts(); }) => {
+let confirmation = (message, data, title = 'Confirm', submitFunction = (data) => { hideAlerts(); }) => {
     let alert = $('#alert');
     $(document).on('click', '#alert #alertYes', () => {
-        submitFunction(data);
         hideAlerts();
+        submitFunction(data);
         $(document).off('click', '#alert #alertYes');
     });
     alert.css('display', 'flex');
@@ -85,12 +90,58 @@ let confirm = (message, data, title = 'Confirm', submitFunction = (data) => { hi
     $('#alertYes').css('display', 'flex');
     $('#alertNo').css('display', 'flex');
 };
-let hideAlerts = () => {
-    $('#alert').hide();
+let hideAlerts = () => $('#alert').hide();
+let turnOnMode = (mode) => {
+    Application.mode.push(mode);
+    setElementVisibilityByMode();
 };
-$(() => {
-    let doc = $(document);
-    setLanguageVariables();
-    doc.on('click', '#alertNo, #alertOk', () => $('#alert').hide());
-});
+let turnOffMode = (mode) => {
+    Application.mode = Application.mode.filter((value) => value != mode);
+    setElementVisibilityByMode();
+};
+let toggleMode = (mode) => {
+    if (!isInMode(mode))
+        turnOnMode(mode);
+    else
+        turnOffMode(mode);
+};
+let clearModes = () => { Application.mode = []; };
+let isInMode = (mode) => Application.mode.includes(mode);
+let setElementVisibilityByMode = () => {
+    const mode = Application.mode;
+    const elements = $('[data-visible-in-mode]');
+    elements.each((index, elem) => {
+        let element = $(elem);
+        let visibleInModes = element.data('visible-in-mode');
+        let showElement = visibleInModes.every(visibleMode => {
+            return mode.includes(visibleMode);
+        });
+        if (element.hasClass('useVisibility')) {
+            if (showElement) {
+                element.css('visibility', 'visible');
+            }
+            else
+                element.css('visibility', 'hidden');
+        }
+        else
+            element.toggle(showElement);
+    });
+    const invisibleElements = $('[data-invisible-in-mode]');
+    invisibleElements.each((index, elem) => {
+        let element = $(elem);
+        let inVisibleInModes = element.data('invisible-in-mode');
+        let hideElement = inVisibleInModes.every(invisibleMode => {
+            return mode.includes(invisibleMode);
+        });
+        element.toggle(!hideElement);
+    });
+    $('[data-active-in-mode]').each((index, elem) => {
+        const button = $(elem);
+        const activeInMode = button.data('active-in-mode');
+        mode.includes(activeInMode)
+            ? button.addClass('active')
+            : button.removeClass('active');
+    });
+};
+$(() => ajax('/ajax/languageVars', null, 'GET', setupCore, null, null));
 //# sourceMappingURL=dredgepos.core.js.map

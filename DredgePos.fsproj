@@ -9,6 +9,7 @@
         <Compile Include="Browser.module.fs" />
         <Compile Include="Database.module.fs" />
         <Compile Include="Language.module.fs" />
+        <Compile Include="GenericEntities.module.fs" />
         <Compile Include="Theme.module.fs" />
         <Compile Include="Reservations.module.fs" />
         <Compile Include="Floorplan.module.fs" />
@@ -31,6 +32,7 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Content Remove="node_modules\**" />
+      <Content Remove="wwwroot\scripts\ts\test.ts" />
     </ItemGroup>
 
     <ItemGroup>

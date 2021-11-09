@@ -1,6 +1,7 @@
 namespace WebApplication
 
 open Clerk
+open Floorplan
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Mvc.RazorPages
 open Microsoft.Extensions.Hosting;
@@ -23,25 +24,28 @@ module Program =
         post "/authenticateClerk" (bindJson<int> (handlePostRoute AjaxController.loginWithLoginCode) )
         post "/getTableData" (bindJson<int> AjaxController.getTableData)
         post "/updateTableShape" (bindJson<Floorplan.floorplan_table_shape> AjaxController.updateTableShape)
-        post "/transformTable" (bindJson<Floorplan.floorplan_table_transform> AjaxController.transformTable)
+        post "/transformTable" (bindJson<Floorplan.floorplan_table> AjaxController.transformTable)
         post "/createTable" (bindJson<Floorplan.floorplan_table> AjaxController.createTable)
-        post "/addDecoration" (bindJson<Decorations.decoration_creator> AjaxController.AddDecoration)
+        post "/addDecoration" (bindJson<Decorations.floorplan_decoration> AjaxController.AddDecoration)
         post "/updateDecoration" (bindJson<Decorations.floorplan_decoration> AjaxController.UpdateDecoration)
-        post "/deleteDecoration" (bindJson<int> AjaxController.DeleteDecoration)
-        post "/newEmptyReservation" (bindJson<int> AjaxController.newEmptyReservation)
+        post "/deleteDecoration" (bindJson<Decorations.floorplan_decoration> AjaxController.DeleteDecoration)
+        post "/deleteTable" (bindJson<Floorplan.floorplan_table> AjaxController.deleteTable)
+        post "/mergeTables" (bindJson<Floorplan.floorplan_table[]> AjaxController.mergeTables)
+        post "/newEmptyReservation" (bindJson<reservation> AjaxController.newEmptyReservation)
+        post "/updateReservation" (bindJson<reservation> AjaxController.updateReservation)
         post "/getReservation" (bindJson<int> (fun reservation -> json <| GetReservationById reservation) )
-        post "/unreserveTable" (bindJson<int> (fun tableNumber -> json <| Floorplan.unReserveTable tableNumber) )
+        post "/unreserveTable" (bindJson<floorplan_table> AjaxController.unreserveTable )
         getf "/getRoomData/%i" AjaxController.getRoomData
+        getf "/getKeyboardLayout/%s" AjaxController.getKeyboardLayout
         getf "/getTablesAndDecorations/%i" AjaxController.getRoomTablesAndDecorations
         get "/languageVars" (json <| AjaxController.getLanguageVars)
         get "/getOpenTables" (json <| Floorplan.getActiveTables Floorplan.currentVenue)
         getf "/getActiveTables/%i" AjaxController.getActiveTables
-        getf "/tableIsOpen/%i" (fun tableNumber -> json <| Floorplan.tableIsOpen tableNumber)
-        getf "/transferTables/%i/%i" AjaxController.transferTable
-        getf "/mergeTables/%i/%i" AjaxController.mergeTables
+        getf "/getFloorplanData/%i" AjaxController.getFloorplanData
+        getf "/tableIsOpen/%i" (fun tableNumber -> json <| Floorplan.tableNumberIsOpen tableNumber)
+        getf "/transferTable/%i/%i" AjaxController.transferTable
         getf "/unmergeTable/%i" AjaxController.unmergeTable
         getf "/tableExists/%i" (fun tableNumber -> json <| Floorplan.tableExists tableNumber)
-        getf "/deleteTable/%i" (fun tableNumber -> json <| Floorplan.deleteTable tableNumber)
     }
 
     let pageRouter = router {
@@ -56,6 +60,7 @@ module Program =
     let app = application {
         use_static "wwwroot"
         use_router pageRouter
+
     }
 
     run app

@@ -6,7 +6,8 @@ open Dapper.FSharp
 open Clerk
 open Thoth.Json.Net
 
-type session = {session_id: string; clerk_json: string; clerk_id: int; expires: int}
+[<CLIMutable>]
+type session = {id: int; session_id: string; clerk_json: string; clerk_id: int; expires: int}
 
 let deleteSession sessionId context =
     delete {
@@ -25,19 +26,22 @@ let deleteSessionByClerkId clerk_id context =
 
 let createNewSession (clerk: clerk) context =
     if (getClerkByLoginCode clerk.clerk_login_code).IsSome then
-        deleteSessionByClerkId clerk.clerk_id context
+        deleteSessionByClerkId clerk.id context
         let newSessionId = (Guid.NewGuid().ToString "N") + (Guid.NewGuid().ToString "N")
 
-        let newSession = {  session_id = newSessionId
+        let newSession = {
+                            id = 0
+                            session_id = newSessionId
                             clerk_json = clerk |> jsonEncode
-                            clerk_id = clerk.clerk_id
+                            clerk_id = clerk.id
                             expires = int <| DateTimeOffset.Now.AddHours(24.0).ToUnixTimeSeconds()
                          }
-
         insert {
             table "sessions"
             value newSession
-        } |> db.Insert |> ignore
+        }
+        |> db.Insert
+        |> ignore
 
         Browser.setCookie "dredgepos_clerk_logged_in" newSessionId (DateTimeOffset.UtcNow.AddHours(24.0)) context
 
@@ -63,7 +67,7 @@ let sessionExists (sessionId: string) context =
 let checkAuthentication clerk =
     let existingClerk = getClerkByLoginCode clerk.clerk_login_code
     if existingClerk.IsSome
-       && existingClerk.Value.clerk_id = clerk.clerk_id
+       && existingClerk.Value.id = clerk.id
        && existingClerk.Value.clerk_name = clerk.clerk_name
        && existingClerk.Value.clerk_login_code = clerk.clerk_login_code
        then true
@@ -79,12 +83,12 @@ let getSession (sessionId: string) =
         } |> db.Select<session>
 
     match sessions |> length with
-    | 0 -> {session_id = ""; clerk_json = ""; clerk_id= 0; expires= 0}
+    | 0 -> {session_id = ""; clerk_json = ""; clerk_id= 0; expires= 0; id=0}
     | _ -> sessions |> first
 
 let getCurrentClerk context =
     let cookie = getLoginCookie context
-    let emptyClerk = {clerk_id=0; clerk_login_code=0; clerk_usergroup=0; clerk_name=""}
+    let emptyClerk = {id=0; clerk_login_code=0; clerk_usergroup=0; clerk_name=""}
     match cookie with
     | "" ->
         Browser.redirect "/login" context

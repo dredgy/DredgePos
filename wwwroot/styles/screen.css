@@ -26,7 +26,7 @@ body{
 	display:flex;
 	align-items:center;
 	justify-content:center;
-	
+
 }
 
 #tableDetails div{
@@ -154,7 +154,7 @@ body{
 #bottomHalf{
 	flex:1;
 	overflow-x:auto;
-	overflow-y:hidden;	
+	overflow-y:hidden;
 	scroll-behavior: smooth;
 }
 
@@ -233,7 +233,7 @@ td .posButton.normal.hasImage a:first-of-type{
 	flex-basis:24%;
 	background-size:contain;
 	background-repeat:no-repeat;
-	background-position:center;	
+	background-position:center;
 	align-items:center;
 }
 
@@ -242,7 +242,7 @@ td .posButton.normal.hasImage a:nth-of-type(2){
 }
 
 td .posButton.doubleHeight{
-	flex-direction:column;	
+	flex-direction:column;
 }
 
 td .posButton.doubleHeight.hasImage a:first-of-type{
@@ -254,7 +254,7 @@ td .posButton.doubleHeight.hasImage a:first-of-type{
 	flex-basis:66%;
 	background-size:contain;
 	background-repeat:no-repeat;
-	background-position:center 20%;	
+	background-position:center 20%;
 }
 
 .mobile td .posButton.doubleHeight.hasImage a:first-of-type{
@@ -274,7 +274,7 @@ td .posButton.doubleWidth.hasImage a:first-of-type{
 	flex-basis:24%;
 	background-size:contain;
 	background-repeat:no-repeat;
-	background-position:0 center;	
+	background-position:0 center;
 	display:flex;
 	align-items:center;
 }
@@ -294,7 +294,7 @@ td .posButton.doubleWidth.doubleHeight.hasImage a:first-of-type{
 	height:100%;
 	background-size:contain;
 	background-repeat:no-repeat;
-	background-position:center;	
+	background-position:center;
 }
 
 td .posButton.doubleWidth.doubleHeight.hasImage a:nth-of-type(2){
@@ -326,7 +326,7 @@ td .posButton.doubleWidth.doubleHeight.hasImage a:nth-of-type(2){
 .instructionRow td{
     font-weight:lighter !important;
     font-size:1em !important;
-   
+
 }
 
 td.itemCell{
@@ -489,7 +489,7 @@ a.logOut{
 
 .bottomCell{
 	flex-basis:10%;
-	width:100%; 
+	width:100%;
 }
 
 
@@ -498,7 +498,7 @@ a.logOut{
 	display:flex;
 	flex-direction:column;
 	flex-basis:80%;
-	
+
 }
 
 #tablemapLeftColumn a,
@@ -553,14 +553,14 @@ a.logOut{
 
 .floorplanControls,
 .mergeControls{
-	visibility:hidden;
 	width:100%;
 	flex-basis:33%;
 	display:flex;
 	flex-direction:column;
 }
 
-.editControls a{
+.editControls > a,
+.editControls .posHeader{
 	height:100%;
 	display:flex;
 	flex-wrap:wrap;
@@ -568,11 +568,22 @@ a.logOut{
 	align-items:center;
 	justify-content:center;
 	text-align:center;
+    padding:0.5em;
 }
-
 .editControls .posHeader{
 	flex-direction:column;
 }
+
+.posHeader.currentTable > * {
+    width: 100%;
+    flex:1;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.posHeader.currentTable b {align-items: flex-end}
+.posHeader.currentTable small {align-items: flex-start}
 
 .floorplanControls a,
 .mergeControls a{

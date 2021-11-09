@@ -18,9 +18,7 @@ let (|?) lhs rhs = if lhs = null then rhs else lhs
 
 let map list = list |> Map.ofList
 
-let JoinArray (char: string) (array: string[]) = String.Join(char, array)
-
-let first (array: 'a[]) = array.[0]
+let JoinArray (char: string) (array: 'a[]) = String.Join(char, array)
 
 let StringReplace (search:string) (replace:string) (string:string) = (search, replace) |> string.Replace
 
@@ -37,6 +35,9 @@ let GetFileContents (file: string) = File.ReadAllText file
 let GetFileName (file: string) = Path.GetFileName file
 
 let length (variable: 'T[]) = variable.Length
+let first (array: 'a[]) = array.[0]
+let last (array: 'a[]) = array.[array.Length-1]
+
 
 let removeFalseValues (variable: bool[]) = variable |> Array.filter id
 
@@ -67,14 +68,15 @@ let RunSynchronously task =
     |> Async.AwaitTask
     |> Async.RunSynchronously
 
+let AppendToArray (element: 'T) (array : 'T[]) = Array.append [|element|] array
+
 let ToLowerCase (string: string) = string.ToLower()
 let ToUpperCase (string: string) = string.ToUpper()
 let ToTitleCase (string: string) = CultureInfo.CurrentCulture.TextInfo.ToTitleCase <| string
 
 let recordToMap (record: 'T) =
     seq {
-        for prop in FSharpType.GetRecordFields(typeof<'T>) ->
-        prop.Name, prop.GetValue(record) |> string
+        for prop in FSharpType.GetRecordFields(typeof<'T>) -> prop.Name, prop.GetValue(record) |> string
     }
     |> Map.ofSeq
 

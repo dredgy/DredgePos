@@ -27,13 +27,17 @@
 					<div id="tableMap"></div>
 				</div>
 				<div id="centerBottomRow">
-					<div class="editControls">
-					<a class="posHeader currentTable"></a>
-					<a onclick="loadScreen('orderScreen', 'table='+selectedTableNumber)" class="posButton"><!--[lang:order_table]--></a>
-					<a class="posButton reserveTableButton"><!--[lang:reserve_table]--></a>
-					<a onclick="loadScreen('paymentSplitter', 'table='+selectedTableNumber)" class="posButton payTableButton"><!--[lang:pay_table]--></a>
-					<a class="posButton viewTableButton"><!--[lang:view_table]--></a>
-
+					<div class="editControls" data-visible-in-mode='["tableSelected"]'>
+                        <div class="posHeader currentTable">
+                            <b class="selectedTableNumber"></b>
+                            <a class="reservationStatus" data-visible-in-mode='["reservedTableSelected"]'></a>
+                            <small class="selectedTableCovers"></small>
+                        </div>
+                        <a class="posButton"><!--[lang:order_table]--></a>
+                        <a class="posButton reserveTableButton" data-invisible-in-mode='["reservedTableSelected"]'><!--[lang:reserve_table]--></a>
+                        <a class="posButton unreserveTableButton" data-visible-in-mode='["reservedTableSelected"]'><!--[lang:unreserve_table]--></a>
+                        <a class="posButton payTableButton"><!--[lang:pay_table]--></a>
+                        <a class="posButton viewTableButton"><!--[lang:view_table]--></a>
 					</div>
 				</div>
 			</div>
@@ -43,22 +47,22 @@
 				</div>
 				<div class="middleCell">
 					<a class="posButton editModeButton"><!--[lang:edit_floorplan]--></a>
-					<div class="floorplanControls">
-						<a class="posButton addTableButton"><!--[lang:add_table]--></a>
+					<div class="floorplanControls useVisibility" data-visible-in-mode='["edit"]'>
+						<a class="posButton addTableButton" ><!--[lang:add_table]--></a>
 						<a class="posButton addDecoration"><!--[lang:add_decoration]--></a>
-						<a class="posButton deleteDecoration"><!--[lang:delete_decoration]--></a>
-						<a class="posButton deleteTableButton"><!--[lang:delete_table]--></a>
-						<a class="posButton changeShapeButton"><!--[lang:change_shape]--></a>
+						<a class="posButton deleteDecoration useVisibility"  data-visible-in-mode='["decorationSelected", "edit"]'><!--[lang:delete_decoration]--></a>
+						<a class="posButton deleteTableButton useVisibility" data-visible-in-mode='["tableSelected", "edit"]'><!--[lang:delete_table]--></a>
+						<a class="posButton changeShapeButton useVisibility" data-visible-in-mode='["tableSelected", "edit"]'><!--[lang:change_shape]--></a>
 					</div>
-					<div class="mergeControls">
-						<a onclick="mergeModeOn()" class="posButton mergeButton"><!--[lang:merge_table]--></a>
-						<a onclick="unmergeTable()" class="posButton unmergeButton"><!--[lang:unmerge_table]--></a>
-						<a class="transferTableButton posButton"><!--[lang:transfer_table]--></a>
+					<div class="mergeControls useVisibility" data-visible-in-mode='["tableSelected"]'>
+						<a class="posButton mergeButton" data-active-in-mode="merge"><!--[lang:merge_table]--></a>
+						<a class="posButton unmergeButton" data-visible-in-mode='["tableSelected"]'><!--[lang:unmerge_table]--></a>
+						<a class="transferTableButton posButton" data-active-in-mode="transfer" data-visible-in-mode='["activeTableSelected"]'><!--[lang:transfer_table]--></a>
 					</div>
-					</div>
-					<div  class="bottomCell">
+                </div>
+                <div class="bottomCell">
 
-					</div>
+                </div>
 
 			</div>
 		</div>
@@ -70,14 +74,5 @@
 		</div>
 		<div id="decoratorContent"><!--[var:decorator]--></div>
 	</div>
-	<script type="text/javascript">
-		var roomToLoad = 1;
-		var width = 1152
-		var height = 850
-		$(document).ready( function () {
-			setupTableMap();
-        } );
-
-	</script>
 </body>
 </html>

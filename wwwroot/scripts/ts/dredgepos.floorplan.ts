@@ -1,335 +1,163 @@
 ﻿/// <reference path="./typings/konva.d.ts" />
-let stage : Konva.Stage
-let transformer: Konva.Transformer;
-let tableLayer: Konva.Layer;
-let editMode = false;
-let activeTables : number[] = [];
-let selectedTable : table;
-let selectedTableNumber : number;
-let currentRoom : number;
-let basis = 1280;
-let scale : number = 1;
-let newTable : number;
-let roomName : string;
 
-//Makes sure canvas always fits inside the div
-function getDimensions(parentDiv : JQuery) {
-    let tableMap = $('#tableMap')
-    let outerWidth = parentDiv.outerWidth();
-    let outerHeight = parentDiv.outerHeight();
-
-    let width = outerWidth;
-    let height = outerWidth;
-
-    if (outerWidth >= outerHeight) {
-        width = outerHeight;
-        height = outerHeight;
-    }
-
-    tableMap.height(height)
-    tableMap.width(width)
-    scale = width / basis
-
-    return {width: width, height:height}
+interface dimensions{
+    height:number
+    width:number
 }
 
-function setupTableMap() {
-    let doc = $(document)
-    activeTables = ajaxSync('/ajax/getActiveTables/1', null, 'GET');
+interface floorplan{
+    stage: Konva.Stage
+    transformer: Konva.Transformer
+    tableLayer: Konva.Layer
+    rooms: room[]
+    tables: table[]
+    decorations: decoration[]
+    activeTableNumbers: number[]
+    selectedTableNumber: number
+    selectedDecorationId: number
+    currentRoom: room
+    roomToLoad: room
+    visualScale: number
+    visualScaleBasis: number
+    floorplanDiv: JQuery
+    reservations: reservation[]
+}
 
-    let dimensions = getDimensions($('#mapContainer'));
-    roomName = 'Deck & Courtyard';
-    stage = new Konva.Stage({
-        container: 'tableMap',
-        width: dimensions.width,
-        height: dimensions.height,
-    });
+interface floorplan_data{
+    tables: table[]
+    decorations: decoration[]
+    activeTableNumbers: number[]
+    rooms: room[]
+    reservations:reservation[]
+}
 
-    $('body').on('click', '.editModeButton', () => {toggleEditMode()} )
 
-    $('.roomButton').on('click', function () {
-        roomName = $(this).text();
-        loadRoom($(this).data('value'));
-    });
-    $('.transferTableButton').on('click', function () {
-        transferModeOn();
-    });
-    $('.addDecoration').on('click', function () {
-        $('#decorator').css('display', 'flex');
-    });
-    $('.deleteDecoration').on('click', function () {
-        deleteDecoration(selectedDecoration);
-    });
-    $('.decoratorItem').on('click', function () {
-        addDecoration(this);
-    });
-    $('.changeShapeButton').on('click', function () {
-        changeTableShape(selectedTableNumber);
-    });
-    $('.reserveTableButton').on('click', function () {
-        if ($(this).text() === lang('reserve_table')) {
-            reserveTable();
+const Floorplan: floorplan = {
+    rooms: [],
+    tables: [],
+    decorations:[],
+    reservations:[],
+    activeTableNumbers: [],
+    stage: null,
+    transformer:null,
+    tableLayer: null,
+    selectedTableNumber: 0,
+    currentRoom: null,
+    roomToLoad: null,
+    visualScale: 1,
+    visualScaleBasis: 1280,
+    floorplanDiv: null,
+    selectedDecorationId: 0
+};
+
+$(() => ajax('/ajax/getFloorplanData/1', null, 'get', setupFloorplan, null, null) )
+
+
+const setupFloorplanEvents = () => {
+    const doc = $(document)
+    doc.on('click', '.roomButton', roomButtonClicked)
+    doc.on('click', '.editModeButton', editModeButtonClicked)
+    doc.on('click', '.changeShapeButton', changeTableShape)
+    doc.on('click', '.addTableButton', showAddTablePopup)
+    doc.on('click', '.deleteTableButton', confirmDeleteTable)
+    doc.on('click', '.addDecoration', showDecorator)
+    doc.on('click', '.deleteDecoration', deleteDecoration)
+    doc.on('click', '.decoratorItem', addDecoration)
+    doc.on('click', '.mergeButton', toggleMergeMode)
+    doc.on('click', '.unmergeButton', unmergeTable)
+    doc.on('click', '.transferTableButton', toggleTransferMode)
+    doc.on('click', '.reserveTableButton', reserveTable)
+    doc.on('click', '.unreserveTableButton', unreserveTable)
+}
+
+const roomButtonClicked = (e: Event) => {
+    const button = $(e.target)
+    const roomId = button.data('value')
+    loadRoom(getRoomById(roomId))
+}
+
+const editModeButtonClicked = (e: Event) => {
+    const button = $(e.target)
+    button.toggleClass('active')
+    toggleMode('edit')
+
+    if(isInMode('edit')){
+        Floorplan.stage.find('Group, Image').forEach(table => table.draggable(true))
+
+        if(isInMode('tableSelected')){
+            const selectedTableShape = getTableShapeFromTableNumber(Floorplan.selectedTableNumber)
+            selectTable(selectedTableShape)
         }
-        else {
-            unreserveTable();
-        }
-    });
-    $('.addTableButton').on('click', function () {
-        addTable();
-    });
-    $('.deleteTableButton').on('click', function () {
-        deleteTable();
-    });
-    loadRoom(roomToLoad);
-}
-
-let updateTableShape = (tableData) => {
-    return ajaxSync('/ajax/updateTableShape', tableData)
-}
-
-//Change the shape of a table in edit mode.
-function changeTableShape(tableNumber: number) {
-    let tableData = getTableData(tableNumber)
-    let tableShape = tableData['shape']
-    let tableWidth = tableData['width']
-    let tableHeight = tableData['height']
-    let tableRotation = tableData['rotation']
-
-    let order = ['square', 'rect', 'longrect', 'diamond', 'circle', 'ellipse', 'longellipse']
-
-    if (order.indexOf(tableShape) === -1) tableShape = 'square'
-
-    //What the next shape is
-    let currentIndex = order.indexOf(tableShape)
-    let nextIndex = currentIndex + 1
-    if (nextIndex > (order.length) - 1) nextIndex = 0
-
-    let nextShape = order[nextIndex]
-
-    switch(nextShape) {
-        case 'square':
-        case 'circle':
-            tableHeight = tableWidth
-            tableRotation = 0
-            break
-        case 'diamond':
-            tableHeight = tableWidth
-            tableRotation = 45
-            break
-        case 'rect':
-        case 'ellipse':
-            tableHeight = tableWidth * 2
-            tableRotation = 0
-            break
-        case 'longrect':
-        case 'longellipse':
-            tableRotation = 90
-            break
-    }
-
-    let updateData = {
-        table_number: tableNumber,
-        shape: nextShape,
-        height: tableHeight,
-        width: tableWidth,
-        rotation: tableRotation
-    }
-
-    tableData = updateTableShape(updateData)
-    let tableGroup = stage.find('#' + tableNumber)[0]
-    transformer.nodes([]);
-    tableGroup.destroy();
-
-    let newTable = createTableElement(tableData);
-    tableLayer.add(newTable);
-    stage.draw();
-
-    selectTable(tableNumber);
-    loadRoom(currentRoom, tableNumber);
-}
-
-let createTable = (tableData) => {
-    return ajaxSync('/ajax/createTable', tableData)
-}
-
-let tableExists = (tableNumber : number) => {
-    return ajaxSync(`/ajax/tableExists/${tableNumber}`)
-}
-
-function addTable(tableNumber : number) {
-    if (!tableNumber) {
-        showVirtualNumpad(lang('new_table_number'), 4, false, false, true, addTable);
-    }
-    else {
-        let newTableInfo = {
-            table_number: tableNumber,
-            room_id: currentRoom,
-            default_covers: 2,
-            width: 200,
-            height: 200,
-            rotation: 0,
-            pos_x: basis / 2,
-            pos_y: basis / 2,
-            shape: 'square',
-            merged_children : '',
-            previous_state: '',
-            status: 0,
-            reservation: 0,
-            venue_id: 1
-        };
-
-        let newTableData = createTable(newTableInfo)
-
-        if (!newTableData.table_number){
-            alert(newTableData)
-            return false
-        }
-
-        newTable = createTableElement(newTableData);
-        tableLayer.add(newTable);
-        tableLayer.draw();
-        selectTable(tableNumber);
-
+    } else {
+        setTransformerNodes([])
+        Floorplan.stage.find('Group, Image').forEach(table => table.draggable(false))
     }
 }
-function selectTable(tableNumber: number) {
-    let table = stage.find('#' + tableNumber)[0];
-    table.fire('click');
+
+const setupFloorplan = (floorplanData : floorplan_data) => {
+
+    Floorplan.tables = floorplanData.tables
+    Floorplan.activeTableNumbers = floorplanData.activeTableNumbers
+    Floorplan.rooms = floorplanData.rooms
+    Floorplan.decorations = floorplanData.decorations
+    Floorplan.reservations = floorplanData.reservations
+
+    getDimensions()
+    setupFloorplanEvents()
+
+    loadRoom(Floorplan.rooms[0])
 }
 
-function deleteTable(tableNumber = 0) {
-    if (!tableNumber) {
-        confirm(lang('confirm_delete_table', selectedTableNumber), selectedTableNumber, 'Confirm', deleteTable);
-    }
-    else {
-        if (tableIsOpen(selectedTableNumber)) {
-            alert(lang('error_delete_existing_table'));
-        }
-        else {
-            ajax(`/ajax/deleteTable/${selectedTableNumber}`, null, 'GET');
-            let table = stage.find('#' + tableNumber)[0];
-            transformer.nodes([]);
-            table.destroy();
-            tableLayer.draw();
-            selectedTable = null
-            selectedTableNumber = null
-        }
-    }
-}
-// Rotate a shape around any point.
-// shape is a Konva shape
-// angleDegrees is the angle to rotate by, in degrees.
-// point is an object {x: posX, y: posY}
-function rotateAroundPoint(shape, angleDegrees, point) {
-    let angleRadians = angleDegrees * Math.PI / 180;
-    // they lied, I did have to use trigonometry
-    const x = point.x +
-        (shape.x() - point.x) * Math.cos(angleRadians) -
-        (shape.y() - point.y) * Math.sin(angleRadians);
-    const y = point.y +
-        (shape.x() - point.x) * Math.sin(angleRadians) +
-        (shape.y() - point.y) * Math.cos(angleRadians);
-    shape.rotation(shape.rotation() + angleDegrees); // rotate the shape in place
-    shape.x(x); // move the rotated shape in relation to the rotation point.
-    shape.y(y);
+const loadRoom = (roomToLoad: room) => {
+    setRoomBackground(roomToLoad)
+    setupKonva()
+
+    const tablesInRoom = Floorplan.tables.filter(table => table.room_id == roomToLoad.id)
+    const decorationsInRoom = Floorplan.decorations.filter(decoration => decoration.decoration_room == roomToLoad.id)
+    decorationsInRoom.forEach(decoration => createDecorationShape(decoration, false))
+    tablesInRoom.forEach(createTableShape)
+
+    Floorplan.currentRoom = roomToLoad
 }
 
-function createDecoration(data, idToSelect = false) {
-    let draggable = editMode;
-    var decoration = new Image();
-    decoration.onload = function () {
-        var dec = new Konva.Image({
-            id: data.decoration_id.toString(),
-            x: data.decoration_pos_x * scale,
-            y: data.decoration_pos_y * scale,
-            image: decoration,
-            offsetX: data.decoration_width * 0.5 * scale,
-            offsetY: data.decoration_height * 0.5 * scale,
-            rotation: data.decoration_rotation,
-            width: data.decoration_width * scale,
-            height: data.decoration_height * scale,
-            draggable: draggable,
-        });
-
-        if (editMode && dec.id() === idToSelect) {
-            transformer.nodes([dec]);
-            transformer.moveToTop();
-        }
-
-
-        dec.on('click', function () {
-            selectDecoration(this);
-        });
-        dec.on('tap', function () {
-            selectDecoration(this);
-        });
-        dec.on('dragend', function () {
-            saveDecTransformation(this);
-        });
-
-        dec.on('transformend', function () {
-            saveDecTransformation(this);
-        });
-        // add the shape to the layer
-        tableLayer.add(dec);
-        tableLayer.draw();
-        dec.moveToBottom();
-    };
-    decoration.src = 'images/decorations/' + data.decoration_image;
-    return decoration;
+const getRoomById = (roomId: number) => {
+    return Floorplan.rooms.find(
+        (room) => room.id == roomId
+    )
 }
 
-var selectedDecoration = false;
-function selectDecoration(decoration) {
-    if (editMode) {
-        if ((transformer.nodes().length > 0 && transformer.nodes()[0] != decoration) || transformer.nodes().length == 0) {
-            resetActiveTable();
-            transformer.nodes([decoration]);
-            decoration.moveToTop();
-            transformer.moveToTop();
-            selectedDecoration = decoration;
-            toggleFloorplanControls();
-        }
-        else {
-            transformer.nodes([]);
-            selectedDecoration = false;
-            $('.deleteDecoration').css('display', 'none');
-        }
-    }
-}
-function createTableElement(data, selectTable = false) {
-    // Create container group
+const tableIsOpen = (table: table) => Floorplan.activeTableNumbers.includes(table.table_number)
 
-    let draggable = editMode || newTable === data.table_number;
+const createTableShape = (table: table) => {
+    const draggable = isInMode('edit')
 
-    let table = new Konva.Group({
-        x: data.pos_x * scale,
-        y: data.pos_y * scale,
+    const tableGroup = new Konva.Group({
+        x: table.pos_x * Floorplan.visualScale,
+        y: table.pos_y * Floorplan.visualScale,
         draggable: draggable,
         listening: true,
-        id: data.table_number.toString()
+        id: table.table_number.toString()
     });
-    let fillColor = 'gray';
-    if (data.status === 'reserved') {
-        fillColor = 'lightgreen';
-    }
-    if (activeTables.includes(data.table_number)) {
-        fillColor = 'lightblue';
-    }
-    data.width = data.width * scale;
-    data.height = data.height * scale;
-    // Create background shape
-    let shape;
-    switch (data.shape) {
+
+    const fillColor = tableIsOpen(table)
+                    ? 'lightblue'
+                    : table.status == 2
+                        ? 'lightgreen'
+                        : 'gray'
+
+
+    let tableShape: Konva.Shape
+
+    switch(table.shape){
         case "circle": // fall-through
         case "ellipse": // fall-through
         case "longellipse":
-            shape = new Konva.Ellipse({
+            tableShape = new Konva.Ellipse({
                 x: 0,
                 y: 0,
-                radiusX: data.width * 0.5,
-                radiusY: data.height * 0.5,
-                rotation: data.rotation,
+                radiusX: table.width * 0.5 * Floorplan.visualScale,
+                radiusY: table.height * 0.5 * Floorplan.visualScale,
+                rotation: table.rotation,
                 fill: fillColor,
                 stroke: "black",
                 strokeWidth: 4,
@@ -338,14 +166,14 @@ function createTableElement(data, selectTable = false) {
             });
             break;
         default:
-            shape = new Konva.Rect({
+            tableShape = new Konva.Rect({
                 x: 0,
                 y: 0,
-                offsetX: data.width * 0.5,
-                offsetY: data.height * 0.5,
-                width: data.width,
-                height: data.height,
-                rotation: data.rotation,
+                offsetX: table.width * 0.5 * Floorplan.visualScale,
+                offsetY: table.height * 0.5 * Floorplan.visualScale,
+                width: table.width * Floorplan.visualScale,
+                height: table.height * Floorplan.visualScale,
+                rotation: table.rotation,
                 fill: fillColor,
                 stroke: "black",
                 strokeWidth: 4,
@@ -353,497 +181,643 @@ function createTableElement(data, selectTable = false) {
                 listening: true
             });
             break;
-    } // End switch
-    // Create label
-    let label = new Konva.Text({
-        x: data.width * -0.5,
-        y: data.height * -0.5,
-        width: data.width,
-        height: data.height,
-        text: data.table_number.toString(),
-        fontSize: 40 * scale,
+    }
+
+    const label = new Konva.Text({
+        x: table.width * -0.5 * Floorplan.visualScale,
+        y: table.height * -0.5 * Floorplan.visualScale,
+        width: table.width * Floorplan.visualScale,
+        height: table.height * Floorplan.visualScale,
+        text: table.table_number.toString(),
+        fontSize: 40 * Floorplan.visualScale,
         fill: "black",
         align: "center",
         verticalAlign: "middle",
         draggable: false,
         listening: false
     });
-    tableNumber = data.tablenumber;
-    table.add(shape, label);
-    table.on('dblclick', function () {
-        tableNumber = parseInt(getTableNumber(this));
-        if (!editMode) {
-            loadScreen('orderScreen', 'table=' + tableNumber);
-        }
-    });
-    table.on('dbltap', function () {
-        tableNumber = getTableNumber(this);
-        loadScreen('orderScreen', 'table=' + tableNumber);
-    });
-    table.on('dragend', function () {
-        saveTransformation(table);
-    });
-    innerShape = getTableShape(table);
-    table.on('click', function () {
-        selectTableShape(this);
-    });
-    table.on('tap', function () {
-        selectTableShape(this);
-    });
-    innerShape.on('transformend', function () {
-        saveTransformation(table);
-    });
-    // add the shape to the layer
-    tableLayer.add(table);
-    table.moveToTop();
-    if (tableNumber === selectedTableNumber) {
-        selectTable = table;
-    }
-    if (selectTable) {
-        if (selectTable === tableNumber) {
-            table.fire('click');
-        }
-    }
-    return table;
+
+    tableGroup.add(tableShape, label)
+
+    setupTableEvents(tableGroup)
+
+    Floorplan.tableLayer.add(tableGroup)
+    return tableGroup
 }
-function loadRoom(room: number, selectTable : number = 0, selectDecoration = false) {
-    //if (room === currentRoom) return false
 
-    ajax(`/ajax/getRoomData/${room}`, null, 'GET', (response) => {
-        let floorplanDiv = $('#tableMap')
-        let backgroundImage = response.background_image
-        floorplanDiv.css("background-image", `url(images/rooms/${backgroundImage})`)
-        floorplanDiv.css("background-size", `${width}px ${height}px`)
-    }, null, null)
+const setupTableEvents = (tableGroup: Konva.Group) => {
+    const tableShape = getTableShapeFromGroup(tableGroup)
 
-    $('.roomButton').removeClass('active');
-    let selector = ".roomButton:contains('" + roomName + "')";
-    $(selector).addClass('active');
-    currentRoom = room;
-    resetActiveTable();
-    stage.destroy();
-    stage = new Konva.Stage({
+    tableGroup.on('click', (e) => tableClicked(e.target as Konva.Shape))
+    tableGroup.on('tap', (e) => tableClicked(e.target as Konva.Shape))
+    tableGroup.on('dragend', (e) => saveTableTransformation(e.target as Konva.Group))
+    tableShape.on('transformend', (e) => {
+        const group = getTableGroupFromShape(e.target as Konva.Shape)
+        saveTableTransformation(group)
+    })
+}
+
+const getTableShapeFromGroup = (group: Konva.Group) => group.getChildren()[0] as Konva.Shape
+const getTableGroupFromShape = (shape: Konva.Shape) => shape.parent as Konva.Group
+
+const saveTableTransformation = (tableGroup: Konva.Group) => {
+    const originalTable = getTableDataFromGroup(tableGroup)
+    const tableShape = getTableShapeFromGroup(tableGroup)
+
+    const newTableInfo : table = {
+        table_number : originalTable.table_number,
+        previous_state : originalTable.previous_state,
+        merged_children : originalTable.merged_children,
+        id : originalTable.id,
+        width : Math.round(tableShape.scaleX() * tableShape.width()/Floorplan.visualScale),
+        height: Math.round(tableShape.scaleY() * tableShape.height()/Floorplan.visualScale),
+        pos_x: Math.round(tableGroup.x()/Floorplan.visualScale),
+        pos_y: Math.round(tableGroup.y()/Floorplan.visualScale),
+        rotation: Math.round(tableShape.rotation()),
+        room_id: originalTable.room_id,
+        status: originalTable.status,
+        venue_id: originalTable.venue_id,
+        shape : originalTable.shape,
+        default_covers: originalTable.default_covers,
+    }
+
+    saveTable(newTableInfo)
+    redrawTable(tableGroup)
+}
+
+
+const saveTable = (tableToUpdate: table) => {
+    const tables =
+        Floorplan
+            .tables
+            .filter(table => {
+                return table.id != tableToUpdate.id
+            })
+
+    tables.push(tableToUpdate)
+
+    Floorplan.tables = tables
+    ajax("/ajax/transformTable", tableToUpdate, 'post', null,null,null)
+}
+
+const setTransformerNodes = (nodes: Konva.Shape[]) => {
+    Floorplan.transformer.moveToTop()
+    if (nodes.length < 1) Floorplan.transformer.moveToBottom()
+    Floorplan.transformer.nodes(nodes)
+}
+
+const getTableDataFromTableNumber = (tableNumber: number) => {
+    return Floorplan.tables.filter(table => table.table_number == tableNumber)[0]
+}
+
+const getTableDataFromGroup = (tableGroup: Konva.Node) => {
+    const tableNumber = tableGroup.attrs.id
+    return Floorplan.tables.find(table => tableNumber == table.table_number)
+}
+
+const getTableDataFromShape = (tableShape: Konva.Shape) => getTableDataFromGroup(tableShape.parent)
+
+const getTableShapeFromTableNumber = (tableNumber: number) => {
+    const tableGroup = Floorplan.stage.find('Group').find((group: Konva.Shape) => {
+        return group.attrs.id == tableNumber
+    }) as Konva.Group
+
+    return tableGroup.getChildren()[0] as Konva.Shape
+}
+
+const getTableGroupFromTableNumber = (tableNumber : number) => {
+    const tableShape = getTableShapeFromTableNumber(tableNumber)
+    return getTableGroupFromShape(tableShape)
+}
+
+const setReservationStatus = (table: table) => {
+    const reservationText = $('.reservationStatus')
+    const tableShape = getTableShapeFromTableNumber(table.table_number)
+    reservationText.text('')
+
+    if(table.status == 2) {
+        tableShape.fill('lightgreen')
+        const reservations = Floorplan.reservations.filter(reservation => reservation.reservation_table_id == table.id)
+        if (reservations.length) {
+            turnOnMode('reservedTableSelected')
+            reservationText.text(lang('reserved'))
+            let reservation = reservations[0]
+            if (reservation.reservation_name != '') {
+                reservationText.text(lang('reserved_for', reservation.reservation_name))
+            }
+        }
+    } else {
+        let fillColor = tableIsOpen(table) ? 'lightblue' : 'gray'
+        tableShape.fill(fillColor)
+        turnOffMode('reservedTableSelected')
+    }
+
+}
+
+const reserveTable = () => {
+    showVirtualNumpad(lang('how_many_covers'), 2, false, false, true, createEmptyReservation)
+}
+
+const createEmptyReservation = (covers: number) => {
+    const newReservation: reservation = {
+        id: 0,
+        reservation_covers: covers,
+        reservation_created_at: 0,
+        reservation_table_id: getSelectedTableData().id,
+        reservation_name: '',
+        reservation_time: 0,
+    }
+
+    ajax('/ajax/newEmptyReservation', newReservation,'post', emptyReservationCreated, null, null )
+}
+
+const emptyReservationCreated = (reservation: reservation) => {
+    Floorplan.reservations.push(reservation)
+    const selectedTable = getSelectedTableData()
+    selectedTable.status = 2
+    selectedTable.default_covers = reservation.reservation_covers
+    updateTableData(selectedTable)
+    updateCoverText(selectedTable)
+    setReservationStatus(getSelectedTableData())
+
+    showVirtualKeyboard(lang('confirm_reservation_name'), 32, false, addReservationName)
+}
+
+const addReservationName = (name: string) => {
+    hideVirtualKeyboard()
+    const reservation = Floorplan.reservations.filter(reservation => reservation.reservation_table_id == getSelectedTableData().id)[0]
+    reservation.reservation_name = name
+    ajax('/ajax/updateReservation', reservation, 'post', reservationNameAdded, null, null)
+}
+
+const reservationNameAdded = (updatedReservation: reservation) => {
+    console.log(updatedReservation)
+    Floorplan.reservations = Floorplan.reservations.filter(reservation => reservation.id != updatedReservation.id)
+    Floorplan.reservations.push(updatedReservation)
+    setReservationStatus(getSelectedTableData())
+}
+
+const getReservationsOnTable = (table: table) => Floorplan.reservations.filter(reservation => reservation.reservation_table_id == table.id)
+
+const updateTableData = (tableToRemove: table) => {
+    Floorplan.tables = Floorplan.tables.filter(table => table.id != tableToRemove.id)
+    Floorplan.tables.push(tableToRemove)
+}
+
+const unreserveTable = () => {
+    const selectedTable = getSelectedTableData()
+    selectedTable.status = 0
+    ajax('/ajax/unreserveTable', selectedTable, 'post', tableUnreserved, null, null)
+}
+
+const tableUnreserved = (table: table) => {
+    Floorplan.reservations = Floorplan.reservations.filter(reservation => reservation.reservation_table_id != table.id)
+    updateTableData(table)
+    setReservationStatus(table)
+}
+
+const getSelectedTableData = () => getTableDataFromTableNumber(Floorplan.selectedTableNumber)
+
+const deselectTables = () => {
+    Floorplan.stage.find('Rect, Ellipse').forEach( (shape: Konva.Shape, index) => {
+        shape.stroke('black')
+    });
+
+    Floorplan.selectedDecorationId = 0
+    Floorplan.selectedTableNumber = 0
+    turnOffMode('tableSelected')
+    turnOffMode('activeTableSelected')
+    turnOffMode('decorationSelected')
+    turnOffMode('merge')
+    turnOffMode('transfer')
+
+    setTransformerNodes([])
+}
+
+const selectTable = (tableShape: Konva.Shape) => {
+    tableShape.stroke('yellow')
+    const table = getTableDataFromShape(tableShape)
+    Floorplan.selectedTableNumber = table.table_number
+
+    if(isInMode('edit')){
+        setTransformerNodes([tableShape])
+    }
+
+    if(tableIsOpen(table)){
+        turnOnMode('activeTableSelected')
+    }
+
+    $('.reservationStatus').html('<b>'+lang('active_table', table.table_number.toString()+'</b>'))
+
+
+    updateCoverText(table)
+    $('.selectedTableNumber').text(lang('active_table', table.table_number.toString()))
+    setReservationStatus(table)
+
+    const unmergeVisibility = table.merged_children ? 'visible' : 'hidden'
+    $('.unmergeButton').css('visibility', unmergeVisibility)
+    turnOnMode('tableSelected')
+}
+
+const updateCoverText = (table:table) => $('.selectedTableCovers').text(lang('covers', table.default_covers.toString()))
+
+const tableClicked = (tableShape: Konva.Shape) => {
+    const table = getTableDataFromShape(tableShape)
+
+    if(isInMode('merge')) {
+        mergeTables(getTableDataFromTableNumber(Floorplan.selectedTableNumber), table)
+        return;
+    }
+
+    if(isInMode('transfer')){
+        transferTables(getTableDataFromTableNumber(Floorplan.selectedTableNumber), table)
+    }
+
+    const selectedTableNumber = Floorplan.selectedTableNumber
+    deselectTables()
+
+    if(selectedTableNumber != table.table_number){
+        selectTable(tableShape)
+    }
+
+}
+
+const createDecorationShape =  (decoration:decoration, select?: boolean) => {
+        const draggable = isInMode('edit')
+        const decorationShape = new Image()
+
+        decorationShape.onload = () => {
+            const decorationImage = new Konva.Image({
+                id: decoration.id.toString(),
+                x: decoration.decoration_pos_x * Floorplan.visualScale,
+                y: decoration.decoration_pos_y *  Floorplan.visualScale,
+                image: decorationShape,
+                offsetX: decoration.decoration_width * 0.5 *  Floorplan.visualScale,
+                offsetY: decoration.decoration_height * 0.5 *  Floorplan.visualScale,
+                rotation: decoration.decoration_rotation,
+                width: decoration.decoration_width *  Floorplan.visualScale,
+                height: decoration.decoration_height *  Floorplan.visualScale,
+                draggable: draggable,
+            });
+
+            // add the shape to the layer
+            Floorplan.tableLayer.add(decorationImage)
+            Floorplan.tableLayer.draw()
+            decorationImage.moveToBottom()
+
+            setupDecorationEvents(decorationImage)
+
+            if(select){
+                decorationImage.moveToTop()
+                selectDecorationShape(decorationImage)
+            }
+        }
+
+        decorationShape.src = 'images/decorations/' + decoration.decoration_image
+}
+
+const setupDecorationEvents = (decorationShape: Konva.Image) => {
+    decorationShape.on('click', e => {
+            decorationClicked(e.target as Konva.Image)
+    })
+
+    decorationShape.on('transformend', e => {
+        decorationTransformed(e.target as Konva.Image)
+    })
+
+    decorationShape.on('dragend', e => {
+        decorationTransformed(e.target as Konva.Image)
+    })
+}
+
+const decorationClicked = (decorationShape: Konva.Image) => {
+    if(isInMode('edit')){
+        turnOffMode('tableSelected')
+        if ((Floorplan.transformer.nodes().length > 0 && Floorplan.transformer.nodes()[0] != decorationShape) || Floorplan.transformer.nodes().length == 0) {
+            selectDecorationShape(decorationShape)
+        }  else {
+            deselectTables()
+            decorationShape.moveToBottom()
+        }
+    }
+}
+
+const selectDecorationShape = (decorationShape: Konva.Image) => {
+    deselectTables()
+    Floorplan.transformer.nodes([decorationShape])
+    Floorplan.selectedDecorationId = Number(decorationShape.id())
+    decorationShape.moveToTop()
+    Floorplan.transformer.moveToTop()
+    turnOnMode('decorationSelected')
+}
+
+const getDecorationDataById = (id: number) => {
+    return Floorplan.decorations.find(decoration => id == decoration.id)
+}
+
+const decorationTransformed = (decorationShape: Konva.Image) => {
+
+    const oldDecorationData = getDecorationDataById(Number(decorationShape.id()))
+    const newDecoration: decoration = {
+        id: oldDecorationData.id,
+        decoration_room: oldDecorationData.decoration_room,
+        decoration_pos_x: Math.round(decorationShape.x() / Floorplan.visualScale),
+        decoration_pos_y:  Math.round(decorationShape.y() / Floorplan.visualScale),
+        decoration_rotation:  Math.round(decorationShape.rotation()),
+        decoration_width:  Math.round((decorationShape.scaleX() * decorationShape.width()) / Floorplan.visualScale),
+        decoration_height:  Math.round((decorationShape.scaleY() * decorationShape.height()) / Floorplan.visualScale),
+        decoration_image: oldDecorationData.decoration_image,
+    }
+
+    saveDecoration(newDecoration)
+}
+
+const saveDecoration = (decorationToUpdate: decoration) => {
+    const decorations =
+        Floorplan
+            .decorations
+            .filter(decoration => {
+                return decoration.id != decorationToUpdate.id
+            })
+
+    decorations.push(decorationToUpdate)
+
+    Floorplan.decorations = decorations
+    ajax("/ajax/updateDecoration", decorationToUpdate, 'post', null,null,null)
+}
+
+const showDecorator = () => $('#decorator').css('display', 'flex')
+const hideDecorator = () => $('#decorator').css('display', 'flex').hide()
+
+const addDecoration = (e: Event) => {
+    const button = $(e.currentTarget)
+
+    const newDecoration: decoration = {
+        id: 0,
+        decoration_room: Floorplan.currentRoom.id,
+        decoration_pos_x: Floorplan.visualScaleBasis / 2,
+        decoration_pos_y: Floorplan.visualScaleBasis / 2,
+        decoration_rotation: 0,
+        decoration_width: 200,
+        decoration_height: 200,
+        decoration_image: button.data('image')
+    }
+
+   ajax('/ajax/addDecoration', newDecoration, 'post', decorationAdded, null, null)
+}
+
+const decorationAdded = (decoration: decoration) => {
+    Floorplan.decorations.push(decoration)
+    createDecorationShape(decoration, true)
+
+    hideDecorator()
+}
+
+
+const deleteDecoration = () => ajax(
+                        '/ajax/deleteDecoration',
+                         getDecorationDataById(Floorplan.selectedDecorationId),
+                        'post', decorationDeleted, null, null)
+
+const decorationDeleted = (deletedDecoration:decoration) => {
+    Floorplan.decorations = Floorplan.decorations.filter(decoration => decoration.id != deletedDecoration.id)
+    const decorationShape = Floorplan.stage.findOne(`#${deletedDecoration.id}`)
+    decorationShape.destroy()
+    deselectTables()
+}
+
+const setRoomBackground = (roomToLoad: room) => {
+    const width = Floorplan.floorplanDiv.width()
+    const height = Floorplan.floorplanDiv.height()
+
+    Floorplan.floorplanDiv.css("background-image", `url(images/rooms/${roomToLoad.background_image})`)
+    Floorplan.floorplanDiv.css("background-size", `${width}px ${height}px`)
+}
+
+const setupKonva = () => {
+    const dimensions = getDimensions()
+
+    if(Floorplan.stage !== null) Floorplan.stage.destroy()
+
+    Floorplan.stage = new Konva.Stage({
         container: 'tableMap',
-        width: width,
-        height: height,
-    });
+        width: dimensions.width,
+        height: dimensions.height,
+    })
 
-    transformer = new Konva.Transformer({
+    Floorplan.stage.on('click', e => {
+        if(e.target == Floorplan.stage){
+            deselectTables()
+        }
+    })
+
+    Floorplan.transformer = new Konva.Transformer({
         rotationSnaps: [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 225, 270, -15, -30, -45, -60, -75, -90, -105, -120, -135, -150, -165, -180, -225, -270, 360, -360],
-        anchorSize: 40 * scale,
+        anchorSize: 30 * Floorplan.visualScale,
         ignoreStroke: true,
-        centeredScaling: true
+        centeredScaling: true,
+        anchorCornerRadius: 10,
     });
 
-    let tablesAndDecorations =  ajaxSync(`/ajax/getTablesAndDecorations/${room}`, null, 'GET');
-    let decorations = tablesAndDecorations['decorations']
-    let tables = tablesAndDecorations['tables']
+    Floorplan.tableLayer = new Konva.Layer()
+    Floorplan.tableLayer.add(Floorplan.transformer)
 
-
-    tableLayer = new Konva.Layer();
-    tableLayer.add(transformer);
-
-    // Loop data and call the creation method for each decoration/table.
-    decorations.forEach(itemData => {
-        createDecoration(itemData, selectDecoration);
-    });
-
-    tables.forEach(itemData => {
-        tableLayer.add(createTableElement(itemData, selectTable));
-    });
-    activeTables = getOpenTables()
-    stage.add(tableLayer);
+    Floorplan.stage.add(Floorplan.tableLayer)
 }
 
-var mergeMode = false;
-var parentMergeTable;
-var childMergeTable;
-var tableTransferOrigin;
-var transferMode = false;
-function transferModeOn() {
-    mergeModeOff();
-    if (!transferMode) {
-        tableTransferOrigin = selectedTableNumber;
-        transferMode = true;
-        $('.transferTableButton').addClass('active');
-        $('.transferTableButton').text('Select a table to transfer items to');
-    }
-    else {
-        transferModeOff();
-    }
-}
-function transferModeOff() {
-    transferMode = false;
-    $('.transferTableButton').removeClass('active');
-    $('.transferTableButton').text(lang('transfer_table'));
-}
+const resetKonva = setupKonva
 
-let getOpenTables = () => {
-    return ajaxSync('/ajax/getActiveTables/1', null, 'GET');
-}
+const changeTableShape = () => {
 
-let transferTableAjax = (origin, destination) => {
-    ajax(`/ajax/transferTables/${origin}/${destination}`, null, 'GET')
-}
+    if(!Floorplan.selectedTableNumber) return
 
-function transferTables() {
-    destination = selectedTableNumber;
-    origin = tableTransferOrigin;
-    if (destination !== origin) {
-        transferTableAjax(origin, destination)
-        activeTables = getOpenTables()
-        transferModeOff();
-        getTableShape(selectedTable).fill('lightblue')
-        getTableShape( getTableGroup(origin) ).fill('gray')
-    }
-    else {
-        alert("Can't transfer a table to itself.");
-        transferModeOff();
-    }
-}
-function mergeModeOn() {
-    transferModeOff();
-    if (!mergeMode) {
-        mergeMode = true;
-        $('.mergeButton').addClass('active');
-        $('.mergeButton').text('Select a table to merge with Table ' + selectedTableNumber);
-        parentMergeTable = selectedTableNumber;
-    }
-    else {
-        mergeModeOff();
-    }
-}
-function mergeModeOff() {
-    mergeMode = false;
-    $('.mergeButton').removeClass('active');
-    $('.mergeButton').text(lang('merge_table'));
-}
+    const table = getTableDataFromTableNumber(Floorplan.selectedTableNumber)
+    const tableGroup = getTableGroupFromTableNumber(table.table_number)
 
-let ajaxMergeTables = (parent, child) => {
-    return ajaxSync(`/ajax/mergeTables/${parent}/${child}`, null, 'GET')
-}
+    const order = ['square', 'rect', 'longrect', 'diamond', 'circle', 'ellipse', 'longellipse']
+    if (order.indexOf(table.shape) === -1)
+        table.shape = 'square'
 
-let ajaxUnmergeTable = (parent) => {
-    return ajaxSync(`/ajax/unmergeTable/${parent}`, null, 'GET')
-}
+    const currentIndex = order.indexOf(table.shape)
+    let nextIndex = currentIndex + 1
+    if (nextIndex > (order.length) - 1)
+        nextIndex = 0
 
-function mergeTables() {
-    parentMergeTable = parseInt(parentMergeTable);
-    childMergeTable = parseInt(childMergeTable);
-    if (childMergeTable !== parentMergeTable) {
-        let result = ajaxMergeTables(parentMergeTable, childMergeTable)
-        mergeModeOff();
+    table.shape = order[nextIndex]
 
-        loadRoom(currentRoom)
-        newTable = getTableGroup(parentMergeTable);
-        newTable.draggable(true);
-
-        if (tableIsOpen(parentMergeTable)) {
-            getTableShape(newTable).fill('lightblue');
-        }
-    }
-    else {
-        alert("Can't merge a table with itself!");
-        mergeModeOff();
-    }
-}
-//When a table is passed (a group of the shape plus the text), returns the number as string.
-function getTableNumber(tableGroup) {
-    textItem = tableGroup.getChildren()[1];
-    return textItem.getText();
-}
-function getTableGroup(tableNumber) {
-    return stage.find('#' + tableNumber)[0];
-}
-function getTableShape(tableGroup) {
-    return tableGroup.getChildren()[0];
-}
-
-function getReservation(id) {
-    return ajaxSync('/ajax/getReservation', id)
-}
-
-//When a user selects a table.
-function selectTableShape(table) {
-    let tableNumber = getTableNumber(table);
-    let shape = getTableShape(table);
-    let strokeColor = shape.stroke();
-    selectedTable = table;
-    selectedTableNumber = tableNumber;
-    if(transferMode) transferTables()
-    if (mergeMode) {
-        childMergeTable = tableNumber;
-        mergeTables();
-    }
-    else {
-        //If table is not selected
-        if (strokeColor !== "yellow") {
-            let tableData = getTableData(selectedTableNumber)
-
-            let coverNumberString = lang('covers', tableData.default_covers.toString());
-            let tableString = '<b>' + lang('activeTable', selectedTableNumber.toString()) + '</b>';
-            $('.reserveTableButton').text(lang('reserve_table'));
-            if (tableData.status === 'reserved') {
-                let reservation = getReservation(tableData.reservation_id)
-                console.log(reservation)
-                $('.reserveTableButton').text(lang('unreserve_table'));
-                if (reservation.reservation_name) {
-                    reservationString = lang('reserved_for', reservation.reservation_name);
-                }
-                else {
-                    reservationString = lang('reserved');
-                }
-                tableString += '<small>' + reservationString + '</small>';
-            }
-            tableString += "<small> (" + coverNumberString + ")</small>";
-            $('.currentTable').html(tableString);
-
-            stage.find('Rect').forEach(function (rect, index) {
-                rect.stroke("black");
-            });
-            stage.find('Ellipse').forEach(function (circ, index) {
-                circ.stroke("black");
-            });
-            shape.stroke("yellow");
-            toggleEditControls(true);
-            if (editMode) {
-                toggleFloorplanControls();
-                $('.deleteDecoration').css('display', 'none');
-                transformer.nodes([getTableShape(table)]);
-                table.moveToTop();
-                transformer.moveToTop();
-            }
-            tableLayer.draw();
-            //If the table is already selected
-        }
-        else {
-            resetActiveTable();
-            transformer.nodes([]);
-            tableLayer.draw();
-        }
-    }
-}
-
-let getTableData = (tableNumber) => {
-    return ajaxSync('/ajax/getTableData', tableNumber)
-}
-
-let isTableMerged = (tableNumber) => {
-    let mergeData = getTableData(tableNumber).merged_children
-    return mergeData !== ""
-}
-
-function resetActiveTable() {
-    if (!transferMode) {
-        if (selectedTable) {
-            getTableShape(selectedTable).stroke('black');
-        }
-        selectedTable = null;
-        selectedTableNumber = "";
-        toggleFloorplanControls(false, editMode);
-        toggleEditControls(false);
-    }
-    else {
-        $('.editControls').css('display', 'none');
-    }
-}
-function addDecoration(button) {
-    let insertData = {
-        decoration_room: currentRoom,
-        basis: basis,
-        decoration_image: $(button).data('image')
+    switch(table.shape) {
+        case 'square':
+        case 'circle':
+            // noinspection JSSuspiciousNameCombination
+            table.height = table.width
+            table.rotation = 0
+            break
+        case 'diamond':
+            // noinspection JSSuspiciousNameCombination
+            table.height = table.width
+            table.rotation = 45
+            break
+        case 'rect':
+        case 'ellipse':
+            table.height = table.width * 2
+            table.rotation = 0
+            break
+        case 'longrect':
+        case 'longellipse':
+            table.rotation = 90
+            break
     }
 
-    ajaxSync('/ajax/addDecoration', insertData)
-    $('#decorator').css('display', 'none');
-    selectedDecoration = false;
-    loadRoom(currentRoom);
-}
-function deleteDecoration(decoration) {
-    ajax('/ajax/deleteDecoration', decoration.id());
-    $('.deleteDecoration').css('display', 'none');
-    decoration.destroy()
-    selectedDecoration = false;
-    transformer.nodes([])
-}
-function saveDecTransformation(decoration: Konva.Shape) {
-    let newData = {
-        decoration_id: decoration.id(),
-        decoration_pos_x: decoration.x() / scale,
-        decoration_pos_y: decoration.y() / scale,
-        decoration_width: parseInt((decoration.scaleX() * decoration.width()) / scale),
-        decoration_height: parseInt((decoration.scaleY() * decoration.height()) / scale),
-        decoration_rotation: parseInt(decoration.rotation()),
-        decoration_image: decodeURIComponent(decoration.image().src),
-        decoration_room: currentRoom
-    };
 
-    if (editMode) {
-        idToSelect = decoration.id();
-    }
-    ajax('/ajax/updateDecoration', newData)
+    saveTable(table)
+    deselectTables()
+    redrawTable(tableGroup)
 }
-//When a table has been resized, rotated etc.
-function saveTransformation(table) {
-    tableNumber = getTableNumber(table);
-    shape = getTableShape(table);
-    newRotation = parseInt(shape.rotation());
-    newWidth = parseInt(shape.scaleX() * shape.width() / scale);
-    newHeight = parseInt((shape.scaleY() * shape.height()) / scale);
-    newXPos = parseInt(table.x() / scale);
-    newYPos = parseInt(table.y() / scale);
-    updateData = {
+
+const redrawTable = (tableGroup: Konva.Group) => {
+    deselectTables()
+    const draggable = tableGroup.draggable()
+    const table = getTableDataFromGroup(tableGroup)
+    tableGroup.destroy()
+    const newTableGroup = createTableShape(table)
+    const newTableShape = getTableShapeFromTableNumber(table.table_number)
+    selectTable(newTableShape)
+    newTableGroup.draggable(draggable)
+}
+
+const showAddTablePopup = () => showVirtualNumpad(lang('new_table_number'), 4, false, false, true, addTable);
+
+const addTable = (tableNumber: number) => {
+    const newTable : table  = {
+        id: 0,
         table_number: tableNumber,
-        rotation: newRotation,
-        width: newWidth,
-        height: newHeight,
-        pos_x: newXPos,
-        pos_y: newYPos
+        room_id: Floorplan.currentRoom.id,
+        default_covers: 2,
+        width: 200,
+        height: 200,
+        rotation: 0,
+        pos_x: Floorplan.visualScaleBasis / 2,
+        pos_y: Floorplan.visualScaleBasis / 2,
+        shape: 'square',
+        merged_children : '',
+        previous_state: '',
+        status: 0,
+        venue_id: 1
     };
-    transformTable(updateData)
+
+    ajax('/ajax/createTable', newTable, 'post', tableAdded, tableNotAdded, null)
 }
 
-let transformTable = (tableData) => {
-    return ajax("/ajax/transformTable", tableData)
+const tableAdded = (table: table) => {
+    deselectTables()
+    const newTableGroup = createTableShape(table)
+    Floorplan.tables.push(table)
+    selectTable(getTableShapeFromGroup(newTableGroup))
 }
 
-function unmergeTable() {
-
-    ajaxUnmergeTable(selectedTableNumber)
-    loadRoom(currentRoom);
-}
-function reserveTable(covers) {
-    if (!covers) {
-        showVirtualNumpad(lang('how_many_covers'), 2, false, false, true, reserveTable);
-    }
-    else {
-        let table = getTableGroup(selectedTableNumber);
-        let newReservation = ajaxSync('/ajax/newEmptyReservation', selectedTableNumber)
-
-        table.fire('click');
-        let tableShape = getTableShape(table);
-        tableShape.fill('lightgreen');
-        table.draw();
-        table.fire('click');
-        completeReservation(newReservation);
-    }
+const tableNotAdded = (response: string) => {
+    posAlert(response)
 }
 
-function unreserveTable(input) {
-    if (!input) {
-        confirm(lang('confirm_delete_reservation', selectedTableNumber), selectedTableNumber, lang('confirm'), unreserveTable);
+const confirmDeleteTable = () => confirmation(
+                                    lang('confirm_delete_table', Floorplan.selectedTableNumber.toString()),
+                                    Floorplan.selectedTableNumber,
+                                'Confirm', deleteTable)
+
+const deleteTable = (tableNumber: number) => {
+    if(!tableNumber) return false
+    const tableToDelete = getTableDataFromTableNumber(tableNumber)
+
+    if(tableIsOpen(tableToDelete)){
+        posAlert(lang('error_delete_existing_table'))
+        return false
     }
-    else {
-        ajaxSync('/ajax/unreserveTable', input)
-        hideAlerts()
-        table = getTableGroup(input);
-        table.fire('click');
-        tableShape = getTableShape(table);
-        tableShape.fill('gray');
-        table.draw();
-        table.fire('click');
-    }
-}
-function completeReservation(resName) {
-    if (!resName) {
-        showVirtualKeyboard(lang('enter_reservation_name'));
-    }
-    else {
-        //callPhpFunction('updateTableMapTable', [selectedTableNumber, 'reservation_name', resName]);
-        loadRoom(currentRoom, selectedTableNumber);
-    }
-}
-function toggleEditMode() {
-    let editModeButton = $('.editModeButton');
-    if (editMode === true) {
-        editMode = false;
-        loadRoom(currentRoom);
-        editModeButton.removeClass('active');
-        editModeButton.html(lang('edit_floorplan'));
-        toggleFloorplanControls(false);
-        if (selectedTable)
-            selectedTable.fire('click');
-        stage.find('Group').forEach(function (table, index) {
-            table.draggable(false);
-        });
-    }
-    else {
-        editMode = true;
-        stage.find('Group').forEach(function (table, index) {
-            table.draggable(true);
-            if (getTableShape(table).stroke() === "yellow") {
-                table.moveToTop();
-                transformer.nodes([getTableShape(table)]);
-                transformer.moveToTop();
-            }
-        });
-        stage.find('Image').forEach(function (img, index) {
-            img.draggable(true);
-        });
-        toggleFloorplanControls();
-        transformer.moveToTop();
-        tableLayer.draw();
-        editModeButton.addClass('active');
-        editModeButton.html(lang('stop_edit_floorplan'));
-    }
-}
-function toggleFloorplanControls(onOrOff = true, subControlsOnly = false) {
-    if (onOrOff || subControlsOnly) {
-        $('.floorplanControls').css('visibility', 'visible');
-    }
-    else {
-        $('.floorplanControls').css('visibility', 'hidden');
-    }
-    if (selectedTable) {
-        $('.changeShapeButton').css('visibility', 'visible');
-        $('.deleteTableButton').css('visibility', 'visible');
-    }
-    else {
-        $('.changeShapeButton').css('visibility', 'hidden');
-        $('.deleteTableButton').css('visibility', 'hidden');
-    }
-    if (selectedDecoration) {
-        $('.deleteDecoration').css('display', 'flex');
-    }
-    else {
-        $('.deleteDecoration').css('display', 'none');
-    }
+
+    ajax(`/ajax/deleteTable`,  tableToDelete, 'post', tableDeleted, null, null);
 }
 
-let tableIsOpen = (tableNumber) => {
-    return ajaxSync(`/ajax/tableIsOpen/${tableNumber}`, null, 'GET')
+const tableDeleted = (deletedTable: table) => {
+    Floorplan.tables = Floorplan.tables.filter(table => table.table_number != deletedTable.table_number)
+    const tableGroup = getTableGroupFromTableNumber(deletedTable.table_number)
+    deselectTables()
+    tableGroup.destroy()
 }
 
-function toggleEditControls(onOrOff = true) {
-    if (onOrOff) {
-        $('.editControls').css("display", "flex");
-        if (isTableMerged(selectedTableNumber)) {
-            $('.mergeControls').css("visibility", "visible");
-            $('.unmergeButton').css('display', 'flex');
-            $('.mergeButton').css('display', 'flex');
-        }
-        else {
-            $('.mergeControls').css("visibility", "visible");
-            $('.mergeButton').css('display', 'flex');
-            $('.unmergeButton').css('display', 'none');
-        }
-        if (tableIsOpen(selectedTableNumber)) {
-            $('.payTableButton').css('display', 'flex');
-            $('.viewTableButton').css('display', 'flex');
-            $('.reserveTableButton').css('display', 'none');
-            $('.transferTableButton').css('display', 'flex');
-        }
-        else {
-            $('.payTableButton').css('display', 'none');
-            $('.viewTableButton').css('display', 'none');
-            $('.reserveTableButton').css('display', 'flex');
-            $('.transferTableButton').css('display', 'none');
-        }
+const toggleMergeMode = () => toggleMode('merge')
+
+
+const mergeTables = (table1: table, table2: table ) => {
+    toggleMergeMode()
+    if(table1.table_number == table2.table_number){
+        posAlert(lang('error_self_merge'))
+        return false;
     }
-    else {
-        $('.editControls').css("display", "none");
-        $('.mergeControls').css("visibility", "hidden");
-        $('.mergeButton').css("display", "none");
-        $('.unmergeButton').css("display", "none");
+    ajax('/ajax/mergeTables', [table1, table2], 'post', tablesMerged, null, null)
+}
+
+const tablesMerged = (tables: Record<'child'|'parent'|'merged', table>) => {
+    tableDeleted(tables['child'])
+    tableDeleted(tables['parent'])
+    tableAdded(tables['merged'])
+    deselectTables()
+    const tableGroup = getTableGroupFromTableNumber(tables['merged'].table_number)
+    selectTable(getTableShapeFromGroup(tableGroup))
+    tableGroup.draggable(true)
+}
+
+const unmergeTable = () => ajax(`/ajax/unmergeTable/${Floorplan.selectedTableNumber}`, null, 'get', tablesUnmerged, null, null)
+
+const tablesUnmerged = (tables: Record<'child'|'parent', table>) => {
+    const parentTable = tables['parent']
+    const childTable = tables['child']
+
+    tableDeleted(parentTable)
+    tableAdded(parentTable)
+    tableAdded(childTable)
+    deselectTables()
+}
+
+const toggleTransferMode = () => toggleMode('transfer')
+
+const transferTables = (origin: table, destination: table) => {
+    if(origin.table_number == destination.table_number){
+        posAlert(lang('transfer_self_error'))
+        return
     }
+
+    ajax(`/ajax/transferTable/${origin.table_number}/${destination.table_number}`, null, 'get', tableTransferred, null, null)
+}
+
+const tableTransferred = (tables: Record<"origin"|"destination", table>) => {
+    const origin = tables['origin']
+    const destination = tables['destination']
+
+    Floorplan.activeTableNumbers = Floorplan.activeTableNumbers.filter(tableNumber => tableNumber != origin.table_number)
+    Floorplan.activeTableNumbers.push(destination.table_number)
+    if(Floorplan.currentRoom.id == origin.room_id) {
+        redrawTable(getTableGroupFromTableNumber(origin.table_number))
+    }
+    redrawTable(getTableGroupFromTableNumber(destination.table_number))
+}
+
+const getDimensions = () => {
+
+    Floorplan.floorplanDiv = $('#tableMap')
+    const parentDiv = $('#mapContainer')
+    const outerWidth = parentDiv.outerWidth()
+    const outerHeight = parentDiv.outerHeight()
+
+    let width = outerWidth;
+    let height = outerWidth;
+
+    if (outerWidth >= outerHeight) {
+        width = outerHeight
+        height = outerHeight
+    }
+
+    Floorplan.floorplanDiv.height(height)
+    Floorplan.floorplanDiv.width(width)
+    Floorplan.visualScale = width / Floorplan.visualScaleBasis
+
+    return {width: width, height:height}
 }

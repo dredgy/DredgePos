@@ -1,4 +1,5 @@
-﻿type PosMode = "edit" | "void" | "transfer" | "default"
+﻿type PosMode = "edit" | "void" | "transfer" | "default" | "tableSelected" | "decorationSelected" | "activeTableSelected" | "merge" | "reservedTableSelected"
+type PosModes =  PosMode[]
 
 interface ajaxResult {
     status: string
@@ -7,10 +8,9 @@ interface ajaxResult {
 
 interface ApplicationState {
     keyboard: keyboard
-    mode: PosMode
+    mode: PosModes
     languageVars: Record<any, string>
 }
-
 
 interface table {
     table_number: number,
@@ -25,20 +25,41 @@ interface table {
     rotation: number
     merged_children: string
     previous_state: string
-    status: string
-    table_id: number
+    status: number
+    id: number
+}
+
+interface decoration {
+    id: number
+    decoration_room: number
+    decoration_pos_x: number
+    decoration_pos_y: number
+    decoration_rotation: number
+    decoration_width: number
+    decoration_height: number
+    decoration_image: string
 }
 
 interface room {
-    room_id: number
+    id: number
     room_name: string
     background_image: string
     venue_id: number
 }
 
 
+interface reservation {
+    id: number,
+    reservation_name: string,
+    reservation_time: number,
+    reservation_covers: number,
+    reservation_created_at: number,
+    reservation_table_id: number,
+}
+
 interface keyboard {
     capsLock: boolean
     shift: boolean
-    layout: string
+    layouts: VirtualKeyboard
+    currentLayout: string
 }
