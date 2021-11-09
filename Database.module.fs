@@ -1,5 +1,7 @@
 ﻿module db
 
+open Dapper
+open Dapper.FSharp
 open Dapper.FSharp.MySQL
 open MySql.Data.MySqlClient
 open DredgeFramework
@@ -23,6 +25,16 @@ let Insert<'a> asyncQuery =
     asyncQuery
         |> connection.InsertAsync<'a>
         |> RunSynchronously
+
+let InsertOutput<'a> asyncQuery =
+    asyncQuery
+        |> connection.InsertAsync<'a>
+        |> RunSynchronously
+        |> ignore
+
+    let table = asyncQuery.Table
+    connection.Query<'a>($"""Select * From {table} Where id = (select last_insert_id())""")
+        |> EnumerableToArray
 
 let Update<'a> asyncQuery =
     asyncQuery

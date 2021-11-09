@@ -1,13 +1,13 @@
 ﻿     let Application : ApplicationState = {
         keyboard : null,
-        mode: "default",
+        mode: [],
         languageVars: {}
     }
 
 
     /** Parses a language variable. */
      let lang = (key: string, replacements?: string[] | string) => {
-        let finalValue = Application.languageVars[key]
+        let finalValue = Application.languageVars[key] || ''
 
         if(!replacements) return finalValue
         if(typeof replacements === 'string') replacements = [replacements]
@@ -26,17 +26,20 @@
     }
 
     /** Call an Ajax function asynchronously */
-     let ajax = (endpoint : string, data: any, method = 'POST', successFunction : Function , errorFunction : JQuery.Ajax.ErrorCallback<any>, beforeFunction: any) => {
+     let ajax = (endpoint : string, data: any, method = 'POST', successFunction : Function , errorFunction : Function, beforeFunction: any) => {
         data = (data == null) ? data :  JSON.stringify(data)
         return $.ajax({
             url: endpoint,
             method: method,
             data: data,
-            success: (response) => {
-                if(successFunction)
+            success: (response: ajaxResult) => {
+                if(successFunction && response.status == 'success')
                     successFunction(JSON.parse(response.data))
+                else if (errorFunction && response.status != 'success'){
+                    errorFunction(JSON.parse(response.data))
+                }
             },
-            error: errorFunction,
+            error: (error) => console.log(error.statusCode),
             beforeSend: beforeFunction
         })
     }
@@ -44,7 +47,7 @@
 
     /*
         For the flow of the app, synchronous is commonly preferred
-        though trying to keep it's usage as low as possible.
+        though trying to keep its usage as low as possible.
      */
      let ajaxSync = (endpoint : string, data?: any, method = 'POST') => {
         let response =  JSON.parse(
@@ -69,12 +72,17 @@
     }
 
 
-     let setLanguageVariables = () => {
-        Application.languageVars = ajaxSync('/ajax/languageVars', null, 'GET')
-    }
+     let setupCore = (languageVars: Record<string, string>) => {
+         Application.languageVars = languageVars
+         const doc = $(document)
+         doc.on('click', '#alertNo, #alertOk', hideAlerts)
+
+         setElementVisibilityByMode()
+     }
+
 
      // @ts-ignore
-     let alert = (message: string, title='Message') => {
+     let posAlert = (message: string, title='Message') => {
         let alertBox = $('#alert')
         alertBox.css('display', 'flex');
         alertBox.data('value', '');
@@ -86,13 +94,12 @@
         $('#alertNo').css('display', 'none');
     }
 
-     // @ts-ignore
-     let confirm = (message: string, data: any, title='Confirm', submitFunction = (data: any) => {hideAlerts()}) => {
+     let confirmation = (message: string, data: any, title='Confirm', submitFunction = (data: any) => {hideAlerts()}) => {
         let alert = $('#alert')
 
         $(document).on('click', '#alert #alertYes', () => {
-            submitFunction(data)
             hideAlerts()
+            submitFunction(data)
             $(document).off('click', '#alert #alertYes')
         })
 
@@ -106,13 +113,69 @@
     }
 
 
-     let hideAlerts = () => {
-        $('#alert').hide()
-    }
+     let hideAlerts = () => $('#alert').hide()
 
-$( () => {
-    let doc = $(document)
-    setLanguageVariables()
+     let turnOnMode = (mode : PosMode) => {
+         Application.mode.push(mode)
+         setElementVisibilityByMode()
+     }
 
-    doc.on('click', '#alertNo, #alertOk', () => $('#alert').hide())
-})
+     let turnOffMode = (mode : PosMode) => {
+         Application.mode = Application.mode.filter((value) => value != mode)
+         setElementVisibilityByMode()
+
+     }
+
+     let toggleMode = (mode: PosMode) => {
+         if(!isInMode(mode))
+             turnOnMode(mode)
+         else
+             turnOffMode(mode)
+     }
+
+     let clearModes = () => {Application.mode = []}
+     let isInMode = (mode: PosMode) => Application.mode.includes(mode)
+
+     let setElementVisibilityByMode = () => {
+         const mode = Application.mode
+         const elements = $('[data-visible-in-mode]')
+
+         elements.each((index, elem) => {
+             let element = $(elem)
+             let visibleInModes : PosModes = element.data('visible-in-mode')
+
+             let showElement = visibleInModes.every( visibleMode => {
+                 return mode.includes(visibleMode)
+             });
+
+             if(element.hasClass('useVisibility')){
+                 if(showElement) {
+                    element.css('visibility', 'visible')
+                 } else element.css('visibility', 'hidden')
+             } else element.toggle(showElement)
+         })
+
+        const invisibleElements = $('[data-invisible-in-mode]')
+        invisibleElements.each((index, elem) => {
+            let element = $(elem)
+            let inVisibleInModes: PosModes = element.data('invisible-in-mode')
+            let hideElement = inVisibleInModes.every(invisibleMode => {
+                return mode.includes(invisibleMode)
+            })
+            element.toggle(!hideElement)
+        })
+
+
+         $('[data-active-in-mode]').each((index, elem) =>{
+             const button = $(elem)
+             const activeInMode : PosMode = button.data('active-in-mode')
+
+            mode.includes(activeInMode)
+                ? button.addClass('active')
+                : button.removeClass('active')
+
+         })
+
+     }
+
+$( () => ajax('/ajax/languageVars', null, 'GET', setupCore, null, null))

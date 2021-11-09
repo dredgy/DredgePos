@@ -1,4 +1,9 @@
-﻿ let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, allowDecimals = true, allowClose = true, submitFunction: Function) => {
+﻿type KeyboardRowName = `row${number}${"" | "_"}${string}`;
+interface VirtualKeyboard {
+    [layoutName: string]: Partial<Record<KeyboardRowName, string[]>>;
+}
+
+let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, allowDecimals = true, allowClose = true, submitFunction: Function) => {
         let numpad = $('#virtualNumpad');
         let inputBox = $('#virtualNumpadInput')
         let closeKeyboardButton = $('.closeKeyboards')
@@ -23,10 +28,9 @@
         numpad.data('password', isPassword);
         numpad.data('allowdecimals', allowDecimals);
 
-        $(document).unbind('keyup');
-        $(document).keyup(e => {
+        $(document).off('keyup');
+        $(document).on('keyup', e => {
             let key = e.key;
-
             switch (key) {
                 case 'Backspace':
                 case 'Delete':
@@ -64,7 +68,7 @@
         let submitFunction = numpad.data('submitfunction')
         let allowedValues = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'submit', 'clear']
         let currentValue = numpad.data('value').toString()
-        //Test
+
         if (allowDecimals)
             allowedValues.push('.', ',')
 
@@ -96,7 +100,7 @@
      let clearNumpadInput = () => {
         $('#virtualNumpadInput').text("")
         $('#virtualNumpad').data('value', '')
-    }
+     }
 
      let setupVirtualNumpad = () => {
         $(document).on('click', '.virtualNumpadButton', e => {
@@ -109,11 +113,12 @@
         });
     }
 
-     let setupVirtualKeyboard = () => {
+     let setupVirtualKeyboard = (keyboardLayouts: VirtualKeyboard) => {
         Application.keyboard = {
             capsLock: false,
             shift: false,
-            layout: 'default'
+            layouts: keyboardLayouts,
+            currentLayout: 'default',
         }
 
         $(document).on('click', '.virtualKeyboardButton', e => {
@@ -123,7 +128,7 @@
         setKeyboardLayout('default')
     }
 
-     let showVirtualKeyboard = (heading: string, maxlength = 32, isPassword = false, submitFunction = () => {
+     let showVirtualKeyboard = (heading: string, maxlength = 32, isPassword = false, submitFunction :Function = () => {
         hideVirtualKeyboard()
     }) => {
         let keyboard = $('#virtualKeyboard')
@@ -166,7 +171,7 @@
             case 'submit':
                 hideVirtualKeyboard();
                 let submitFunction = keyboard.data('submitfunction')
-                submitFunction();
+                submitFunction(inputBox.text());
                 break;
             case 'shift':
                 if (Application.keyboard.capsLock) break;
@@ -206,8 +211,10 @@
     }
 
      let setKeyboardLayout = (layout: string, modifier = '') => {
-        let keyboardLayout = ajaxSync('/languages/english/keyboardLayout.json', null, 'get')
+
         if (modifier != '') modifier = `_${modifier}`
+        Application.keyboard.currentLayout = layout
+        let layoutToLoad = Application.keyboard.layouts[layout]
 
         $('.virtualKeyboardRow').each((index, row) => {
             /*
@@ -215,7 +222,7 @@
             and translators making their own language packs
             */
             index = index + 1;
-            let currentRow: Record<string, string> = keyboardLayout[layout]["row" + index + modifier]
+            let currentRow = layoutToLoad[`row${index}${modifier}`]
 
             $(row).children('a').each((keyIndex, button) => {
                 let key = $(button);
@@ -251,6 +258,6 @@
     }
 
 $(() => {
-        setupVirtualNumpad()
-        setupVirtualKeyboard();
+   setupVirtualNumpad()
+   ajax('/ajax/getKeyboardLayout/english', null, 'get',setupVirtualKeyboard, null, null)
 })

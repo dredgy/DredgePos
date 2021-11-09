@@ -38,13 +38,13 @@ type floorplan_table = {
     rotation: int
     merged_children: string
     previous_state: string
-    status: string
-    table_id: int
+    status: int
+    id: int
 }
 
 [<CLIMutable>]
 type floorplan_room = {
-    room_id: int
+    id: int
     room_name: string
     background_image: string
     venue_id: int
@@ -66,8 +66,8 @@ let floorplan_table_decoder : Decoder<floorplan_table> =
                     rotation = get.Required.Field "rotation" Decode.int
                     merged_children = get.Required.Field "merged_children" Decode.string
                     previous_state = get.Required.Field "previous_state" Decode.string
-                    status = get.Required.Field "status" Decode.string
-                    table_id = get.Required.Field "table_id" Decode.int
+                    status = get.Required.Field "status" Decode.int
+                    id = get.Required.Field "id" Decode.int
                 })
 
 
@@ -78,9 +78,11 @@ let getTableFile (tableNumber: int) =
     let tableNumberString = tableNumber |> string
     activeTablePath + "table" + tableNumberString + ".table"
 
-let tableIsOpen (tableNumber: int) =
+let tableNumberIsOpen (tableNumber: int) =
     let tableFile = getTableFile tableNumber
     File.Exists tableFile
+
+let tableIsOpen (table: floorplan_table) = tableNumberIsOpen table.table_number
 
 let fileNameToTableNumber (fileName: string) = //Takes a file name for a floorplan table and returns the table number
     if fileName.Contains ".table" then
@@ -105,15 +107,14 @@ let tablesInRoom (roomId: int) = //Get a list of all tables in a particular room
     |> db.Select<floorplan_table>
 
 
-
 let getActiveTables (venueId: int) =
     select{
         table "floorplan_tables"
         where (eq "venue_id" venueId)
     }
     |> db.Select
-    |> Array.map getTableNumber
     |> Array.filter tableIsOpen
+    |> Array.map (fun table -> table.table_number)
 
 let openNewTable tableNumber = //Create a new table file pre-populated with skeleton data
     let tableFile = getTableFile tableNumber
@@ -128,10 +129,10 @@ let transferTable origin destination = //Transfers a table from one to another
     let originFile = getTableFile origin
     let destinationFile = getTableFile destination
 
-    if tableIsOpen origin then
+    if tableNumberIsOpen origin then
         (* If the destination is not an already open table,
         then we simply have to rename the origin to destination *)
-        if not <| tableIsOpen destination then
+        if not <| tableNumberIsOpen destination then
             let content = File.ReadAllText originFile
             let newContent = content.Replace($"number=\"{origin|>string}\">", $"number=\"{destination|>string}\">")
             File.WriteAllText(originFile, newContent)
@@ -159,10 +160,18 @@ let getTable (tableNumber : int) =
       |> db.Select<floorplan_table>
       |> first
 
+let getTableById (id : int) =
+    select {
+        table "floorplan_tables"
+        where (eq "id" id)
+    }
+      |> db.Select<floorplan_table>
+      |> first
+
 let getRoom (roomId: int) =
     select {
         table "floorplan_rooms"
-        where (eq "room_id" roomId)
+        where (eq "id" roomId)
     } |> db.Select<floorplan_room> |> first
 
 let getRoomList (venueId: int) =
@@ -172,6 +181,7 @@ let getRoomList (venueId: int) =
     }  |> db.Select<floorplan_room>
 
 let updateFloorplanTable (tableNumber:int) (column: string) value =
+    //TODO: Make update query venue specific
     let sql = "Update floorplan_tables Set @column = @value Where table_number = @tableNumber"
     let parameters = [("column", box column); ("value", box value); ("tableNumber", box tableNumber)]
     db.connection.Execute(sql, parameters) |> ignore
@@ -185,24 +195,25 @@ let updateTableShape (floorplanTable: floorplan_table_shape)  =
         where (eq "table_number" floorplanTable.table_number + eq "venue_id" currentVenue)
     } |> db.Update
 
-let updateTablePosition (floorplanTable: floorplan_table_transform) =
+
+let updateTablePosition (floorplanTable: floorplan_table) =
     update {
         table "floorplan_tables"
         set floorplanTable
         where (eq "table_number" floorplanTable.table_number + eq "venue_id" currentVenue)
     } |> db.Update
 
-let createEmptyReservation tableNumber covers =
-    let table = getTable tableNumber
-    let status = if table.status = "" then "reserved" else table.status
-
-    //let res = newReservation "" 0 covers
-
-    update{
+let createEmptyReservation (reservation: reservation) =
+    update {
         table "floorplan_tables"
-        set {| status = status  |}
-        where(eq "table_number" tableNumber)
+        set {| status = 2  |}
+        where(eq "id" reservation.reservation_table_id)
     } |> db.Update |> ignore
+
+    insert{
+        table "reservations"
+        value reservation
+    } |> db.InsertOutput |> first
 
 
 
@@ -217,7 +228,7 @@ let matchTable (tableNumberToMatch: int) (floorplanTableToCheck: floorplan_table
 
 let findChildTable (childTable: int) (parentTable: floorplan_table) =
     let json = parentTable.merged_children
-    let childTables = json |> Decode.fromString(Decode.array floorplan_table_decoder)
+    let childTables = json |> Decode.Auto.fromString<floorplan_table[]>
 
     let matchedTables =
         match childTables with
@@ -262,16 +273,24 @@ let tableExists (tableNumber: int) =
                 language.getAndReplace "error_table_exists" [room.room_name]
 
 
-let addNewTable newTable =
-    if tableExists newTable.table_number = "False" then
-        insert{
-            table "floorplan_tables"
-            value newTable
-        } |> db.Insert |> ignore
-        true
-    else false
+let addNewTableWithoutOutput (newTable: floorplan_table) =
+    insert{
+        table "floorplan_tables"
+        value newTable
+    }
+    |> db.Insert
 
-let deleteTable tableNumber =
+let addNewTable (newTable: floorplan_table) =
+        let newTableList =
+            insert{
+                table "floorplan_tables"
+                value newTable
+            }
+            |> db.InsertOutput
+
+        newTableList |> first
+
+let deleteTable (tableNumber: int) =
     delete {
         table "floorplan_tables"
         where (eq "table_number" tableNumber + eq "venue_id" currentVenue)
@@ -342,7 +361,7 @@ let updateUnmergedTables parentTable childTable =
        where(eq "table_number" parentTable.table_number + eq "venue_id" currentVenue)
     } |> db.Update |> ignore
 
-    addNewTable childTable |> ignore
+    addNewTableWithoutOutput childTable |> ignore
     true
 
 let processUnmerge originalTable unmergedChild =
@@ -354,25 +373,35 @@ let processUnmerge originalTable unmergedChild =
 
 let unmergeTable tableNumber = //Separates a merged table into itself and the last table merged into it.
     let currentTable = getTable tableNumber
-    let mergedChildren = currentTable.merged_children |> Decode.fromString(Decode.list floorplan_table_decoder)
+    let mergedChildren = currentTable.merged_children |> Decode.Auto.fromString<floorplan_table[]>
 
     match mergedChildren with
         | Ok listOfChildTables ->
-            let unmergedChild = listOfChildTables |> List.last
-            processUnmerge currentTable unmergedChild
-        | Error _ -> false
+            let unmergedChild = listOfChildTables |> last
+            processUnmerge currentTable unmergedChild |> ignore
+            Some (getTable currentTable.table_number, unmergedChild)
+        | Error _ -> None
 
 let convertRoomListToLinks (room: floorplan_room) =
     let vars = map [
-        "roomId", room.room_id |> string
+        "roomId", room.id |> string
         "roomName", room.room_name
     ]
 
     Theme.loadTemplateWithVars "roomButton" vars
 
+let getReservationList (tableList: floorplan_table[]) =
+    let tableIds =
+        tableList
+            |> Array.map(fun table -> table.id)
+            |> JoinArray ","
+
+    db.connection.Query<reservation>($"""Select * From reservations Where reservation_table_id In ({tableIds})""")
+        |> EnumerableToArray
+
 let newReservation name time covers =
     let reservation = {
-        reservation_id = 0
+        id = 0
         reservation_name = name
         reservation_time = time
         reservation_covers = covers
@@ -385,12 +414,12 @@ let newReservation name time covers =
         value reservation
     } |> db.Insert
 
-let unReserveTable tableNumber =
-    let table = getTable tableNumber
-    DeleteReservation table.table_id
-    if table.status = "reserved" then
-        update {
-            table "floorplan_tables"
-            set {| status = "" ; reservation_id = 0 |}
-        } |> db.Update |> ignore
 
+let tableList venueId =
+    select{
+            table "floorplan_tables"
+            innerJoin "floorplan_rooms" "id" "floorplan_tables.room_id"
+        }
+    |> db.SelectJoin<floorplan_table, floorplan_room>
+    |> Array.filter (fun (_, room) -> room.venue_id = venueId )
+    |> Array.map fst

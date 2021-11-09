@@ -1,9 +1,12 @@
 ﻿module AjaxController
 
 open DredgeFramework
+open Floorplan
 open Microsoft.AspNetCore.Http
+open Reservations
 open language
 open Giraffe
+open Dapper.FSharp
 
 let loginWithLoginCode (context: HttpContext) (login_code: int) =
      if Session.clerkLogin login_code context then ajaxSuccess "success"
@@ -15,27 +18,49 @@ let getActiveTables venue = Floorplan.getActiveTables venue |> ajaxSuccess |> js
 
 let getRoomData roomId = Floorplan.getRoom roomId |> ajaxSuccess |> json
 
-let mergeTables (parent, child) =
+let mergeTables (tables: floorplan_table[]) =
     let status =
-        if Floorplan.mergeTables parent child then "success"
-        else "fail"
-
-    map [
-        "status", status
-        "data" , parent |> Floorplan.getTable |> jsonEncode
-    ]
-    |> json
+        if mergeTables tables.[0].table_number tables.[1].table_number then
+            let outputTables = map [
+                "parent", tables.[0];
+                "child", tables.[1];
+                "merged", getTable tables.[0].table_number;
+            ]
+            ajaxSuccess outputTables
+        else ajaxFail "Could Not Merge Tables"
+    status |> json
 
 let unmergeTable tableNumber =
-    let status =
-        if Floorplan.unmergeTable tableNumber then "success"
-        else "fail"
+    let unmerged = Floorplan.unmergeTable tableNumber
+    let unmergedTables =
+        match unmerged  with
+            | Some (parent, child) ->
+                map["parent", parent; "child", child] |> ajaxSuccess
+            | None -> ajaxFail "Could not Unmerge Table"
 
-    map [
-        "status", status
-        "data" , "[true]"
-    ]
+    unmergedTables |> json
+
+
+let getFloorplanData venue =
+    let tableList = Floorplan.tableList venue
+    let reservationList = getReservationList tableList
+    {|
+        tables = tableList
+        decorations = Decorations.decorationList venue
+        activeTableNumbers = Floorplan.getActiveTables venue
+        rooms = Floorplan.getRoomList venue
+        reservations = reservationList
+    |}
+    |> ajaxSuccess
     |> json
+
+let getKeyboardLayout (language: string) =
+    let layout = $"""wwwroot/languages/{language}/keyboardLayout.json""" |> GetFileContents
+    map [
+            "status", "success"
+            "data", layout
+        ] |> json
+
 
 let getRoomTablesAndDecorations roomId =
     let tables = Floorplan.tablesInRoom roomId
@@ -53,50 +78,70 @@ let updateTableShape (table: Floorplan.floorplan_table_shape) =
     Floorplan.updateTableShape table |> ignore
     getTableData table.table_number
 
-let transformTable (table: Floorplan.floorplan_table_transform) =
+let transformTable (table: Floorplan.floorplan_table) =
     Floorplan.updateTablePosition table |> ignore
     getTableData table.table_number
 
-let createTable (tableData) =
-    let newTableCreated = Floorplan.addNewTable tableData
+let createTable (tableData: floorplan_table) =
     let result =
-        if newTableCreated then Floorplan.getTable tableData.table_number |> jsonEncode |> ajaxSuccess
-        else Floorplan.tableExists tableData.table_number |> jsonEncode |> ajaxFail
+        if tableExists tableData.table_number = "False" then
+            ajaxSuccess (addNewTable tableData)
+        else ajaxFail (tableExists tableData.table_number)
 
-    json result
+    result |> json
+
+let deleteTable (table: floorplan_table) =
+    Floorplan.deleteTable table.table_number
+    table |> ajaxSuccess |> json
 
 let transferTable (origin, destination) =
     Floorplan.transferTable origin destination
-    ajaxSuccess "true" |> json
+    let data = map ["origin", getTable origin ; "destination", getTable destination]
+    ajaxSuccess data |> json
 
-let AddDecoration (data: Decorations.decoration_creator) =
+let AddDecoration (data: Decorations.floorplan_decoration) =
     let image = "wwwroot/images/decorations/" + data.decoration_image
     let width, height = image |> GetImageSize
     let aspectRatio = decimal width /  decimal height
 
     let decoration : Decorations.floorplan_decoration = {
-        decoration_id = 0
+        id = 0
         decoration_height = (200m / aspectRatio) |> int
         decoration_width = 200
         decoration_rotation = 0
         decoration_image = data.decoration_image
-        decoration_pos_x = data.basis/2
-        decoration_pos_y = data.basis/2
+        decoration_pos_x = data.decoration_pos_x
+        decoration_pos_y = data.decoration_pos_y
         decoration_room = data.decoration_room
     }
 
-    Decorations.CreateDecoration decoration |> ignore
-    ajaxSuccess "true" |> json
+    Decorations.CreateDecoration decoration |> ajaxSuccess |> json
 
 let UpdateDecoration data =
     Decorations.UpdateDecoration data |> ignore
     ajaxSuccess "true" |> json
 
-let DeleteDecoration id =
-    Decorations.DeleteDecorationById id |> ignore
-    ajaxSuccess "true" |> json
+let DeleteDecoration id = ajaxSuccess (Decorations.DeleteDecoration id) |> json
 
-let newEmptyReservation tableNumber =
-    Floorplan.createEmptyReservation tableNumber 2
+let newEmptyReservation (reservation: reservation) =
+    let newReservation = {reservation with
+                            reservation_created_at = CurrentTime()
+                            reservation_time = CurrentTime()
+                          }
 
-    json <| ajaxSuccess "true"
+    if reservation.reservation_table_id > 0 then
+        let table = {(getTableById reservation.reservation_table_id) with
+                        status = 2
+                        default_covers = reservation.reservation_covers}
+        updateTablePosition table |> ignore
+
+    let createdReservation = Floorplan.createEmptyReservation newReservation
+    ajaxSuccess createdReservation |> json
+
+let updateReservation (reservation: reservation) = updateReservation reservation |> ajaxSuccess |> json
+
+let unreserveTable (table: floorplan_table) =
+    let newTable = {table with status = 0}
+    updateTablePosition newTable |> ignore
+    DeleteReservation newTable.id
+    newTable |> ajaxSuccess |> json
