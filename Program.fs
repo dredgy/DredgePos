@@ -1,14 +1,11 @@
 namespace WebApplication
 
-open Clerk
-open Floorplan
-open Microsoft.AspNetCore.Http
-open Microsoft.AspNetCore.Mvc.RazorPages
-open Microsoft.Extensions.Hosting;
+
+open DredgePos
 open Reservations
 open Saturn
 open Giraffe
-open DredgeFramework
+open Types
 
 module Program =
 
@@ -23,14 +20,13 @@ module Program =
         pipe_through browser
         post "/authenticateClerk" (bindJson<int> (handlePostRoute AjaxController.loginWithLoginCode) )
         post "/getTableData" (bindJson<int> AjaxController.getTableData)
-        post "/updateTableShape" (bindJson<Floorplan.floorplan_table_shape> AjaxController.updateTableShape)
-        post "/transformTable" (bindJson<Floorplan.floorplan_table> AjaxController.transformTable)
-        post "/createTable" (bindJson<Floorplan.floorplan_table> AjaxController.createTable)
-        post "/addDecoration" (bindJson<Decorations.floorplan_decoration> AjaxController.AddDecoration)
-        post "/updateDecoration" (bindJson<Decorations.floorplan_decoration> AjaxController.UpdateDecoration)
-        post "/deleteDecoration" (bindJson<Decorations.floorplan_decoration> AjaxController.DeleteDecoration)
-        post "/deleteTable" (bindJson<Floorplan.floorplan_table> AjaxController.deleteTable)
-        post "/mergeTables" (bindJson<Floorplan.floorplan_table[]> AjaxController.mergeTables)
+        post "/transformTable" (bindJson<floorplan_table> AjaxController.transformTable)
+        post "/createTable" (bindJson<floorplan_table> AjaxController.createTable)
+        post "/addDecoration" (bindJson<floorplan_decoration> AjaxController.AddDecoration)
+        post "/updateDecoration" (bindJson<floorplan_decoration> AjaxController.UpdateDecoration)
+        post "/deleteDecoration" (bindJson<floorplan_decoration> AjaxController.DeleteDecoration)
+        post "/deleteTable" (bindJson<floorplan_table> AjaxController.deleteTable)
+        post "/mergeTables" (bindJson<floorplan_table[]> AjaxController.mergeTables)
         post "/newEmptyReservation" (bindJson<reservation> AjaxController.newEmptyReservation)
         post "/updateReservation" (bindJson<reservation> AjaxController.updateReservation)
         post "/getReservation" (bindJson<int> (fun reservation -> json <| GetReservationById reservation) )

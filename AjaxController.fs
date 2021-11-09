@@ -1,12 +1,13 @@
 ﻿module AjaxController
 
 open DredgeFramework
+open DredgePos
 open Floorplan
 open Microsoft.AspNetCore.Http
 open Reservations
 open language
 open Giraffe
-open Dapper.FSharp
+open Types
 
 let loginWithLoginCode (context: HttpContext) (login_code: int) =
      if Session.clerkLogin login_code context then ajaxSuccess "success"
@@ -74,11 +75,11 @@ let getRoomTablesAndDecorations roomId =
 
 let getTableData tableNumber = json <| Floorplan.getTable tableNumber
 
-let updateTableShape (table: Floorplan.floorplan_table_shape) =
+let updateTableShape (table: floorplan_table) =
     Floorplan.updateTableShape table |> ignore
     getTableData table.table_number
 
-let transformTable (table: Floorplan.floorplan_table) =
+let transformTable (table: floorplan_table) =
     Floorplan.updateTablePosition table |> ignore
     getTableData table.table_number
 
@@ -99,12 +100,12 @@ let transferTable (origin, destination) =
     let data = map ["origin", getTable origin ; "destination", getTable destination]
     ajaxSuccess data |> json
 
-let AddDecoration (data: Decorations.floorplan_decoration) =
+let AddDecoration (data: floorplan_decoration) =
     let image = "wwwroot/images/decorations/" + data.decoration_image
     let width, height = image |> GetImageSize
     let aspectRatio = decimal width /  decimal height
 
-    let decoration : Decorations.floorplan_decoration = {
+    let decoration : floorplan_decoration = {
         id = 0
         decoration_height = (200m / aspectRatio) |> int
         decoration_width = 200

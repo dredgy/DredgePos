@@ -5,11 +5,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Types.fs" />
         <Compile Include="DredgeFramework.module.fs" />
         <Compile Include="Browser.module.fs" />
         <Compile Include="Database.module.fs" />
-        <Compile Include="Language.module.fs" />
         <Compile Include="GenericEntities.module.fs" />
+        <Compile Include="Language.module.fs" />
         <Compile Include="Theme.module.fs" />
         <Compile Include="Reservations.module.fs" />
         <Compile Include="Floorplan.module.fs" />

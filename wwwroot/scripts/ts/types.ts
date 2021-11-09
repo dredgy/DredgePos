@@ -1,6 +1,7 @@
 ﻿type PosMode = "edit" | "void" | "transfer" | "default" | "tableSelected" | "decorationSelected" | "activeTableSelected" | "merge" | "reservedTableSelected"
 type PosModes =  PosMode[]
 
+
 interface ajaxResult {
     status: string
     data : any

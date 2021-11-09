@@ -26,7 +26,7 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
        "decorator", Decorations.generateDecorator()
    ]
    let styles = ["tableMap.css"]
-   let scripts = ["konva.js" ; "dredgepos.floorplan.js"]
+   let scripts = ["external/konva.min.js" ; "dredgepos.floorplan.js"]
    let currentClerk = recordToMap <| Session.getCurrentClerk ctx
 
    let arrays = map["clerk", currentClerk]

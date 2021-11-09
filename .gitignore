@@ -6,3 +6,5 @@
 /tables/*
 /Properties/
 /.idea/
+/wwwroot/scripts/js/*.js
+/wwwroot/scripts/js/*.map

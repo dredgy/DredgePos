@@ -4,21 +4,9 @@ open System
 open System.IO
 open System.Text.RegularExpressions
 open DredgeFramework
-open Dapper
 open Dapper.FSharp
-open Floorplan
-
-[<CLIMutable>]
-type floorplan_decoration = {
-    id: int
-    decoration_room: int
-    decoration_pos_x: int
-    decoration_pos_y: int
-    decoration_rotation: int
-    decoration_width: int
-    decoration_height: int
-    decoration_image: string
-}
+open DredgePos
+open Types
 
 let decorationList venue =
     select {

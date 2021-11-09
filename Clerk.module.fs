@@ -1,14 +1,13 @@
 ﻿module Clerk
 
-open System
 open Dapper.FSharp
 open DredgeFramework
-open Renci.SshNet
+open DredgePos
 open Thoth.Json.Net
+open Types
 
 let mutable loginCookie = ""
 
-type clerk = {id: int; clerk_name: string; clerk_login_code: int; clerk_usergroup: int}
 let clerk_decoder : Decoder<clerk> =
         Decode.object
             (fun get ->

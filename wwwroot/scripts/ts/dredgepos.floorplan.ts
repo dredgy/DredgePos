@@ -50,6 +50,10 @@ const Floorplan: floorplan = {
     selectedDecorationId: 0
 };
 
+const getData = (dataType: entity) => {
+    
+}
+
 $(() => ajax('/ajax/getFloorplanData/1', null, 'get', setupFloorplan, null, null) )
 
 

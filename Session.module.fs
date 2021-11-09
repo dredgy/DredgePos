@@ -4,10 +4,9 @@ open System
 open DredgeFramework
 open Dapper.FSharp
 open Clerk
+open DredgePos
 open Thoth.Json.Net
-
-[<CLIMutable>]
-type session = {id: int; session_id: string; clerk_json: string; clerk_id: int; expires: int}
+open Types
 
 let deleteSession sessionId context =
     delete {

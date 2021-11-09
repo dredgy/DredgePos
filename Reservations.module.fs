@@ -3,15 +3,8 @@
 open System
 open DredgeFramework
 open Dapper.FSharp
-[<CLIMutable>]
-type reservation = {
-    id: int
-    reservation_name: string
-    reservation_time: int
-    reservation_covers: int
-    reservation_table_id: int
-    reservation_created_at: int
-}
+open DredgePos
+open Types
 
 let GetReservationById (id: int) =
     select {

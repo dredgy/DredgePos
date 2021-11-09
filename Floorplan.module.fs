@@ -1,54 +1,18 @@
 ﻿module Floorplan
 
+open DredgePos
 open Reservations
 
 let currentVenue = 1
 
 open System
-open System.Collections
-open System.Collections.Generic
 open System.IO
-open System.Xml
 open System.Xml.Linq
-open System.Linq
 open DredgeFramework
 open Dapper
 open Dapper.FSharp
-open Dapper.FSharp.MySQL
-open MySql.Data.MySqlClient
 open Thoth.Json.Net
-
-[<CLIMutable>]
-type floorplan_table_shape = { table_number: int; shape: string; width: int; height: int; rotation: int}
-[<CLIMutable>]
-type floorplan_table_transform = { table_number: int; pos_x: int; pos_y: int; width: int; height: int; rotation: int}
-
-
-[<CLIMutable>]
-type floorplan_table = {
-    table_number: int
-    room_id: int
-    venue_id: int
-    pos_x: int
-    pos_y: int
-    shape: string
-    width: int
-    height: int
-    default_covers: int
-    rotation: int
-    merged_children: string
-    previous_state: string
-    status: int
-    id: int
-}
-
-[<CLIMutable>]
-type floorplan_room = {
-    id: int
-    room_name: string
-    background_image: string
-    venue_id: int
-}
+open Types
 
 let floorplan_table_decoder : Decoder<floorplan_table> =
         Decode.object
@@ -188,7 +152,7 @@ let updateFloorplanTable (tableNumber:int) (column: string) value =
 
     getTable tableNumber
 
-let updateTableShape (floorplanTable: floorplan_table_shape)  =
+let updateTableShape (floorplanTable: floorplan_table)  =
     update {
         table "floorplan_tables"
         set floorplanTable
@@ -221,7 +185,11 @@ let getChildTables tableNumber =
     let table = getTable tableNumber
     let json = table.merged_children
 
-    json |> Decode.unsafeFromString(Decode.array floorplan_table_decoder)
+    let result = json |> Decode.Auto.fromString<floorplan_table[]>
+    match result with
+        | Ok tables -> tables
+        | Error _ -> [||]
+
 
 let matchTable (tableNumberToMatch: int) (floorplanTableToCheck: floorplan_table) =
     tableNumberToMatch = floorplanTableToCheck.table_number
