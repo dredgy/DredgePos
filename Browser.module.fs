@@ -16,8 +16,6 @@ let cookieExists name (context: HttpContext) =
 let deleteCookie name (context: HttpContext) =
     if cookieExists name context then context.Response.Cookies.Delete(name)
 
-let test = 0
-
 let getCookie cookieName (context: HttpContext) =
     context.Request.Cookies.[cookieName] |? ""
 

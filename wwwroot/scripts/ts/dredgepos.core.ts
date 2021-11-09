@@ -133,8 +133,6 @@
              turnOffMode(mode)
      }
 
-     let test = 9
-
      let clearModes = () => {Application.mode = []}
      let isInMode = (mode: PosMode) => Application.mode.includes(mode)
 
