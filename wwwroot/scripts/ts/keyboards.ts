@@ -1,6 +1,7 @@
 ﻿type KeyboardRowName = `row${number}${"" | "_"}${string}`;
+type KeyboardRow =  Partial<Record<KeyboardRowName, string[]>>
 interface VirtualKeyboard {
-    [layoutName: string]: Partial<Record<KeyboardRowName, string[]>>;
+    [layoutName: string]: KeyboardRow;
 }
 
 let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, allowDecimals = true, allowClose = true, submitFunction: Function) => {
@@ -222,7 +223,9 @@ let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, al
             and translators making their own language packs
             */
             index = index + 1;
-            let currentRow = layoutToLoad[`row${index}${modifier}`]
+
+            // @ts-ignore
+            let currentRow : string[] = layoutToLoad[`row${index}${modifier}`]
 
             $(row).children('a').each((keyIndex, button) => {
                 let key = $(button);
