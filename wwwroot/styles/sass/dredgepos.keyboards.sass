@@ -1,0 +1,151 @@
+@import dredgepos.core
+
+#virtualNumpad, #virtualKeyboard
+    display: none
+
+    .headingRow
+        background-color: var(--global-bgcolor)
+        display: flex
+        flex-basis: 10%
+        border-bottom: solid 1px #fff
+
+        @include mobile
+            font-size: 1.5em
+
+        *
+            height: 100%
+            display: flex
+            align-items: center
+            justify-content: center
+            text-align: center
+
+        h3
+            flex: 1
+
+        .closeKeyboards
+            flex-basis: 20%
+
+#virtualNumpad
+    @include absoluteCenter
+    flex-direction: column
+    height: 70vh
+    width: 30vw
+    border: solid 2px var(--global-border-color)
+
+    @include mobile
+        height: 100vh
+        width: 100vw
+
+    #virtualNumpadInput
+        background-color: var(--global-secondary-bgcolor)
+        flex-basis: 10%
+        display: flex
+        align-items: center
+        justify-content: center
+        text-align: center
+        font-size: 3em
+
+
+    #virtualNumpadButtons
+        display: flex
+        flex-direction: column
+        flex-basis: 80%
+        background-color: var(--global-bgcolor)
+
+        .virtualNumpadRow
+            display: flex
+            flex: 1
+
+            > *
+                flex: 1
+                font-size: 1.5em
+
+#virtualKeyboard
+    @include absoluteCenter
+    flex-direction: column
+    width: 80vw
+    height: 40vh
+    background-color: var(--global-bgcolor)
+    border: solid 2px var(--global-border-color)
+
+    @include mobile
+        width: 100vw
+        height: 10vh
+        top: 0
+        bottom: auto
+
+
+    #virtualKeyboardInput
+        flex-basis: 15%
+        background-color: var(--global-secondary-bgcolor)
+        font-size: 1.5em
+        text-align: center
+        color: var(--global-text-color)
+
+        @include mobile
+            flex-basis: 50%
+            text-align: left
+
+
+    #virtualKeyboardButtons
+        @include flex-column
+        flex-basis: 75%
+
+        @include mobile
+            display: none
+
+    .headingRow
+        @include mobile
+            flex-basis: 50%
+            font-size: 1.2em
+
+        .closeKeyboards
+            flex-basis: 10%
+
+    .virtualKeyboardRow
+        @include flex
+        @include flex-column-item
+
+        > *
+            @include flex
+            @include flex-item
+            font-size: 1.5em
+
+        > [data-value=backspace]
+            flex-basis: 10%
+
+#alert
+    @include flex-column
+    @include absoluteCenter
+    display: none
+    width: 60vw
+    height: 40vh
+    background-color: var(--global-bgcolor)
+    border: solid 2px var(--global-border-color)
+
+    @include mobile
+        width: 100vw
+        height: 100vh
+
+    > *
+        @include flex
+        @include flex-column-item
+
+    #alertHeading
+        @include flex
+        width: 100%
+        flex-basis: 20%
+        font-size: 2em
+
+    #alertMessage
+        flex-basis: 60%
+        font-size: 1.5em
+        background-color: var(--global-secondary-bgcolor)
+
+    #alertButtons
+        @include flex
+        flex-basis: 20%
+
+        a
+            @include flex-item
+            font-size: 2em

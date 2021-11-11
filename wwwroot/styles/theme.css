@@ -15,7 +15,6 @@ body{
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-	
 }
 
 .rtl td.itemCell{
@@ -76,7 +75,7 @@ body.lightMode{
 
 .darkMode .posButton{
 	color: #eee;
-	background: #232B30 -webkit-linear-gradient(top, #3D4850 3%, #000 4%, #333 100%); 
+	background: #232B30 -webkit-linear-gradient(top, #3D4850 3%, #000 4%, #333 100%);
 	text-shadow: 1px 1px #1f272b;
 }
 

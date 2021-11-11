@@ -7,8 +7,8 @@
     <meta name = "viewport" content = "user-scalable = no, initial-scale=0.8,maximum-scale=0.8 ,shrink-to-fit=yes"  />
 </head>
 <body class="darkMode">
-		<div id="tableScreen">
-			<div id="tablemapLeftColumn">
+		<div id="pageContainer">
+			<div id="floorplanLeftColumn">
 				<div class="topCell">
 					<a class="posHeader">Logged in as <!--[arr:clerk|clerk_name]--></a>
 				</div>
@@ -19,14 +19,14 @@
 
 				</div>
 			</div>
-			<div id="tablemapCenterColumn">
-				<div id="centerTopRow">
+			<div id="floorplanCenterColumn">
+				<div class="topCell">
 					<!--[var:roomMenu]-->
 				</div>
-				<div id="mapContainer">
-					<div id="tableMap"></div>
+				<div class="middleCell">
+					<div id="floorplanCanvas"></div>
 				</div>
-				<div id="centerBottomRow">
+				<div class="bottomCell">
 					<div class="editControls" data-visible-in-mode='["tableSelected"]'>
                         <div class="posHeader currentTable">
                             <b class="selectedTableNumber"></b>
@@ -41,7 +41,7 @@
 					</div>
 				</div>
 			</div>
-			<div id="tablemapRightColumn">
+			<div id="floorplanRightColumn">
 				<div class="topCell">
 					<a class="posButton logOut" onclick="logout()">×</a>
 				</div>

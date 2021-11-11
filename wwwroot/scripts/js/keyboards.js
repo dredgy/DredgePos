@@ -102,9 +102,7 @@ let setupVirtualKeyboard = (keyboardLayouts) => {
     });
     setKeyboardLayout('default');
 };
-let showVirtualKeyboard = (heading, maxlength = 32, isPassword = false, submitFunction = () => {
-    hideVirtualKeyboard();
-}) => {
+let showVirtualKeyboard = (heading, maxlength = 32, isPassword = false, submitFunction = () => { hideVirtualKeyboard(); }) => {
     let keyboard = $('#virtualKeyboard');
     let inputBox = $('#virtualKeyboardInput');
     keyboard.css('display', 'flex');
@@ -114,12 +112,13 @@ let showVirtualKeyboard = (heading, maxlength = 32, isPassword = false, submitFu
     keyboard.data('maxlength', maxlength);
     keyboard.data('password', isPassword);
     keyboard.data('submitfunction', submitFunction);
-    $(document).off('keyup');
+    inputBox.trigger('focus');
     $(document).on('keyup', e => {
         let key = e.key;
-        if (key == 'Enter')
+        if (key == 'Enter' && inputBox.val().toString().length > 0) {
             key = 'submit';
-        virtualKeyboardInput(key);
+            virtualKeyboardInput(key);
+        }
     });
 };
 let virtualKeyboardInput = (input) => {
@@ -132,13 +131,13 @@ let virtualKeyboardInput = (input) => {
         case 'backspace':
         case 'delete':
             let newText = inputBox.text().slice(0, -1);
-            inputBox.text(newText);
+            inputBox.val(newText);
             keyboard.data('value', newText);
             break;
         case 'submit':
             hideVirtualKeyboard();
             let submitFunction = keyboard.data('submitfunction');
-            submitFunction(inputBox.text());
+            submitFunction(inputBox.val());
             break;
         case 'shift':
             if (Application.keyboard.capsLock)
@@ -162,15 +161,15 @@ let virtualKeyboardInput = (input) => {
     if (input.length == 1) {
         if (Application.keyboard.shift || Application.keyboard.capsLock) {
             input = input.toUpperCase();
+            //If shift, reload lowercase
+            if (Application.keyboard.shift) {
+                Application.keyboard.shift = false;
+                setKeyboardLayout('default');
+            }
         }
-        let newText = inputBox.text() + input;
+        let newText = inputBox.val() + input;
         keyboard.data('value', newText);
-        inputBox.text(newText);
-        //If shift, reload lowercase
-        if (Application.keyboard.shift) {
-            Application.keyboard.shift = false;
-            setKeyboardLayout('default');
-        }
+        inputBox.val(newText);
     }
 };
 let setKeyboardLayout = (layout, modifier = '') => {
@@ -184,6 +183,7 @@ let setKeyboardLayout = (layout, modifier = '') => {
         and translators making their own language packs
         */
         index = index + 1;
+        // @ts-ignore
         let currentRow = layoutToLoad[`row${index}${modifier}`];
         $(row).children('a').each((keyIndex, button) => {
             let key = $(button);

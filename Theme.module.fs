@@ -10,7 +10,7 @@ open DredgeFramework
 let currentTheme = "restaurant"
 
 let getHTMLForFile file =
-    let stylePath = $"/styles/{file}"
+    let stylePath = $"/styles/css/{file}"
     let scriptPath = $"/scripts/js/{file}"
     let fileExtension = file |> getFileExtension
     let scriptFileExists =  File.Exists ("wwwroot"+stylePath) || File.Exists("wwwroot"+scriptPath)
@@ -26,7 +26,7 @@ let getHTMLForFile file =
 
 
 let ParseScriptsAndStylesheets files html =
-    let defaultScriptsAndStyles = ["external/jquery.js" ; "dredgepos.core.css"; "dredgepos.core.js"; "keyboards.js"; "theme.css"; "screen.css"; ]
+    let defaultScriptsAndStyles = ["dark.theme.css"; "external/jquery.js" ; "dredgepos.core.js"; "keyboards.js";]
     let scriptsAndStylesheets = defaultScriptsAndStyles @ files
 
     let scriptAndStylesheetHTML =
