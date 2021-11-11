@@ -35,8 +35,6 @@ const setupFloorplanEvents = () => {
 };
 const roomButtonClicked = (e) => {
     const button = $(e.target);
-    $('.roomButton').removeClass('active');
-    button.addClass('active');
     const roomId = button.data('value');
     loadRoom(getRoomById(roomId));
 };
@@ -69,6 +67,9 @@ const setupFloorplan = (floorplanData) => {
 const loadRoom = (roomToLoad) => {
     setRoomBackground(roomToLoad);
     setupKonva();
+    $('.roomButton').removeClass('active');
+    let button = $(`.roomButton[data-value=${roomToLoad.id}]`);
+    button.addClass('active');
     const tablesInRoom = Floorplan.tables.filter(table => table.room_id == roomToLoad.id);
     const decorationsInRoom = Floorplan.decorations.filter(decoration => decoration.decoration_room == roomToLoad.id);
     decorationsInRoom.forEach(decoration => createDecorationShape(decoration, false));
