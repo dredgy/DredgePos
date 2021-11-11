@@ -1,4 +1,4 @@
-﻿/node_modules/
+/node_modules/
 /bin/
 /obj/
 *.dll
@@ -6,4 +6,5 @@
 /tables/*
 /Properties/
 /.idea/
-/wwwroot/scripts/js/*
+/wwwroot/scripts/js/*.js
+/wwwroot/styles/css/*
