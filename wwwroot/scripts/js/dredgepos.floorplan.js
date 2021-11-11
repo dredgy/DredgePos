@@ -35,6 +35,8 @@ const setupFloorplanEvents = () => {
 };
 const roomButtonClicked = (e) => {
     const button = $(e.target);
+    $('.roomButton').removeClass('active');
+    button.addClass('active');
     const roomId = button.data('value');
     loadRoom(getRoomById(roomId));
 };
@@ -458,7 +460,7 @@ const setupKonva = () => {
     if (Floorplan.stage !== null)
         Floorplan.stage.destroy();
     Floorplan.stage = new Konva.Stage({
-        container: 'tableMap',
+        container: 'floorplanCanvas',
         width: dimensions.width,
         height: dimensions.height,
     });
@@ -620,19 +622,17 @@ const tableTransferred = (tables) => {
     redrawTable(getTableGroupFromTableNumber(destination.table_number));
 };
 const getDimensions = () => {
-    Floorplan.floorplanDiv = $('#tableMap');
-    const parentDiv = $('#mapContainer');
+    Floorplan.floorplanDiv = $('#floorplanCanvas');
+    const parentDiv = $('#floorplanCenterColumn .middleCell');
     const outerWidth = parentDiv.outerWidth();
     const outerHeight = parentDiv.outerHeight();
-    let width = outerWidth;
-    let height = outerWidth;
     if (outerWidth >= outerHeight) {
-        width = outerHeight;
-        height = outerHeight;
+        Floorplan.floorplanDiv.css('height', '100%');
     }
-    Floorplan.floorplanDiv.height(height);
-    Floorplan.floorplanDiv.width(width);
-    Floorplan.visualScale = width / Floorplan.visualScaleBasis;
-    return { width: width, height: height };
+    else {
+        Floorplan.floorplanDiv.css('width', '100%');
+    }
+    Floorplan.visualScale = Floorplan.floorplanDiv.width() / Floorplan.visualScaleBasis;
+    return { width: Floorplan.floorplanDiv.width(), height: Floorplan.floorplanDiv.height() };
 };
 //# sourceMappingURL=dredgepos.floorplan.js.map

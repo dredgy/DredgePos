@@ -1,0 +1,140 @@
+@import dredgepos.keyboards
+
+#floorplanLeftColumn, #floorplanRightColumn
+    @include flex-column
+    flex-basis: 10%
+    height: 100%
+    background: var(--global-bgcolor)
+
+#floorplanCenterColumn
+    @include flex-column
+    height: 100%
+    flex-basis: 80%
+
+.topCell
+    @include flex
+    flex-basis: 10%
+    width: 100%
+
+    .posHeader
+        @include flex-item
+
+    .posHeader, .posButton
+        border-bottom: solid 2px
+
+    .roomButton
+        border-left: none
+        border-right: none
+
+    .roomButton.active, .roomButton.active
+        border-right: solid 1px var(--posbutton-border-color-active)
+        border-left: solid 1px var(--posbutton-border-color-active)
+        border-bottom: none
+
+    .logOut
+        font-size: 3em
+
+.bottomCell
+    @include flex
+    flex-basis: 15%
+    width: 100%
+    background: var(--global-bgcolor)
+
+.topCell, .bottomCell
+    .posButton
+        @include flex-item
+        flex: 1
+
+.bottomCell
+    .editControls
+        @include flex
+        @include flex-item
+
+    .currentTable
+        @include flex-column
+        @include flex-item
+
+.middleCell
+    @include flex-column
+    flex: 1
+    width: 100%
+
+    #floorplanCanvas
+        aspect-ratio: 1/1
+        background-repeat: no-repeat
+
+    > *:not(#floorplanCanvas)
+        @include flex-column-item
+        flex: 1
+
+    .floorplanControls, .mergeControls
+        @include flex-column
+        > *
+            @include flex-column-item
+
+
+#decorator
+    @include flex-column
+    @include absoluteCenter
+    border: solid 3px var(--global-border-color)
+    background-color: var(--global-bgcolor)
+    width: 30vw
+    height: 50vh
+
+    > *
+        @include flex-column-item
+
+    #decoratorHeader
+        @include flex
+        flex-basis: 10%
+        border-bottom: solid 1px var(--global-border-color)
+
+        h2
+            @include flex
+            @include flex-item
+            flex-basis: 90%
+
+        a
+            @include flex
+            @include flex-item
+            flex-basis: 10%
+
+    #decoratorContent
+        @include flex-column
+        justify-content: flex-start
+        flex-basis: 90%
+        overflow-y: auto
+
+        .decoratorRow
+            @include flex
+            justify-content: flex-start
+            flex-basis: 25%
+            width: 100%
+
+            .decoratorItem
+                @include flex-column
+                flex-basis: 25%
+                height: 100%
+                gap: 1em
+
+                > a
+                    width: 100%
+
+                > a:first-of-type
+                    background-size: contain
+                    background-repeat: no-repeat
+                    background-position: center
+                    flex-basis: 80%
+
+                > a:last-of-type
+                    text-align: center
+                    flex-basis: 20%
+                    font-weight: bold
+
+        .decoratorRow:nth-of-type(odd)
+            .decoratorItem:nth-of-type(odd)
+                background-color: var(--global-secondary-bgcolor)
+
+        .decoratorRow:nth-of-type(even)
+            .decoratorItem:nth-of-type(even)
+                background-color: var(--global-secondary-bgcolor)

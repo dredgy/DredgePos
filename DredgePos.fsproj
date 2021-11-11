@@ -63,6 +63,7 @@
       <Content Include="xslt\orderHtmltoXML.xslt" />
       <Content Include="xslt\htmlToEscPos.xslt" />
       <Content Include=".gitignore" />
+      <Folder Include="wwwroot\styles\css" />
     </ItemGroup>
 
     <ItemGroup>

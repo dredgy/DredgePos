@@ -25,13 +25,13 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
        "roomMenu", roomMenu
        "decorator", Decorations.generateDecorator()
    ]
-   let styles = ["tableMap.css"]
+   let styles = ["dredgepos.floorplan.css"]
    let scripts = ["external/konva.min.js" ; "dredgepos.floorplan.js"]
    let currentClerk = recordToMap <| Session.getCurrentClerk ctx
 
    let arrays = map["clerk", currentClerk]
 
-   htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "tableMap" variables arrays scripts styles
+   htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "floorplan" variables arrays scripts styles
 
 let loadContactPage id =
     Session.clerkLogin 1408 |> ignore

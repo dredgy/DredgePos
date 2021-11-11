@@ -1,0 +1,77 @@
+*
+    margin: 0
+    padding: 0
+    box-sizing: border-box
+    font-family: Arial, Helvetica, sans-serif
+
+input[type=text], select, textarea
+    padding-left: 1em
+    padding-right: 1em
+
+#alert, #decorator
+    display: none
+
+@mixin absoluteCenter
+    position: absolute
+    margin: auto
+    top: 0
+    bottom: 0
+    left: 0
+    right: 0
+
+@mixin mobile
+    @media screen and (max-width: 900px)
+        @content
+
+@mixin flex
+    display: flex
+    justify-content: center
+    align-items: center
+
+@mixin flex-column
+    @include flex
+    flex-direction: column
+
+@mixin flex-item
+    height: 100%
+    flex: 1
+
+@mixin flex-column-item
+    width: 100%
+    flex: 1
+
+body
+    background-image: var(--body-background)
+    background-size: var(--body-background-size)
+    color: var(--global-text-color)
+
+.posButton
+    color: var(--posbutton-text-color)
+    background: var(--posbutton-background)
+    text-shadow: 1px 1px #1f272b
+    border: solid 1px var(--posbutton-border-color)
+
+.posHeader
+    padding: 0.5em
+    color: var(--pos-header-text-color)
+    background: var(--pos-header-background)
+
+.posButton.active,.posButton:active
+    border-color: var(--posbutton-border-color-active)
+    color: var(--posbutton-text-color-active)
+    background: var(--posbutton-background-active) /* webkit */
+    box-shadow: 1px 1px 1px rgba(255,255,255,0.1) /* CSS3 */
+
+#pageContainer
+    @include flex
+    height: 100vh !important
+
+.posButton, .posHeader
+    @include flex
+    text-align: center
+    cursor: default
+
+.posButton.active, .posButton:active
+    border: inset 2px
+
+
