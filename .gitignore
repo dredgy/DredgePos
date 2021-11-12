@@ -6,5 +6,5 @@
 /tables/*
 /Properties/
 /.idea/
-/wwwroot/scripts/js/*
+/wwwroot/scripts/js/
 /wwwroot/styles/css/*
