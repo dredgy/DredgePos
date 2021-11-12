@@ -120,7 +120,7 @@ const loadRoom = (roomToLoad: room) => {
     const decorationsInRoom = Floorplan.decorations.filter(decoration => decoration.decoration_room == roomToLoad.id)
     decorationsInRoom.forEach(decoration => createDecorationShape(decoration, false))
     tablesInRoom.forEach(createTableShape)
-    if(!isInMode('edit')) {
+    if(!isInMode('transfer')) {
         deselectTables()
     }
     Floorplan.currentRoom = roomToLoad
