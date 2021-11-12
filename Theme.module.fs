@@ -26,7 +26,7 @@ let getHTMLForFile file =
 
 
 let ParseScriptsAndStylesheets files html =
-    let defaultScriptsAndStyles = ["dark.theme.css"; "external/jquery.js" ; "dredgepos.core.js"; "keyboards.js";]
+    let defaultScriptsAndStyles = ["dark.theme.css"; "../external/jquery.js" ; "dredgepos.core.js"; "keyboards.js";]
     let scriptsAndStylesheets = defaultScriptsAndStyles @ files
 
     let scriptAndStylesheetHTML =
