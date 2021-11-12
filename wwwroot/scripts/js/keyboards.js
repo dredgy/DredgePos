@@ -100,6 +100,9 @@ let setupVirtualKeyboard = (keyboardLayouts) => {
     $(document).on('click', '.virtualKeyboardButton', e => {
         virtualKeyboardInput($(e.target).data('value'));
     });
+    $(document).on('click', '.forceFocus', (e) => {
+        $('#virtualKeyboardInput').trigger('focus');
+    });
     setKeyboardLayout('default');
 };
 let showVirtualKeyboard = (heading, maxlength = 32, isPassword = false, submitFunction = () => { hideVirtualKeyboard(); }) => {
@@ -107,12 +110,16 @@ let showVirtualKeyboard = (heading, maxlength = 32, isPassword = false, submitFu
     let inputBox = $('#virtualKeyboardInput');
     keyboard.css('display', 'flex');
     $('#virtualKeyboardHeading').html(heading);
+    $('.forceFocus').trigger('click');
     keyboard.data('value', '');
-    inputBox.text('');
+    inputBox.val('');
     keyboard.data('maxlength', maxlength);
     keyboard.data('password', isPassword);
     keyboard.data('submitfunction', submitFunction);
+    inputBox.attr('autofocus', 'autofocus');
     inputBox.trigger('focus');
+    inputBox.trigger('click');
+    inputBox.trigger('select');
     $(document).on('keyup', e => {
         let key = e.key;
         if (key == 'Enter' && inputBox.val().toString().length > 0) {

@@ -1,0 +1,7 @@
+{
+   "short_name":"DredgePos",
+   "name":"F# Point of Sale System",
+   "start_url":"/",
+   "display":"fullscreen",
+   "scope":"/"
+}

@@ -149,16 +149,21 @@ const createTableShape = (table) => {
 };
 const setupTableEvents = (tableGroup) => {
     const tableShape = getTableShapeFromGroup(tableGroup);
-    tableGroup.on('click', (e) => tableClicked(e.target));
-    tableGroup.on('tap', (e) => tableClicked(e.target));
-    tableGroup.on('dragend', (e) => saveTableTransformation(e.target));
-    tableShape.on('transformend', (e) => {
-        const group = getTableGroupFromShape(e.target);
-        saveTableTransformation(group);
-    });
+    tableGroup.on('click', tableClicked);
+    tableGroup.on('tap', tableClicked);
+    tableGroup.on('dragend', tableGroupTransformed);
+    tableShape.on('transformend', tableShapeTransformed);
 };
 const getTableShapeFromGroup = (group) => group.getChildren()[0];
 const getTableGroupFromShape = (shape) => shape.parent;
+const tableGroupTransformed = (e) => {
+    saveTableTransformation(e.target);
+};
+const tableShapeTransformed = (e) => {
+    let shape = e.target;
+    let group = getTableGroupFromShape(shape);
+    saveTableTransformation(group);
+};
 const saveTableTransformation = (tableGroup) => {
     const originalTable = getTableDataFromGroup(tableGroup);
     const tableShape = getTableShapeFromGroup(tableGroup);
@@ -321,7 +326,8 @@ const selectTable = (tableShape) => {
     turnOnMode('tableSelected');
 };
 const updateCoverText = (table) => $('.selectedTableCovers').text(lang('covers', table.default_covers.toString()));
-const tableClicked = (tableShape) => {
+const tableClicked = (event) => {
+    let tableShape = getTableShapeFromGroup(event.currentTarget);
     const table = getTableDataFromShape(tableShape);
     if (isInMode('merge')) {
         mergeTables(getTableDataFromTableNumber(Floorplan.selectedTableNumber), table);
@@ -365,17 +371,13 @@ const createDecorationShape = (decoration, select) => {
     decorationShape.src = 'images/decorations/' + decoration.decoration_image;
 };
 const setupDecorationEvents = (decorationShape) => {
-    decorationShape.on('click', e => {
-        decorationClicked(e.target);
-    });
-    decorationShape.on('transformend', e => {
-        decorationTransformed(e.target);
-    });
-    decorationShape.on('dragend', e => {
-        decorationTransformed(e.target);
-    });
+    decorationShape.on('click', decorationClicked);
+    decorationShape.on('tap', decorationClicked);
+    decorationShape.on('transformend', decorationTransformed);
+    decorationShape.on('dragend', decorationTransformed);
 };
-const decorationClicked = (decorationShape) => {
+const decorationClicked = (event) => {
+    let decorationShape = event.target;
     if (isInMode('edit')) {
         turnOffMode('tableSelected');
         if ((Floorplan.transformer.nodes().length > 0 && Floorplan.transformer.nodes()[0] != decorationShape) || Floorplan.transformer.nodes().length == 0) {
@@ -398,7 +400,8 @@ const selectDecorationShape = (decorationShape) => {
 const getDecorationDataById = (id) => {
     return Floorplan.decorations.find(decoration => id == decoration.id);
 };
-const decorationTransformed = (decorationShape) => {
+const decorationTransformed = (event) => {
+    let decorationShape = event.currentTarget;
     const oldDecorationData = getDecorationDataById(Number(decorationShape.id()));
     const newDecoration = {
         id: oldDecorationData.id,

@@ -56,7 +56,7 @@ body
     color: var(--pos-header-text-color)
     background: var(--pos-header-background)
 
-.posButton.active,.posButton:active
+.posButton.active,.posButton:active, .posButton:focus
     border-color: var(--posbutton-border-color-active)
     color: var(--posbutton-text-color-active)
     background: var(--posbutton-background-active) /* webkit */
@@ -64,7 +64,7 @@ body
 
 #pageContainer
     @include flex
-    height: 100vh !important
+    height: 100vh
 
 .posButton, .posHeader
     @include flex

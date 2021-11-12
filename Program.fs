@@ -2,6 +2,7 @@ namespace WebApplication
 
 
 open DredgePos
+open Microsoft.AspNetCore.Server.Kestrel.Core
 open Reservations
 open Saturn
 open Giraffe
@@ -47,7 +48,7 @@ module Program =
     let pageRouter = router {
         pipe_through browser
         not_found_handler (setStatusCode 404 >=> text "404")
-        get "/" (redirectTo false "/login")
+        get "/" (redirectTo true "/login")
         get "/login" (warbler (fun _ -> PageController.loadHomePage() ))
         get "/floorplan" (warbler (fun ctx -> PageController.loadFloorplan (snd ctx)))
         forward "/ajax" ajaxRouter
@@ -56,7 +57,7 @@ module Program =
     let app = application {
         use_static "wwwroot"
         use_router pageRouter
-
+        url "http://0.0.0.0:5001"
     }
 
     run app

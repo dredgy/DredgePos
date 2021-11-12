@@ -5,6 +5,7 @@
 	<script src="https://unpkg.com/current-device/umd/current-device.min.js"></script>
 	<meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name = "viewport" content = "user-scalable = no, initial-scale=0.8,maximum-scale=0.8 ,shrink-to-fit=yes"  />
+    <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body class="darkMode">
 		<div id="pageContainer">
@@ -34,10 +35,10 @@
                             <small class="selectedTableCovers"></small>
                         </div>
                         <a class="posButton"><!--[lang:order_table]--></a>
-                        <a class="posButton reserveTableButton" data-invisible-in-mode='["reservedTableSelected"]'><!--[lang:reserve_table]--></a>
+                        <a class="posButton reserveTableButton" data-invisible-in-mode='["reservedTableSelected", "activeTableSelected"]'><!--[lang:reserve_table]--></a>
                         <a class="posButton unreserveTableButton" data-visible-in-mode='["reservedTableSelected"]'><!--[lang:unreserve_table]--></a>
-                        <a class="posButton payTableButton"><!--[lang:pay_table]--></a>
-                        <a class="posButton viewTableButton"><!--[lang:view_table]--></a>
+                        <a class="posButton payTableButton" data-visible-in-mode='["activeTableSelected"]'><!--[lang:pay_table]--></a>
+                        <a class="posButton viewTableButton" data-visible-in-mode='["activeTableSelected"]'><!--[lang:view_table]--></a>
 					</div>
 				</div>
 			</div>

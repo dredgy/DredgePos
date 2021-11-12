@@ -212,17 +212,23 @@ const createTableShape = (table: table) => {
 const setupTableEvents = (tableGroup: Konva.Group) => {
     const tableShape = getTableShapeFromGroup(tableGroup)
 
-    tableGroup.on('click', (e) => tableClicked(e.target as Konva.Shape))
-    tableGroup.on('tap', (e) => tableClicked(e.target as Konva.Shape))
-    tableGroup.on('dragend', (e) => saveTableTransformation(e.target as Konva.Group))
-    tableShape.on('transformend', (e) => {
-        const group = getTableGroupFromShape(e.target as Konva.Shape)
-        saveTableTransformation(group)
-    })
+    tableGroup.on('click', tableClicked)
+    tableGroup.on('tap', tableClicked)
+    tableGroup.on('dragend', tableGroupTransformed)
+    tableShape.on('transformend',  tableShapeTransformed)
 }
 
 const getTableShapeFromGroup = (group: Konva.Group) => group.getChildren()[0] as Konva.Shape
 const getTableGroupFromShape = (shape: Konva.Shape) => shape.parent as Konva.Group
+
+const tableGroupTransformed = (e: Konva.KonvaEventObject<any>) => {
+    saveTableTransformation(e.target as Konva.Group)
+}
+const tableShapeTransformed = (e: Konva.KonvaEventObject<any>) => {
+    let shape = e.target as Konva.Shape
+    let group = getTableGroupFromShape(shape)
+    saveTableTransformation(group)
+}
 
 const saveTableTransformation = (tableGroup: Konva.Group) => {
     const originalTable = getTableDataFromGroup(tableGroup)
@@ -425,7 +431,8 @@ const selectTable = (tableShape: Konva.Shape) => {
 
 const updateCoverText = (table:table) => $('.selectedTableCovers').text(lang('covers', table.default_covers.toString()))
 
-const tableClicked = (tableShape: Konva.Shape) => {
+const tableClicked =  (event: Konva.KonvaEventObject<any>) => {
+    let tableShape = getTableShapeFromGroup(event.currentTarget as Konva.Group)
     const table = getTableDataFromShape(tableShape)
 
     if(isInMode('merge')) {
@@ -481,20 +488,14 @@ const createDecorationShape =  (decoration:decoration, select?: boolean) => {
 }
 
 const setupDecorationEvents = (decorationShape: Konva.Image) => {
-    decorationShape.on('click', e => {
-            decorationClicked(e.target as Konva.Image)
-    })
-
-    decorationShape.on('transformend', e => {
-        decorationTransformed(e.target as Konva.Image)
-    })
-
-    decorationShape.on('dragend', e => {
-        decorationTransformed(e.target as Konva.Image)
-    })
+    decorationShape.on('click', decorationClicked)
+    decorationShape.on('tap', decorationClicked)
+    decorationShape.on('transformend', decorationTransformed)
+    decorationShape.on('dragend', decorationTransformed)
 }
 
-const decorationClicked = (decorationShape: Konva.Image) => {
+const decorationClicked = (event: Konva.KonvaEventObject<any>) => {
+    let decorationShape = event.target as Konva.Image
     if(isInMode('edit')){
         turnOffMode('tableSelected')
         if ((Floorplan.transformer.nodes().length > 0 && Floorplan.transformer.nodes()[0] != decorationShape) || Floorplan.transformer.nodes().length == 0) {
@@ -519,8 +520,8 @@ const getDecorationDataById = (id: number) => {
     return Floorplan.decorations.find(decoration => id == decoration.id)
 }
 
-const decorationTransformed = (decorationShape: Konva.Image) => {
-
+const decorationTransformed = (event: Konva.KonvaEventObject<MouseEvent>|Konva.KonvaEventObject<TouchEvent|DragEvent|MouseEvent>) => {
+    let decorationShape = event.currentTarget as Konva.Image
     const oldDecorationData = getDecorationDataById(Number(decorationShape.id()))
     const newDecoration: decoration = {
         id: oldDecorationData.id,

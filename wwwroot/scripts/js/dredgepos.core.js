@@ -56,13 +56,16 @@ let ajaxSync = (endpoint, data, method = 'POST') => {
     return response;
 };
 /* Redirect to a specific URL */
-let redirect = (url) => {
-    window.location.href = url;
+let redirect = (url) => location.assign(url);
+const resize = () => {
+    $('#pageContainer').height(window.innerHeight + "px");
 };
 let setupCore = (languageVars) => {
     Application.languageVars = languageVars;
     const doc = $(document);
     doc.on('click', '#alertNo, #alertOk', hideAlerts);
+    window.addEventListener('resize', resize);
+    resize();
     setElementVisibilityByMode();
 };
 // @ts-ignore
@@ -130,7 +133,7 @@ let setElementVisibilityByMode = () => {
     invisibleElements.each((index, elem) => {
         let element = $(elem);
         let inVisibleInModes = element.data('invisible-in-mode');
-        let hideElement = inVisibleInModes.every(invisibleMode => {
+        let hideElement = inVisibleInModes.some(invisibleMode => {
             return mode.includes(invisibleMode);
         });
         element.toggle(!hideElement);

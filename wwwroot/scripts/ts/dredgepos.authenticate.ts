@@ -2,8 +2,9 @@
 
 let  authenticate = (input : string) => {
     let login = ajaxSync('/ajax/authenticateClerk', input)
-    if(login === 'success')
-        redirect('/floorplan')
+    if(login === 'success'){
+        location.assign('/floorplan')
+    }
     else
         showLoginBox()
 }

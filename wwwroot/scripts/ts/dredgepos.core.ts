@@ -67,15 +67,20 @@
     }
 
     /* Redirect to a specific URL */
-     let redirect = (url: string) : void => {
-        window.location.href = url
-    }
+     let redirect = (url: string) : void => location.assign(url)
 
+
+
+    const resize = () => {
+        $('#pageContainer').height(window.innerHeight + "px");
+    }
 
      let setupCore = (languageVars: Record<string, string>) => {
          Application.languageVars = languageVars
          const doc = $(document)
          doc.on('click', '#alertNo, #alertOk', hideAlerts)
+         window.addEventListener('resize', resize)
+         resize()
 
          setElementVisibilityByMode()
      }
@@ -159,7 +164,7 @@
         invisibleElements.each((index, elem) => {
             let element = $(elem)
             let inVisibleInModes: PosModes = element.data('invisible-in-mode')
-            let hideElement = inVisibleInModes.every(invisibleMode => {
+            let hideElement = inVisibleInModes.some(invisibleMode => {
                 return mode.includes(invisibleMode)
             })
             element.toggle(!hideElement)
