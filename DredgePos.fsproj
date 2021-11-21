@@ -14,6 +14,7 @@
         <Compile Include="Theme.module.fs" />
         <Compile Include="Reservations.module.fs" />
         <Compile Include="Floorplan.module.fs" />
+        <Compile Include="OrderScreen.module.fs" />
         <Compile Include="Decorations.module.fs" />
         <Compile Include="Clerk.module.fs" />
         <Compile Include="Session.module.fs" />
@@ -41,6 +42,7 @@
       <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
       <PackageReference Include="Dapper.FSharp" Version="1.16.0" />
       <PackageReference Include="FSharp.Data" Version="4.0.1" />
+      <PackageReference Include="Pluralize.NET.Core" Version="1.0.0" />
       <PackageReference Include="Saturn" Version="0.15.0-preview03" />
 	  <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
       <PackageReference Include="FSharp.Data.SqlClient" Version="2.1.0-beta1" />
@@ -63,6 +65,7 @@
       <Content Include="xslt\orderHtmltoXML.xslt" />
       <Content Include="xslt\htmlToEscPos.xslt" />
       <Content Include=".gitignore" />
+      <Folder Include="wwwroot\fonts" />
       <Folder Include="wwwroot\scripts\js" />
       <Folder Include="wwwroot\styles\css" />
     </ItemGroup>

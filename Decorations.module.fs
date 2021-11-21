@@ -8,22 +8,7 @@ open Dapper.FSharp
 open DredgePos
 open Types
 
-let decorationList venue =
-    select {
-        table "floorplan_decorations"
-        innerJoin "floorplan_rooms" "id" "decoration_room"
-    }
-    |> db.SelectJoin<floorplan_decoration, floorplan_room>
-    |> Array.filter (fun (_, room) -> room.venue_id = venue )
-    |> Array.map fst
-
-let decorationsInRoom (roomId: int) =
-    select {
-        table "floorplan_decorations"
-        where (eq "decoration_room" roomId)
-    }
-    |> db.Select<floorplan_decoration>
-
+let decorationsInRoom (roomId: int) = Entity.getAllByColumn "decoration_room" roomId
 
 let getImageName (image: string, path: string) =
     let imageName =
@@ -61,26 +46,3 @@ let generateDecorator () =
         |> Array.chunkBySize 4
         |> Array.map getImageRowHtml
         |> JoinArray ""
-
-let CreateDecoration (decoration: floorplan_decoration) =
-    insert {
-        table "floorplan_decorations"
-        value decoration
-    }
-    |> db.InsertOutput
-    |> first
-
-
-let UpdateDecoration (decoration: floorplan_decoration) =
-    update {
-        table "floorplan_decorations"
-        set decoration
-        where (eq "id" decoration.id )
-    } |> db.Update
-
-let DeleteDecoration (decoration: floorplan_decoration) =
-    delete {
-        table "floorplan_decorations"
-        where (eq "id" decoration.id)
-    } |> db.Delete |> ignore
-    decoration

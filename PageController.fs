@@ -1,5 +1,7 @@
 ﻿module PageController
 
+open System
+open DredgePos.Types
 open Microsoft.AspNetCore.Http
 open Floorplan
 open Giraffe
@@ -16,8 +18,8 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
    Session.RequireClerkAuthentication ctx
 
    let roomMenu =
-       getRoomList currentVenue
-         |> Array.map convertRoomListToLinks
+       Entity.getAllInVenue<floorplan_room>
+         |> Array.map makeRoomButton
          |> String.concat "\n"
 
    let variables = map [
@@ -33,22 +35,46 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
 
    htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "floorplan" variables arrays scripts styles
 
-let loadContactPage id =
-    Session.clerkLogin 1408 |> ignore
-    Theme.loadTemplate "index"
+let loadOrderScreen (ctx: HttpContext) : HttpHandler =
+   Session.RequireClerkAuthentication ctx
+
+   let categoryList =
+       Entity.getAll<order_screen_page_group>
+        |> Array.filter (fun category -> category.id <> 0)
+        |> Array.map (fun category ->
+            let categoryMap = recordToMap category
+            let categoryArray = map ["page", categoryMap]
+            Theme.loadTemplateWithArrays "orderScreen/page_group_button" categoryArray
+            )
+        |> String.concat "\n"
+
+   let grids =
+       OrderScreen.getAllPageGrids ()
+       |> Array.map OrderScreen.getPagesHTML
+       |> String.concat "\n"
+
+
+   let variables = map [
+       "title", "Order"
+       "categoryList", categoryList
+       "pageGroups", grids
+   ]
+
+   let styles = ["dredgepos.orderScreen.css"]
+   let scripts = ["dredgepos.orderScreen.js"]
+   let currentClerk = recordToMap <| Session.getCurrentClerk ctx
+   let arrays = map["clerk", currentClerk]
+
+   htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "orderScreen" variables arrays scripts styles
 
 let getOpenTables() =
-    let rows = Floorplan.openTables
+    let rows = openTables()
     rows |> jsonEncode
 
-let transferTables() =
-
-    Theme.loadTemplate "index"
-
 let mergeTables parent child =
-    Floorplan.mergeTables parent child |> ignore
+    mergeTables parent child |> ignore
     "done"
 
 let unmergeTables table =
-    Floorplan.unmergeTable table |> ignore
+    unmergeTable table |> ignore
     "done"

@@ -3,8 +3,6 @@
 open DredgePos
 open Reservations
 
-let currentVenue = 1
-
 open System
 open System.IO
 open System.Xml.Linq
@@ -13,28 +11,6 @@ open Dapper
 open Dapper.FSharp
 open Thoth.Json.Net
 open Types
-
-let floorplan_table_decoder : Decoder<floorplan_table> =
-        Decode.object
-            (fun get ->
-                {
-                    table_number = get.Required.Field "table_number" Decode.int
-                    room_id = get.Required.Field "room_id" Decode.int
-                    venue_id = get.Required.Field "venue_id" Decode.int
-                    pos_x = get.Required.Field "pos_x" Decode.int
-                    pos_y = get.Required.Field "pos_y" Decode.int
-                    shape = get.Required.Field "shape" Decode.string
-                    width = get.Required.Field "width" Decode.int
-                    height = get.Required.Field "height" Decode.int
-                    default_covers = get.Required.Field "default_covers" Decode.int
-                    rotation = get.Required.Field "rotation" Decode.int
-                    merged_children = get.Required.Field "merged_children" Decode.string
-                    previous_state = get.Required.Field "previous_state" Decode.string
-                    status = get.Required.Field "status" Decode.int
-                    id = get.Required.Field "id" Decode.int
-                })
-
-
 
 let activeTablePath = "tables/active/"
 
@@ -54,7 +30,7 @@ let fileNameToTableNumber (fileName: string) = //Takes a file name for a floorpl
         (fileName.Split "/table").[1] |> int
     else 0
 
-let openTables = //Get a list of all open tables.
+let openTables () = //Get a list of all open tables.
     let tableList = Directory.GetFiles(activeTablePath)
 
     tableList
@@ -117,12 +93,13 @@ let saveOrderToTable orderXML tableNumber =
     File.WriteAllText(tableFile, tableXML)
 
 let getTable (tableNumber : int) =
-    select {
+    let query = select {
         table "floorplan_tables"
-        where (eq "table_number" tableNumber + eq "venue_id" currentVenue)
+        where (eq "table_number" tableNumber + eq "venue_id" (getCurrentVenue()))
     }
-      |> db.Select<floorplan_table>
-      |> first
+
+    let result = query |> db.Select<floorplan_table>
+    result |> first
 
 let getTableById (id : int) =
     select {
@@ -138,12 +115,6 @@ let getRoom (roomId: int) =
         where (eq "id" roomId)
     } |> db.Select<floorplan_room> |> first
 
-let getRoomList (venueId: int) =
-    select {
-        table "floorplan_rooms"
-        where (eq "venue_id" venueId)
-    }  |> db.Select<floorplan_room>
-
 let updateFloorplanTable (tableNumber:int) (column: string) value =
     //TODO: Make update query venue specific
     let sql = "Update floorplan_tables Set @column = @value Where table_number = @tableNumber"
@@ -156,16 +127,11 @@ let updateTableShape (floorplanTable: floorplan_table)  =
     update {
         table "floorplan_tables"
         set floorplanTable
-        where (eq "table_number" floorplanTable.table_number + eq "venue_id" currentVenue)
+        where (eq "table_number" floorplanTable.table_number + eq "venue_id" (getCurrentVenue()))
     } |> db.Update
 
 
-let updateTablePosition (floorplanTable: floorplan_table) =
-    update {
-        table "floorplan_tables"
-        set floorplanTable
-        where (eq "table_number" floorplanTable.table_number + eq "venue_id" currentVenue)
-    } |> db.Update
+let updateTablePosition (floorplanTable: floorplan_table) = Entity.updateInDatabase floorplanTable
 
 let createEmptyReservation (reservation: reservation) =
     update {
@@ -174,12 +140,7 @@ let createEmptyReservation (reservation: reservation) =
         where(eq "id" reservation.reservation_table_id)
     } |> db.Update |> ignore
 
-    insert{
-        table "reservations"
-        value reservation
-    } |> db.InsertOutput |> first
-
-
+    Entity.addToDatabase reservation
 
 let getChildTables tableNumber =
     let table = getTable tableNumber
@@ -213,15 +174,13 @@ let tableExists (tableNumber: int) =
     let numberOfResults =
        select{
            table "floorplan_tables"
-           where (eq "table_number" tableNumber + eq "venue_id" currentVenue)
+           where (eq "table_number" tableNumber + eq "venue_id" (getCurrentVenue()))
        } |> db.Select<floorplan_table> |> length
 
     match numberOfResults with
        | 0 ->
             let allTables =
-                select {
-                    table "floorplan_tables"
-                }   |> db.Select<floorplan_table>
+                Entity.getAllInVenue<floorplan_table>
                     |> Array.map(findChildTable tableNumber)
                     |> Array.filter(fun tableNumber -> tableNumber <> 0)
 
@@ -248,21 +207,7 @@ let addNewTableWithoutOutput (newTable: floorplan_table) =
     }
     |> db.Insert
 
-let addNewTable (newTable: floorplan_table) =
-        let newTableList =
-            insert{
-                table "floorplan_tables"
-                value newTable
-            }
-            |> db.InsertOutput
-
-        newTableList |> first
-
-let deleteTable (tableNumber: int) =
-    delete {
-        table "floorplan_tables"
-        where (eq "table_number" tableNumber + eq "venue_id" currentVenue)
-    } |> db.Delete |> ignore
+let addNewTable (newTable: floorplan_table) = Entity.addToDatabase newTable
 
 let mergeTables parent child = //Merge two tables together
     if parent = child then false else
@@ -292,13 +237,12 @@ let mergeTables parent child = //Merge two tables together
 
         let existingChildrenJson = parentTable.merged_children |> StringTrim
         let existingChildren =
-            existingChildrenJson
-                |> Decode.fromString(Decode.list floorplan_table_decoder)
+            existingChildrenJson |> Decode.Auto.fromString<floorplan_table[]>
 
         let tableList =
             match existingChildren with
-                | Error _ -> [newChildTable]
-                | Ok tables -> tables @ [newChildTable]
+                | Error _ -> [|newChildTable|]
+                | Ok tables -> [tables ; [|newChildTable|]] |> Array.concat
 
         let newChildrenJson = tableList |> jsonEncode
         let parentPreviousState = parentTable |> jsonEncode
@@ -314,10 +258,11 @@ let mergeTables parent child = //Merge two tables together
                    pos_y = newPosY
                    default_covers = parentTable.default_covers + childTable.default_covers
                 |}
-            where (eq "table_number" parent + eq "venue_id" currentVenue)
+            where (eq "table_number" parent + eq "venue_id" (getCurrentVenue()))
         } |> db.Update |> ignore
 
-        deleteTable child
+        Entity.deleteById<floorplan_table> newChildTable.id
+            |> ignore
 
         true
 
@@ -326,7 +271,7 @@ let updateUnmergedTables parentTable childTable =
     update {
        table "floorplan_tables"
        set parentTable
-       where(eq "table_number" parentTable.table_number + eq "venue_id" currentVenue)
+       where(eq "table_number" parentTable.table_number + eq "venue_id" (getCurrentVenue()))
     } |> db.Update |> ignore
 
     addNewTableWithoutOutput childTable |> ignore
@@ -350,7 +295,7 @@ let unmergeTable tableNumber = //Separates a merged table into itself and the la
             Some (getTable currentTable.table_number, unmergedChild)
         | Error _ -> None
 
-let convertRoomListToLinks (room: floorplan_room) =
+let makeRoomButton (room: floorplan_room) =
     let vars = map [
         "roomId", room.id |> string
         "roomName", room.room_name
@@ -377,17 +322,7 @@ let newReservation name time covers =
         reservation_created_at = CurrentTime()
     }
 
-    insert {
-        table "reservations"
-        value reservation
-    } |> db.Insert
+    Entity.addToDatabase reservation
 
 
-let tableList venueId =
-    select{
-            table "floorplan_tables"
-            innerJoin "floorplan_rooms" "id" "floorplan_tables.room_id"
-        }
-    |> db.SelectJoin<floorplan_table, floorplan_room>
-    |> Array.filter (fun (_, room) -> room.venue_id = venueId )
-    |> Array.map fst
+let tableList () = Entity.getAllInVenue<floorplan_table>

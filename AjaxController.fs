@@ -42,15 +42,23 @@ let unmergeTable tableNumber =
     unmergedTables |> json
 
 
-let getFloorplanData venue =
-    let tableList = Floorplan.tableList venue
+let getFloorplanData (id: int) =
+    let tableList = Entity.getAllInVenue<floorplan_table>
     let reservationList = getReservationList tableList
     {|
         tables = tableList
-        decorations = Decorations.decorationList venue
-        activeTableNumbers = Floorplan.getActiveTables venue
-        rooms = Floorplan.getRoomList venue
+        decorations = Entity.getAllInVenue<floorplan_decoration>
+        activeTableNumbers = Floorplan.getActiveTables (getCurrentVenue())
+        rooms = Entity.getAllInVenue<floorplan_room>
         reservations = reservationList
+    |}
+    |> ajaxSuccess
+    |> json
+
+let getOrderScreenData (id: int) =
+    let pages = Entity.getAllInVenue<order_screen_page_group>
+    {|
+        order_screen_pages = pages
     |}
     |> ajaxSuccess
     |> json
@@ -62,28 +70,13 @@ let getKeyboardLayout (language: string) =
             "data", layout
         ] |> json
 
-
-let getRoomTablesAndDecorations roomId =
-    let tables = Floorplan.tablesInRoom roomId
-    let decorations = Decorations.decorationsInRoom roomId
-    let data = {|
-        tables = tables
-        decorations = decorations
-    |}
-
-    data |> ajaxSuccess |> json
-
-let getTableData tableNumber = json <| Floorplan.getTable tableNumber
-
-let updateTableShape (table: floorplan_table) =
-    Floorplan.updateTableShape table |> ignore
-    getTableData table.table_number
-
 let transformTable (table: floorplan_table) =
-    Floorplan.updateTablePosition table |> ignore
-    getTableData table.table_number
+        Entity.updateInDatabase table
+        |> ajaxSuccess
+        |> json
 
 let createTable (tableData: floorplan_table) =
+
     let result =
         if tableExists tableData.table_number = "False" then
             ajaxSuccess (addNewTable tableData)
@@ -92,7 +85,8 @@ let createTable (tableData: floorplan_table) =
     result |> json
 
 let deleteTable (table: floorplan_table) =
-    Floorplan.deleteTable table.table_number
+    Entity.deleteById<floorplan_table> table.id
+        |> ignore
     table |> ajaxSuccess |> json
 
 let transferTable (origin, destination) =
@@ -116,13 +110,19 @@ let AddDecoration (data: floorplan_decoration) =
         decoration_room = data.decoration_room
     }
 
-    Decorations.CreateDecoration decoration |> ajaxSuccess |> json
+    Entity.addToDatabase decoration
+        |> ajaxSuccess
+        |> json
 
-let UpdateDecoration data =
-    Decorations.UpdateDecoration data |> ignore
+let UpdateDecoration (data: floorplan_decoration) =
+    Entity.updateInDatabase data
+        |> ignore
     ajaxSuccess "true" |> json
 
-let DeleteDecoration id = ajaxSuccess (Decorations.DeleteDecoration id) |> json
+let DeleteDecoration (decorationToDelete: floorplan_decoration) =
+    Entity.deleteById<floorplan_decoration> decorationToDelete.id
+    |> ajaxSuccess
+    |> json
 
 let newEmptyReservation (reservation: reservation) =
     let newReservation = {reservation with

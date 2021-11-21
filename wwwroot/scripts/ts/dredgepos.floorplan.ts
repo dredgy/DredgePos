@@ -500,12 +500,14 @@ const decorationClicked = (event: Konva.KonvaEventObject<any>) => {
     let decorationShape = event.target as Konva.Image
     if(isInMode('edit')){
         turnOffMode('tableSelected')
-        if ((Floorplan.transformer.nodes().length > 0 && Floorplan.transformer.nodes()[0] != decorationShape) || Floorplan.transformer.nodes().length == 0) {
+        if ((isInMode('decorationSelected') && Floorplan.selectedDecorationId != Number(decorationShape.id())) || !isInMode('decorationSelected')) {
             selectDecorationShape(decorationShape)
         }  else {
             deselectTables()
             decorationShape.moveToBottom()
         }
+    } else {
+        deselectTables()
     }
 }
 
@@ -612,11 +614,14 @@ const setupKonva = () => {
         height: dimensions.height,
     })
 
-    Floorplan.stage.on('click', e => {
+    const stageClick = (e: Konva.KonvaEventObject<any> ) => {
         if(e.target == Floorplan.stage){
             deselectTables()
         }
-    })
+    }
+
+    Floorplan.stage.on('click', stageClick)
+    Floorplan.stage.on('tap', stageClick)
 
     Floorplan.transformer = new Konva.Transformer({
         rotationSnaps: [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 225, 270, -15, -30, -45, -60, -75, -90, -105, -120, -135, -150, -165, -180, -225, -270, 360, -360],

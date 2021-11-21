@@ -29,6 +29,14 @@ type floorplan_table = {
 }
 
 [<CLIMutable>]
+type category = {
+    id: int
+    category_name: string
+    category_print_group: string
+    category_department: string
+}
+
+[<CLIMutable>]
 type floorplan_room = {
     id: int
     room_name: string
@@ -53,3 +61,36 @@ type clerk = {id: int; clerk_name: string; clerk_login_code: int; clerk_usergrou
 
 [<CLIMutable>]
 type session = {id: int; session_id: string; clerk_json: string; clerk_id: int; expires: int}
+
+[<CLIMutable>]
+type order_screen_page_group = {id: int; venue_id: int; label: string; grid_id: int}
+
+[<CLIMutable>]
+type grid = {id: int; grid_name: string; grid_rows: int; grid_cols: int; grid_data: string}
+
+[<CLIMutable>]
+type button = {
+    id: int
+    text: string
+    primary_action: string
+    primary_action_value: string
+    secondary_action: string
+    secondary_action_value: string
+    image: string
+    extra_classes: string
+    extra_styles: string
+}
+
+[<CLIMutable>]
+type item = {
+    id: int
+    item_code: string
+    item_category: int
+    item_name: string
+    item_type: string
+    price1: float
+    price2: float
+    price3: float
+    price4: float
+    price5: float
+}

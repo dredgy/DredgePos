@@ -17,7 +17,7 @@ let getHTMLForFile file =
     match scriptFileExists with
         | true ->
             match fileExtension with
-            | ".css" -> $"\t<link test rel=\"stylesheet\" href=\"{stylePath}\" />"
+            | ".css" -> $"\t<link rel=\"stylesheet\" href=\"{stylePath}\" />"
             | ".js" ->
                     let snippet = $"\t<script src=\"{scriptPath}\"></script>"
                     snippet
@@ -121,6 +121,9 @@ and ParseTemplates vars arrays scripts styles (string: string) =
 
 let loadTemplate templateName =
     loadTemplateWithVarsArraysScriptsAndStyles templateName Map.empty<string, string> Map.empty<string, Map<string, string>> [] []
+
+let loadTemplateWithArrays templateName arrays =
+    loadTemplateWithVarsArraysScriptsAndStyles templateName Map.empty arrays [] []
 
 let loadTemplateWithVars templateName vars =
     loadTemplateWithVarsArraysScriptsAndStyles templateName vars Map.empty<string, Map<string, string>> [] []

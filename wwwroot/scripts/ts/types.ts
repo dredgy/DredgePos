@@ -64,3 +64,7 @@ interface keyboard {
     layouts: VirtualKeyboard
     currentLayout: string
 }
+
+interface order_screen_page_group  {id: number; venue_id: number; label: string}
+interface order_screen_page{id: number; order_screen_page_group_id: number; grid_id: number}
+interface grid {id: number; grid_name: string; grid_rows: number; grid_cols: number; grid_data: string}

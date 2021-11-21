@@ -1,8 +1,18 @@
+@font-face
+    font-family: "manrope"
+    src: url("/fonts/OpenSans-Regular.ttf") format('truetype')
+    font-style: normal
+
+
 *
     margin: 0
     padding: 0
     box-sizing: border-box
-    font-family: Arial, Helvetica, sans-serif
+    font-family: 'manrope', sans-serif
+    scroll-behavior: smooth
+
+.rtl
+    direction: rtl
 
 input[type=text], select, textarea
     padding-left: 1em
@@ -50,17 +60,15 @@ body
     background: var(--posbutton-background)
     text-shadow: 1px 1px #1f272b
     border: solid 1px var(--posbutton-border-color)
+    overflow: hidden
+    cursor: pointer
+    text-decoration: none
 
 .posHeader
     padding: 0.5em
     color: var(--pos-header-text-color)
     background: var(--pos-header-background)
-
-.posButton.active,.posButton:active, .posButton:focus
-    border-color: var(--posbutton-border-color-active)
-    color: var(--posbutton-text-color-active)
-    background: var(--posbutton-background-active) /* webkit */
-    box-shadow: 1px 1px 1px rgba(255,255,255,0.1) /* CSS3 */
+    cursor: default
 
 #pageContainer
     @include flex
@@ -69,9 +77,12 @@ body
 .posButton, .posHeader
     @include flex
     text-align: center
-    cursor: default
 
 .posButton.active, .posButton:active
     border: inset 2px
 
+.posButton.voidButton
+    background: var(--void-button-background)
 
+.invisible
+    visibility: hidden

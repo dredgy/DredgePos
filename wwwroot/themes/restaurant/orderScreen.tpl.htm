@@ -1,109 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>DredgePOS</title>	
+	<title>DredgePOS</title>
 	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
 	<script src="https://unpkg.com/current-device/umd/current-device.min.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
-	<link rel="stylesheet" type="text/css" href="themes/restaurant/theme.css?id=ax" media="screen" />
-	<link rel="stylesheet" type="text/css" href="themes/restaurant/screen.css?id=ax" media="screen" />
-    <meta name = "viewport" content = "user-scalable = no, initial-scale=0.8, maximum-scale=0.8 ,shrink-to-fit=yes"  />
-	<script type="text/javascript" src="currency.min.js"></script>
-    <script type="text/javascript" src="posFunctions.js"></script>
+    <meta name = "viewport" content = "user-scalable = no ,shrink-to-fit=yes"  />
+    <link rel="manifest" href="/manifest.webmanifest">
 </head>
-<body class="darkMode">
-	<span id="covers" style="display:none"><!--[var:covers]--></span> 
-	<div id="pageContainer">
-		<div id="leftColumn">
-			<div id="tableDetails">
-                <h2><!--[var:activeTable]--></h2>
-				<div>
-					<a class="posButton coverNumbers"><!--[var:coverString]--></a>
-					<a class="posButton"><!--[var:loggedInAs]--></a>
-				</div>
-            </div>
-            <div id="orderBoxContainer">
-    			<!--[template:orderBoxTable]-->
-            </div>
-			<div id="leftColumnFooter">
-				<p class="messageBox"></p>
-				<h2 class="orderBoxTotals">Total Price: <span >$0.00</span></h2>
-                <p class="selectedTotal">($0.00 Selected)</p>
-			</div>
-		</div>
-		<div id="rightColumn">
-			<div id="topBar">
-					<a class="posButton selectCover"><!--[lang:select_covers]--></a>
-					<a class="posButton freeText" data-type="instruction" data-id="freetext" 
-						data-name=""
-						data-price="0"
-						data-category="0"
-						data-department="0"
-						data-printgroup="0"><!--[lang:freetext_button]--></a>
-					<a class="posButton numpadMultiplier"><!--[lang:numpad_button]--></a>
-				<div class="exit posButton" onclick="loadScreen('tableMap')">×</div>
-			</div>
-			<div id="topHalf">
-	
-				<div class="functionColumn">
-					<a onclick="setPrintGroupOverride(false, this)" class="posButton toggle default active"><!--[lang:print_with|default]--></a>
-					<a onclick="setPrintGroupOverride('Starters', this)" class="posButton toggle"><!--[lang:print_with|Starters]--></a>
-					<a onclick="setPrintGroupOverride('Mains', this)" class="posButton toggle"><!--[lang:print_with|Mains]--></a>
-					<a onclick="setPrintGroupOverride('Desserts', this)" class="posButton toggle"><!--[lang:print_with|Desserts]--></a>
-					<a onclick="setPrintGroupOverride('Drinks', this)" class="posButton toggle"><!--[lang:print_with|Drinks]--></a>
-				</div>
-				<div class="functionColumn">
-                    <a class="posButton accumulateButton"><!--[lang:accumulate_function]--></a>								
-					<a class="posButton void"><!--[lang:void]--></a>
-					<a class="posButton saveOrder"><!--[lang:print_function]--></a>		
-				</div>
-				<div class="functionColumn">
-	
-				</div>
-				<div class="endFunctionColumn">		
-					
-				</div>
-			</div>
-			<div id="middleHalf">
-				<!--[template:categoryMenu]-->
-				
-			</div>
-			<div id="bottomHalf">
-				<div id="pageWrapper">
-									
-				</div>
-			</div>
-			<div class="pageControls">
-				<a class="posButton previousPage"><!--[lang:prev_page]--></a>
-				<a class="posButton nextPage"><!--[lang:next_page]--></a>
-			</div>
-		</div>
-		<div id="coverControl" class="popupBox"></div>
-		<div id="gridContainer">
-			<div id="gridHeader">
-				<h3>Heading</h3>
-				<a class="posButton closeGrid" onclick="hideGrids()">x</a>
-			</div>
-			<div id="gridBody"></div>
-		</div>
-	</div>
+<body>
 
-	<!--[template:keyboards]-->
-	<script type="text/javascript">
-		$(document).ready( function () {
-			//Base grid width must be defined for multipage functionality to work.
-            baseGridWidth = $('#bottomHalf').width();
-			dredgePosSetup('#pageContainer');			
-			loadCategory('Starters');	
-			
-			updateTotal();
-						
-            $("#orderBox tbody tr").on( 'click', function ( e ) {
-                selectRow($(this));
-            } )
-        } );
-  
-		
-	</script>
+<div id="pageContainer">
+    <div id="leftColumn">
+        <h1 class="tableHeading"><!--[lang:active_table]--></h1>
+        <div class="tableInfo">
+            <a href="#" class="posButton"><!--[lang:covers]--></a>
+            <a class="posHeader">Logged in as <!--[arr:clerk|clerk_name]--></a></a>
+        </div>
+        <div class="orderBox">
+
+        </div>
+        <div class="orderBoxInfo"></div>
+        <div class="orderBoxFooter">
+
+        </div>
+    </div>
+    <div id="rightColumn">
+        <div id="topHalf">
+            <div class="utilityButtons">
+                <a class="posButton"></a>
+                <a class="posButton"></a>
+                <a class="posButton"></a>
+                <a class="posButton logoutButton">×</a>
+            </div>
+            <div class="functionButtons">
+                <div class="functionColumn">
+                    <a class="posButton"></a>
+                    <a class="posButton"></a>
+                    <a class="posButton"></a>
+                    <a class="posButton"></a>
+                    <a class="posButton"></a>
+                    <a class="posButton"></a>
+                </div>
+                <div class="functionColumn">
+                    <a class="posButton"></a>
+                    <a class="posButton"></a>
+                    <a class="posButton voidButton"><!--[lang:void]--></a>
+                    <a class="posButton"></a>
+                </div>
+                <div class="functionColumn"></div>
+                <div class="functionColumn"></div>
+            </div>
+        </div>
+        <div id="pageList">
+            <!--[var:categoryList]-->
+        </div>
+        <div id="pageContainer">
+                <!--[var:pageGroups]-->
+        </div>
+        <div class="pageNavigation">
+            <a class="posButton prevButton"><!--[lang:prev_page]--></a>
+            <a class="posButton nextButton"><!--[lang:next_page]--></a>
+        </div>
+    </div>
+</div>
+
+<!--[template:keyboards]-->
+
 </body>
 </html>
