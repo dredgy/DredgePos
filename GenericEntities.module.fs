@@ -1,21 +1,18 @@
 ﻿module Entity
-open DredgePos
-open Types
 open Dapper.FSharp
 open DredgeFramework
 open Pluralize.NET.Core
-open FSharp.Reflection
+
 let getDatabaseTable<'x> =
         let typeName = typeof<'x>.Name
         Pluralizer().Pluralize typeName
-
-
 
 let addToDatabase (record: 'x)=
     let tableName = getDatabaseTable<'x>
     insert {
         table tableName
         value record
+        excludeColumn "id"
     }
     |> db.InsertOutput
     |> first
@@ -24,14 +21,12 @@ let addToDatabase (record: 'x)=
 let inline updateInDatabase (record: ^x) =
     let tableName = getDatabaseTable<'x>
     let id = ((^x) : (member id : int) (record))
-    (* Run an update query *)
     update {
         table tableName
         set record
         where (eq "id" id)
     }
-    |> db.Update |> ignore
-    record
+    |> db.Update
 
 let getAll<'x> =
     let typeName = typeof<'x>.Name

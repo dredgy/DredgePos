@@ -40,8 +40,9 @@
     <ItemGroup>
       <PackageReference Include="Dapper" Version="2.0.78" />
       <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-      <PackageReference Include="Dapper.FSharp" Version="1.16.0" />
+      <PackageReference Include="Dapper.FSharp" Version="2.4.1" />
       <PackageReference Include="FSharp.Data" Version="4.0.1" />
+      <PackageReference Include="Npgsql" Version="6.0.0" />
       <PackageReference Include="Pluralize.NET.Core" Version="1.0.0" />
       <PackageReference Include="Saturn" Version="0.15.0-preview03" />
 	  <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />

@@ -2,12 +2,14 @@
 
 open Dapper
 open Dapper.FSharp
-open Dapper.FSharp.MySQL
-open MySql.Data.MySqlClient
+open Dapper.FSharp.PostgreSQL
+
+
 open DredgeFramework
 
-let connString = "server=localhost;uid=root;pwd=;database=dredgepos;table cache = false"
-let connection = new MySqlConnection(connString)
+let connString = "Server=localhost;Port=5432;User Id=postgres;Password=root;Database=dredgepos;Include Error Detail=true"
+//let connString = "server=localhost;uid=root;pwd=;database=dredgepos;table cache = false"
+let connection = new Npgsql.NpgsqlConnection(connString)
 
 let Select<'a> asyncQuery =
     asyncQuery
@@ -28,18 +30,15 @@ let Insert<'a> asyncQuery =
 
 let InsertOutput<'a> asyncQuery =
     asyncQuery
-        |> connection.InsertAsync<'a>
+        |> connection.InsertOutputAsync<'a, 'a>
         |> RunSynchronously
-        |> ignore
-
-    let table = asyncQuery.Table
-    connection.Query<'a>($"""Select * From {table} Where id = (select last_insert_id())""")
         |> EnumerableToArray
 
 let Update<'a> asyncQuery =
     asyncQuery
-        |> connection.UpdateAsync<'a>
+        |> connection.UpdateOutputAsync<'a, 'a>
         |> RunSynchronously
+        |> EnumerableToArray
 
 let Delete<'a> asyncQuery =
     asyncQuery

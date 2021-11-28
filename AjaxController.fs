@@ -108,6 +108,7 @@ let AddDecoration (data: floorplan_decoration) =
         decoration_pos_x = data.decoration_pos_x
         decoration_pos_y = data.decoration_pos_y
         decoration_room = data.decoration_room
+        venue_id = data.venue_id
     }
 
     Entity.addToDatabase decoration

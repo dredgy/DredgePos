@@ -13,7 +13,6 @@ const loadPageGroup = (e: Event) => {
     let pageGroupId = button.data('page-group-id')
     $('.pageGroup').hide()
     let activeGrid = $(`.pageGroup[data-page-group-id=${pageGroupId}]`)
-
     let navButtons = $('.pageNavigation')
 
     activeGrid.find('.gridPage').length > 1
@@ -30,7 +29,7 @@ const setupOrderScreen = (data: OrderScreen) => {
     doc.on('click', '.prevButton', goToPrevPage)
     doc.on('click', '.loadPageGroup', loadPageGroup)
 
-    let initialPage = $('.loadPageGroup').first().trigger('click')
+    $('.loadPageGroup').first().trigger('click')
 }
 
 /**

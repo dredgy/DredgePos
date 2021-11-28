@@ -79,7 +79,7 @@
         @include flex
         @include flex-column-item
         flex-basis: 10%
-        background-color: magenta
+        background-color: var(--global-secondary-bgcolor)
         flex-grow: 0
         flex-shrink: 0
 
@@ -192,6 +192,7 @@
     .pageNavigation
         @include flex
         @include flex-column-item
+        display: none
         flex-basis: 15%
 
         > *

@@ -36,7 +36,6 @@ module Program =
         getf "/getKeyboardLayout/%s" AjaxController.getKeyboardLayout
         get "/languageVars" (json <| AjaxController.getLanguageVars)
         get "/getOpenTables" (json <| Floorplan.getActiveTables (DredgeFramework.getCurrentVenue()))
-        getf "/getActiveTables/%i" AjaxController.getActiveTables
         getf "/getFloorplanData/%i" AjaxController.getFloorplanData
         getf "/tableIsOpen/%i" (fun tableNumber -> json <| Floorplan.tableNumberIsOpen tableNumber)
         getf "/transferTable/%i/%i" AjaxController.transferTable

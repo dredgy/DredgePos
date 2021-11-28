@@ -54,6 +54,7 @@ type floorplan_decoration = {
     decoration_width: int
     decoration_height: int
     decoration_image: string
+    venue_id: int
 }
 
 [<CLIMutable>]

@@ -27,24 +27,3 @@ let setCookie name value (expiry: DateTimeOffset) (context: HttpContext) =
 
 let redirect url (context: HttpContext) =
     context.Response.Redirect url
-
-let addRoute path controller (endpoints: IEndpointRouteBuilder) =
-    endpoints.MapGet(path, fun context ->
-                    context.Response.WriteAsync(controller())) |> ignore
-    endpoints
-
-let addRouteWithParameter path controller param1 (endpoints: IEndpointRouteBuilder)  =
-    endpoints.MapGet(path, fun context ->
-                    let param1Name, param1Type = param1
-                    let parameter1 = context.Request.RouteValues.[param1Name] |> string |> param1Type
-                    context.Response.WriteAsync(controller parameter1)) |> ignore
-    endpoints
-
-let addRouteWithParameters path controller param1 param2 (endpoints: IEndpointRouteBuilder) =
-    endpoints.MapGet(path, fun context ->
-                    let param1Name, param1Type = param1
-                    let param2Name, param2Type = param2
-                    let parameter1 = context.Request.RouteValues.[param1Name] |> string |> param1Type
-                    let parameter2 = context.Request.RouteValues.[param2Name] |> string |> param2Type
-                    context.Response.WriteAsync(controller parameter1 parameter2)) |> ignore
-    endpoints

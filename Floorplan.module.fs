@@ -1,6 +1,7 @@
 ﻿module Floorplan
 
 open DredgePos
+open Org.BouncyCastle.Asn1.X509
 open Reservations
 
 open System
@@ -115,28 +116,12 @@ let getRoom (roomId: int) =
         where (eq "id" roomId)
     } |> db.Select<floorplan_room> |> first
 
-let updateFloorplanTable (tableNumber:int) (column: string) value =
-    //TODO: Make update query venue specific
-    let sql = "Update floorplan_tables Set @column = @value Where table_number = @tableNumber"
-    let parameters = [("column", box column); ("value", box value); ("tableNumber", box tableNumber)]
-    db.connection.Execute(sql, parameters) |> ignore
-
-    getTable tableNumber
-
-let updateTableShape (floorplanTable: floorplan_table)  =
-    update {
-        table "floorplan_tables"
-        set floorplanTable
-        where (eq "table_number" floorplanTable.table_number + eq "venue_id" (getCurrentVenue()))
-    } |> db.Update
-
-
 let updateTablePosition (floorplanTable: floorplan_table) = Entity.updateInDatabase floorplanTable
 
 let createEmptyReservation (reservation: reservation) =
     update {
         table "floorplan_tables"
-        set {| status = 2  |}
+        set {| status = 2  |}Target
         where(eq "id" reservation.reservation_table_id)
     } |> db.Update |> ignore
 
@@ -306,11 +291,16 @@ let makeRoomButton (room: floorplan_room) =
 let getReservationList (tableList: floorplan_table[]) =
     let tableIds =
         tableList
-            |> Array.map(fun table -> table.id)
-            |> JoinArray ","
+            |> Array.map(fun table -> box table.id)
+            |> List.ofArray
 
-    db.connection.Query<reservation>($"""Select * From reservations Where reservation_table_id In ({tableIds})""")
-        |> EnumerableToArray
+    if tableIds.Length > 0 then
+        select {
+            table "reservations"
+            where (isIn "reservation_table_id" tableIds)
+        }
+        |> db.Select<reservation>
+    else [||]
 
 let newReservation name time covers =
     let reservation = {

@@ -113,7 +113,7 @@ const loadRoom = (roomToLoad: room) => {
     setupKonva()
 
     $('.roomButton').removeClass('active')
-    let button = $(`.roomButton[data-value=${roomToLoad.id}]`)
+    let button = $(`.roomButton[data-value=${roomToLoad?.id}]`)
     button.addClass('active')
 
     const tablesInRoom = Floorplan.tables.filter(table => table.room_id == roomToLoad.id)
@@ -391,7 +391,7 @@ const tableUnreserved = (table: table) => {
 const getSelectedTableData = () => getTableDataFromTableNumber(Floorplan.selectedTableNumber)
 
 const deselectTables = () => {
-    Floorplan.stage.find('Rect, Ellipse').forEach( (shape: Konva.Shape, index) => {
+    Floorplan.stage.find('Rect, Ellipse').forEach( (shape: Konva.Shape) => {
         shape.stroke('black')
     });
 
@@ -536,6 +536,7 @@ const decorationTransformed = (event: Konva.KonvaEventObject<MouseEvent>|Konva.K
         decoration_width:  Math.round((decorationShape.scaleX() * decorationShape.width()) / Floorplan.visualScale),
         decoration_height:  Math.round((decorationShape.scaleY() * decorationShape.height()) / Floorplan.visualScale),
         decoration_image: oldDecorationData.decoration_image,
+        venue_id: oldDecorationData.venue_id,
     }
 
     saveDecoration(newDecoration)
@@ -569,7 +570,8 @@ const addDecoration = (e: Event) => {
         decoration_rotation: 0,
         decoration_width: 200,
         decoration_height: 200,
-        decoration_image: button.data('image')
+        decoration_image: button.data('image'),
+        venue_id: Floorplan.currentRoom.venue_id
     }
 
    ajax('/ajax/addDecoration', newDecoration, 'post', decorationAdded, null, null)
@@ -599,8 +601,10 @@ const setRoomBackground = (roomToLoad: room) => {
     const width = Floorplan.floorplanDiv.width()
     const height = Floorplan.floorplanDiv.height()
 
-    Floorplan.floorplanDiv.css("background-image", `url(images/rooms/${roomToLoad.background_image})`)
-    Floorplan.floorplanDiv.css("background-size", `${width}px ${height}px`)
+    if(roomToLoad.background_image) {
+        Floorplan.floorplanDiv.css("background-image", `url(images/rooms/${roomToLoad?.background_image})`)
+        Floorplan.floorplanDiv.css("background-size", `${width}px ${height}px`)
+    }
 }
 
 const setupKonva = () => {
