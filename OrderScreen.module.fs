@@ -1,5 +1,6 @@
 module OrderScreen
 open System.Security.Cryptography.Xml
+open System.Web
 open DredgeFramework
 open DredgePos
 open FSharp.Collections
@@ -10,9 +11,8 @@ open Theme
 let htmlAttributes (attributes: Map<string, string>) =
     " " + (attributes
         |> Map.toArray
-        |> Array.map (fun (attribute, value) -> attribute+"="+value)
+        |> Array.map (fun (attribute, value) -> attribute+"=\""+HttpUtility.HtmlEncode value + "\"")
         |> String.concat " ")
-
 
 let getAllPageGrids () = Entity.getAllInVenue<order_screen_page_group>
                          |> Array.filter(fun pageGroup -> pageGroup.grid_id <> 0)
@@ -24,11 +24,7 @@ let getImageButtonData (button: button) =
 
     let extraData =
         map [
-            "data-item-code", item.item_code
-            "data-item-price", item.price1.ToString()
-            "data-item-name", item.item_name
-            "data-item-type", item.item_type
-            "data-item-category", item.item_category.ToString()
+            "data-item", jsonEncode item
         ] |> htmlAttributes
 
     {|
