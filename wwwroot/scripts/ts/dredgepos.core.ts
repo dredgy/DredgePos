@@ -3,7 +3,7 @@
         mode: [],
         languageVars: {}
     }
-    
+
 
     /** Parses a language variable. */
      let lang = (key: string, replacements?: string[] | string) => {

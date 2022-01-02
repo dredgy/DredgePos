@@ -36,6 +36,7 @@
       </Content>
       <Content Remove="node_modules\**" />
       <Content Remove="wwwroot\scripts\ts\test.ts" />
+      <Content Remove="languages\**" />
     </ItemGroup>
 
     <ItemGroup>
@@ -62,14 +63,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="languages\english" />
       <Folder Include="tables\archived" />
       <Content Include="xslt\orderXMLtoHTML.xslt" />
       <Content Include="xslt\orderHtmltoXML.xslt" />
       <Content Include="xslt\htmlToEscPos.xslt" />
       <Content Include=".gitignore" />
       <Folder Include="wwwroot\fonts" />
-      <Folder Include="wwwroot\scripts\js" />
       <Folder Include="wwwroot\styles\css" />
     </ItemGroup>
 
@@ -381,6 +380,7 @@
 
     <ItemGroup>
       <EmbeddedResource Remove="node_modules\**" />
+      <EmbeddedResource Remove="languages\**" />
     </ItemGroup>
 
 </Project>
