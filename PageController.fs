@@ -12,7 +12,8 @@ let loadHomePage(): HttpHandler =
      let scripts = ["dredgepos.authenticate.js"]
      let styles = ["dredgepos.authenticate.css"]
 
-     htmlString <| Theme.loadTemplateWithVarsScriptsAndStyles "authenticate" variables scripts styles
+     Theme.loadTemplateWithVarsScriptsAndStyles "authenticate" variables scripts styles
+        |> htmlString
 
 let loadFloorplan (ctx: HttpContext) : HttpHandler =
    Session.RequireClerkAuthentication ctx
