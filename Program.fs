@@ -17,7 +17,6 @@ module Program =
         use_warbler
     }
 
-
     let floorplanRouter = router {
         pipe_through browser
         post "/authenticateClerk" (bindJson<int> (handlePostRoute AjaxController.loginWithLoginCode) )
@@ -32,7 +31,6 @@ module Program =
         post "/updateReservation" (bindJson<reservation> AjaxController.updateReservation)
         post "/getReservation" (bindJson<int> (fun reservation -> json <| GetReservationById reservation) )
         post "/unreserveTable" (bindJson<floorplan_table> AjaxController.unreserveTable )
-        getf "/getRoomData/%i" AjaxController.getRoomData
         getf "/getKeyboardLayout/%s" AjaxController.getKeyboardLayout
         get "/languageVars" (json <| AjaxController.getLanguageVars)
         get "/getOpenTables" (json <| Floorplan.getActiveTables (DredgeFramework.getCurrentVenue()))

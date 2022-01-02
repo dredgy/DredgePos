@@ -19,7 +19,7 @@ let languageVars =
 //Gets a value of a language variable
 let get var =
     if languageVars.ContainsKey var then
-        languageVars.[var]
+        languageVars[var]
     else
         "Missing language variable: " + var
 

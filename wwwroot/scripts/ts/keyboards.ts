@@ -216,7 +216,6 @@ let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, al
     }
 
      let setKeyboardLayout = (layout: string, modifier = '') => {
-
         if (modifier != '') modifier = `_${modifier}`
         Application.keyboard.currentLayout = layout
         let layoutToLoad = Application.keyboard.layouts[layout]
@@ -226,9 +225,8 @@ let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, al
             We start at 1 instead of 0. Makes it easier for non-programmers
             and translators making their own language packs
             */
-            index = index + 1;
+            index = index + 1
 
-            // @ts-ignore
             let currentRow : string[] = layoutToLoad[`row${index}${modifier}`]
 
             $(row).children('a').each((keyIndex, button) => {

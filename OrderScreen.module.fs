@@ -62,7 +62,7 @@ let renderButton (buttonId: int) =
             | "spacer" ->  {|extra_data=""; text=""|}
             | _ -> {|extra_data=""; text=""|}
 
-    let vars = map[
+    let vars = map [
         "extra_classes",  button.extra_classes + " " + extraClasses
         "extra_styles", extra_styles
         "primary_action", button.primary_action

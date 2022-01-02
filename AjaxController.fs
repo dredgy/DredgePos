@@ -17,15 +17,13 @@ let getLanguageVars = ajaxSuccess languageVars
 
 let getActiveTables venue = Floorplan.getActiveTables venue |> ajaxSuccess |> json
 
-let getRoomData roomId = Floorplan.getRoom roomId |> ajaxSuccess |> json
-
 let mergeTables (tables: floorplan_table[]) =
     let status =
-        if mergeTables tables.[0].table_number tables.[1].table_number then
+        if mergeTables tables[0].table_number tables[1].table_number then
             let outputTables = map [
-                "parent", tables.[0];
-                "child", tables.[1];
-                "merged", getTable tables.[0].table_number;
+                "parent", tables[0];
+                "child", tables[1];
+                "merged", getTable tables[0].table_number;
             ]
             ajaxSuccess outputTables
         else ajaxFail "Could Not Merge Tables"
@@ -36,7 +34,7 @@ let unmergeTable tableNumber =
     let unmergedTables =
         match unmerged  with
             | Some (parent, child) ->
-                map["parent", parent; "child", child] |> ajaxSuccess
+                map ["parent", parent; "child", child] |> ajaxSuccess
             | None -> ajaxFail "Could not Unmerge Table"
 
     unmergedTables |> json
@@ -64,7 +62,8 @@ let getOrderScreenData (id: int) =
     |> json
 
 let getKeyboardLayout (language: string) =
-    let layout = $"""wwwroot/languages/{language}/keyboardLayout.json""" |> GetFileContents
+    let layout = $"""wwwroot/languages/{language}/keyboardLayout.json"""
+                 |> GetFileContents
     map [
             "status", "success"
             "data", layout

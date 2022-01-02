@@ -27,8 +27,8 @@ let tableIsOpen (table: floorplan_table) = tableNumberIsOpen table.table_number
 
 let fileNameToTableNumber (fileName: string) = //Takes a file name for a floorplan table and returns the table number
     if fileName.Contains ".table" then
-        let fileName = (fileName.Split ".").[0]
-        (fileName.Split "/table").[1] |> int
+        let fileName = (fileName.Split ".")[0]
+        (fileName.Split "/table")[1] |> int
     else 0
 
 let openTables () = //Get a list of all open tables.
@@ -121,7 +121,7 @@ let updateTablePosition (floorplanTable: floorplan_table) = Entity.updateInDatab
 let createEmptyReservation (reservation: reservation) =
     update {
         table "floorplan_tables"
-        set {| status = 2  |}Target
+        set {| status = 2  |}
         where(eq "id" reservation.reservation_table_id)
     } |> db.Update |> ignore
 
@@ -173,7 +173,7 @@ let tableExists (tableNumber: int) =
             match allTables.Length with
                 | 0 -> false |> string //Table does not exist
                 | _ ->
-                    let parentTableData = getTable allTables.[0]
+                    let parentTableData = getTable allTables[0]
                     let parentRoom = getRoom parentTableData.room_id
                     let parentRoomName = parentRoom.room_name
                     language.getAndReplace "error_table_exists_merged" [parentRoomName; parentTableData.table_number.ToString()]

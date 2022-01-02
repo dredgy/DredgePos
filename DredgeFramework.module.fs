@@ -37,8 +37,8 @@ let GetFileContents (file: string) = File.ReadAllText file
 let GetFileName (file: string) = Path.GetFileName file
 
 let length (variable: 'T[]) = variable.Length
-let first (array: 'a[]) = array.[0]
-let last (array: 'a[]) = array.[array.Length-1]
+let first (array: 'a[]) = array[0]
+let last (array: 'a[]) = array[array.Length-1]
 
 
 let removeFalseValues (variable: bool[]) = variable |> Array.filter id

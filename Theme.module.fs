@@ -43,11 +43,11 @@ let ParseVariables (varArray: Map<string, string>) (html:string) =
     Regex.Replace(html, "<!--\[var\:(.*?)\]-->",
         MatchEvaluator(
             fun matchedVar ->
-                let varName = matchedVar.Groups.[1] |> string |> StringTrim
+                let varName = matchedVar.Groups[1] |> string |> StringTrim
 
                 if varArray.ContainsKey varName then
-                    if varName |> ToLowerCase = "title" then titlePrefix varArray.[varName]
-                    else varArray.[varName]
+                    if varName |> ToLowerCase = "title" then titlePrefix varArray[varName]
+                    else varArray[varName]
                 else
                     "<!--[Undefined Variable: " + varName + "]-->"
     ))
@@ -56,11 +56,11 @@ let ParseArrays (arrayArray: Map<string, Map<string, string>>) (string:string) =
     Regex.Replace(string, "<!--\[arr\:(.*?)\|(.*?)\]-->",
         MatchEvaluator(
             fun matchedVar ->
-                let arrayName = matchedVar.Groups.[1].ToString() |> StringTrim
-                let keyName = matchedVar.Groups.[2].ToString()
+                let arrayName = matchedVar.Groups[1].ToString() |> StringTrim
+                let keyName = matchedVar.Groups[2].ToString()
 
-                if arrayArray.ContainsKey arrayName && arrayArray.[arrayName].ContainsKey keyName then
-                    arrayArray.[arrayName].[keyName]
+                if arrayArray.ContainsKey arrayName && arrayArray[arrayName].ContainsKey keyName then
+                    arrayArray[arrayName][keyName]
                 else
                    "<!--[Undefined Array: " + arrayName + "]-->"
         )
@@ -70,7 +70,7 @@ let ParseSimpleLanguageVariables (string:string) =
     Regex.Replace(string, "<!--\[lang\:(.*?)\]-->",
         new MatchEvaluator(
             fun matchedVar ->
-                let varName = matchedVar.Groups.[1].ToString()
+                let varName = matchedVar.Groups[1].ToString()
                               |> StringTrim
 
                 language.get varName
@@ -80,8 +80,8 @@ let ParseLanguageVariablesWithReplacements (string: string) =
     Regex.Replace(string, "<!--\[lang\:(.*?)\|(.*?)\]-->",
         new MatchEvaluator(
             fun matchedVar ->
-                let varName = matchedVar.Groups.[1].ToString()
-                let replacements = matchedVar.Groups.[2].ToString()
+                let varName = matchedVar.Groups[1].ToString()
+                let replacements = matchedVar.Groups[2].ToString()
                                    |> StringSplit ","
                                    |> Array.toList
 
@@ -115,7 +115,7 @@ let rec loadTemplateWithVarsArraysScriptsAndStyles templateName vars arrays scri
 and ParseTemplates vars arrays scripts styles (string: string) =
     Regex.Replace(string, "<!--\[template\:(.*?)\]-->",
         new MatchEvaluator( fun template ->
-            let templateName = template.Groups.[1].ToString() |> StringTrim
+            let templateName = template.Groups[1].ToString() |> StringTrim
             loadTemplateWithVarsArraysScriptsAndStyles templateName vars arrays scripts styles
         ))
 

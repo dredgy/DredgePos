@@ -8,7 +8,7 @@ open Giraffe
 open DredgeFramework
 
 let loadHomePage(): HttpHandler =
-     let variables = map["title", "Log In"]
+     let variables = map ["title", "Log In"]
      let scripts = ["dredgepos.authenticate.js"]
      let styles = ["dredgepos.authenticate.css"]
 
@@ -31,7 +31,7 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
    let scripts = ["../external/konva.min.js" ; "dredgepos.floorplan.js"]
    let currentClerk = recordToMap <| Session.getCurrentClerk ctx
 
-   let arrays = map["clerk", currentClerk]
+   let arrays = map ["clerk", currentClerk]
 
    htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "floorplan" variables arrays scripts styles
 
@@ -63,7 +63,7 @@ let loadOrderScreen (ctx: HttpContext) : HttpHandler =
    let styles = ["dredgepos.orderScreen.css"]
    let scripts = ["dredgepos.orderScreen.js"]
    let currentClerk = recordToMap <| Session.getCurrentClerk ctx
-   let arrays = map["clerk", currentClerk]
+   let arrays = map ["clerk", currentClerk]
 
    htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "orderScreen" variables arrays scripts styles
 

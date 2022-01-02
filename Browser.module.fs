@@ -17,7 +17,7 @@ let deleteCookie name (context: HttpContext) =
     if cookieExists name context then context.Response.Cookies.Delete(name)
 
 let getCookie cookieName (context: HttpContext) =
-    context.Request.Cookies.[cookieName] |? ""
+    context.Request.Cookies[cookieName] |? ""
 
 let setCookie name value (expiry: DateTimeOffset) (context: HttpContext) =
     deleteCookie name context
