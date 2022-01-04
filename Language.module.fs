@@ -23,11 +23,11 @@ let get var =
     else
         "Missing language variable: " + var
 
-let getAndReplace languageVar replacements =
+let getAndReplace languageVar (replacements: 'x list) =
     let langString = get languageVar
     replacements
-        |> List.mapi (fun index string
-                       -> index + 1, string)
+        |> List.mapi (fun index replacement
+                       -> index + 1, replacement.ToString())
         |> List.fold (fun (result: string) (index, string)
                          -> result.Replace($"[{index}]", string)
                       ) langString

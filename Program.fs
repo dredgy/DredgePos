@@ -52,7 +52,8 @@ module Program =
         get "/" (redirectTo true "/login")
         get "/login" (warbler (fun _ -> PageController.loadHomePage() ))
         get "/floorplan" (warbler (fun ctx -> PageController.loadFloorplan (snd ctx)))
-        get "/order" (warbler (fun ctx -> PageController.loadOrderScreen (snd ctx)))
+        get "/order" (warbler (fun ctx -> PageController.loadOrderScreen (snd ctx) 0))
+        getf "/order/%i" (fun number -> (warbler (fun ctx -> PageController.loadOrderScreen (snd ctx) number)))
         forward "/ajax" floorplanRouter
         forward "/orderScreen" orderScreenRouter
     }

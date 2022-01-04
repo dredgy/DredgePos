@@ -26,6 +26,7 @@
     .orderBox
         flex-basis: 75%
         background: var(--global-bgcolor)
+        overflow-y: auto
 
     .orderBoxInfo
         flex-basis: 5%
@@ -90,7 +91,7 @@
         .active
             border-bottom: none
 
-    #pageContainer
+    #pageGroupContainer
         @include flex-column
         @include flex-column-item
         justify-content: flex-end
@@ -100,7 +101,7 @@
         -ms-overflow-style: none
 
         ::-webkit-scrollbar
-             display: none
+            display: none
 
         .pageGroup
             /*display: inline-flex*/
@@ -153,13 +154,20 @@
 
                     .buttonImg
                         padding: 0.6em
-                        flex-basis: 80%
+                        flex-basis: 65%
                         width: 100%
+                        flex-shrink: 0
+                        flex-grow: 0
 
                     .text
                         @include flex
-                        flex-basis: 20%
+                        align-items: flex-start
+                        flex-grow: 0
+                        flex-shrink: 0
+                        flex-basis: 35%
                         width: 100%
+                        overflow: hidden
+                        font-size: 0.9em
 
                 .hasImage.doubleWidth
                     flex-direction: row
@@ -189,11 +197,55 @@
                         flex-basis: 50%
                         height: 100%
 
+
     .pageNavigation
         @include flex
         @include flex-column-item
         display: none
-        flex-basis: 15%
 
         > *
             @include flex-item
+
+
+.orderBoxTable
+    width: 100%
+    border-collapse: collapse
+
+    tr
+        background: var(--orderbox-row-background)
+
+
+    .selected
+        background: var(--orderbox-selected-row-background)
+
+    thead tr
+        background: var(--orderbox-header-background)
+
+        th
+            font-weight: normal
+            text-align: center
+            padding: 0.2em 0.5em
+
+    tr
+        td, th
+            text-align: center
+            font-size: 0.9em
+
+        td
+            padding: 1em 0.5em
+            font-weight: bold
+
+        .itemCell
+            text-align: center
+            width: 70%
+
+        td.itemCell
+            text-align: left
+
+    tr.instructionRow
+        td.itemCell
+            padding-left: 2em
+            font-weight: 100
+
+        .qtyCell, .totalPriceCell, .printGroupCell
+            font-size: 0

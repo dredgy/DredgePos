@@ -51,6 +51,8 @@
    "merge_table":"Merge Table",
    "unmerge_table":"Unmerge Table",
    "order_table":"Place Order",
+   "order_number": "Order [1]",
+   "new_order": "New Order",
    "view_table":"View Table",
    "reserve_table":"Reserve Table",
    "unreserve_table":"Delete Reservation",

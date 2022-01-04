@@ -11,7 +11,7 @@ open Theme
 let htmlAttributes (attributes: Map<string, string>) =
     " " + (attributes
         |> Map.toArray
-        |> Array.map (fun (attribute, value) -> attribute+"=\""+HttpUtility.HtmlEncode value + "\"")
+        |> Array.map (fun (attribute, value) -> attribute+"='"+HttpUtility.HtmlEncode value + "'")
         |> String.concat " ")
 
 let getAllPageGrids () = Entity.getAllInVenue<order_screen_page_group>
@@ -46,9 +46,7 @@ let renderButton (buttonId: int) =
                         then "invisible"
                         else ""
 
-    let image = if button.image.Length > 0
-                    then loadTemplateWithVars "orderScreen/button_image" (map ["image", button.image])
-                    else ""
+    let image = if button.image.Length > 0 then loadTemplateWithVars "orderScreen/button_image" (map ["image", button.image]) else ""
 
     let extraClasses = [|imageClass; spacerClass|] |> String.concat " "
 
@@ -63,7 +61,7 @@ let renderButton (buttonId: int) =
         "extra_styles", extra_styles
         "primary_action", button.primary_action
         "secondary_action", button.secondary_action
-        "text", if button.text.Length >0 then button.text else action_data.text
+        "text", if button.text.Length > 0 then button.text else action_data.text
         "image", image
         "extra_data", action_data.extra_data
     ]

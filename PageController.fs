@@ -36,12 +36,22 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
 
    htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "floorplan" variables arrays scripts styles
 
-let loadOrderScreen (ctx: HttpContext) : HttpHandler =
+let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
    Session.RequireClerkAuthentication ctx
 
+   let covers = if tableNumber > 0 then (getTable tableNumber).default_covers else 0
+   let coverString = language.getAndReplace "covers" [covers]
+
+   let coverSelectorButton = if tableNumber > 0 then Theme.loadTemplateWithVars "orderScreen/cover_selector_button" (map ["covers", coverString]) else ""
+
+   let orderNumber =
+       if tableNumber > 0 then language.getAndReplace "active_table" [tableNumber]
+       else language.get "new_order"
+
    let categoryList =
-       Entity.getAll<order_screen_page_group>
-        |> Array.filter (fun category -> category.id <> 0)
+       Entity.getAllInVenue<order_screen_page_group>
+        |> Array.filter (fun page_group -> page_group.id <> 0)
+        |> Array.sortBy (fun {order=order} -> order)
         |> Array.map (fun category ->
             let categoryMap = recordToMap category
             let categoryArray = map ["page", categoryMap]
@@ -54,15 +64,17 @@ let loadOrderScreen (ctx: HttpContext) : HttpHandler =
        |> Array.map OrderScreen.getPagesHTML
        |> String.concat "\n"
 
-
    let variables = map [
        "title", "Order"
        "categoryList", categoryList
        "pageGroups", grids
+       "orderNumber", orderNumber
+       "coverSelectorButton", coverSelectorButton
+       "covers", coverString
    ]
 
    let styles = ["dredgepos.orderScreen.css"]
-   let scripts = ["dredgepos.orderScreen.js"]
+   let scripts = ["dredgepos.tables.js";"../external/currency.min.js";"dredgepos.orderScreen.js"; ]
    let currentClerk = recordToMap <| Session.getCurrentClerk ctx
    let arrays = map ["clerk", currentClerk]
 

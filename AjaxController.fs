@@ -54,9 +54,9 @@ let getFloorplanData (id: int) =
     |> json
 
 let getOrderScreenData (id: int) =
-    let pages = Entity.getAllInVenue<order_screen_page_group>
     {|
-        order_screen_pages = pages
+        order_screen_pages = Entity.getAllInVenue<order_screen_page_group>
+        sales_categories = Entity.getAllInVenue<sales_category>
     |}
     |> ajaxSuccess
     |> json

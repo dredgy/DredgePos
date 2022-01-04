@@ -15,6 +15,7 @@
         <Compile Include="Reservations.module.fs" />
         <Compile Include="Floorplan.module.fs" />
         <Compile Include="Printer.module.fs" />
+        <Compile Include="Orders.module.fs" />
         <Compile Include="OrderScreen.module.fs" />
         <Compile Include="Decorations.module.fs" />
         <Compile Include="Clerk.module.fs" />
