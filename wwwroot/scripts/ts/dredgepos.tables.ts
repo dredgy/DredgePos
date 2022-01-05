@@ -4,6 +4,12 @@
     getColumnIndex(columnHeading: string) : number
     EmptyRow() : JQuery<HTMLTableRowElement>
     filterByData(prop: string, value: any) : JQuery
+    pulse() : JQuery
+}
+
+$.fn.pulse = function(this: JQuery) {
+    pulseElement(this)
+    return this
 }
 
 $.fn.EmptyRow = function(this: JQuery) {

@@ -68,6 +68,11 @@ const setupFloorplanEvents = () => {
     doc.on('click', '.transferTableButton', toggleTransferMode)
     doc.on('click', '.reserveTableButton', reserveTable)
     doc.on('click', '.unreserveTableButton', unreserveTable)
+    doc.on('click', '.placeOrderButton', placeOrderButtonClicked)
+}
+
+const placeOrderButtonClicked = () => {
+    redirect(`/order/${Floorplan.selectedTableNumber}`)
 }
 
 const roomButtonClicked = (e: Event) => {
