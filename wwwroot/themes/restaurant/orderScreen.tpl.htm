@@ -29,9 +29,12 @@
                 <tbody></tbody>
             </table>
         </div>
-        <div class="orderBoxInfo"></div>
+        <div class="orderBoxInfo">
+            <span class="voidModeWarning" data-visible-in-mode='["void"]'><!--[lang:void_mode]--></span>
+        </div>
         <div class="orderBoxFooter">
-
+            <span class="orderBoxTotal">$0.00</span>
+            <small><span class="orderBoxSelectedTotal">$0.00</span></small>
         </div>
     </div>
     <div id="rightColumn">
@@ -44,12 +47,7 @@
             </div>
             <div class="functionButtons">
                 <div class="functionColumn">
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
+                    <!--[var:salesCategoryOverrideButtons]-->
                 </div>
                 <div class="functionColumn">
                     <a class="posButton"></a>

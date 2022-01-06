@@ -1,6 +1,6 @@
 ﻿module Theme
 
-open System
+open System.Web
 open System.IO
 open System.Collections.Generic
 open System.Text.RegularExpressions
@@ -138,3 +138,18 @@ let loadTemplateWithVarsAndStyles = loadTemplateWithVarsAndScripts
 
 let loadTemplateWithVarsScriptsAndStyles templateName vars scripts styles =
     loadTemplateWithVarsArraysScriptsAndStyles templateName vars Map.empty<string, Map<string, string>> scripts styles
+
+
+let htmlAttributes (attributes: Map<string, string>) =
+    " " + (attributes
+        |> Map.toArray
+        |> Array.map (fun (attribute, value) -> attribute+"='"+HttpUtility.HtmlEncode value + "'")
+        |> String.concat " ")
+
+let PosButton (text: string) (classes: string) (attributes: string) =
+    let vars = map [
+        "text", text
+        "classes", classes
+        "attributes", attributes
+    ]
+    loadTemplateWithVars "components/posButton" vars

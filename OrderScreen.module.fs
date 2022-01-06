@@ -1,18 +1,12 @@
 module OrderScreen
-open System.Security.Cryptography.Xml
-open System.Web
 open DredgeFramework
 open DredgePos
+open DredgePos.Types
 open FSharp.Collections
 open Thoth.Json.Net
 open Types
 open Theme
 
-let htmlAttributes (attributes: Map<string, string>) =
-    " " + (attributes
-        |> Map.toArray
-        |> Array.map (fun (attribute, value) -> attribute+"='"+HttpUtility.HtmlEncode value + "'")
-        |> String.concat " ")
 
 let getAllPageGrids () = Entity.getAllInVenue<order_screen_page_group>
                          |> Array.filter(fun pageGroup -> pageGroup.grid_id <> 0)
@@ -80,6 +74,15 @@ let renderPageGroup (pageGroup: order_screen_page_group) (pageHTML: string) =
         "page_group_id", pageGroup.id.ToString()
     ]
     loadTemplateWithVars "orderScreen/page_group" vars
+
+let categoryPosButton (category: sales_category) = PosButton (language.getAndReplace "print_with" [category.name]) "categoryOverrideButton" ""
+
+let generateSalesCategoryOverrideButtons () =
+    Entity.getAllInVenue<sales_category>
+        |> Array.map categoryPosButton
+        |> Array.append ([|PosButton (language.getAndReplace "print_with" ["default"]) "categoryOverrideButton" ""|])
+        |> String.concat "\n"
+
 
 let getPagesHTML (gridInfo: grid * order_screen_page_group) =
     let grid, pageGroup = gridInfo

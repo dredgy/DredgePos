@@ -71,6 +71,7 @@ let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
        "orderNumber", orderNumber
        "coverSelectorButton", coverSelectorButton
        "covers", coverString
+       "salesCategoryOverrideButtons", OrderScreen.generateSalesCategoryOverrideButtons ()
    ]
 
    let styles = ["dredgepos.orderScreen.css"]

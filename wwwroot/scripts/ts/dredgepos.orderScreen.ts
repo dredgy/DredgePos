@@ -68,12 +68,58 @@ const navigatePage = (direction: number) => {
 const goToNextPage = () => navigatePage(1)
 const goToPrevPage = () => navigatePage(-1)
 
-const addNewItem = (item: item, qty = 1) => {
+const addItemToOrderBox = (orderItem:orderItem) => {
     const orderBox = $('.orderBoxTable tbody')
-    const lastRow = orderBox.find('tr').last()
-    const salesCategory = OrderScreen.sales_categories.where('id', item.item_category)
+    let selectedRows = orderBox.find('tr.selected')
+    let lastRow : JQuery = selectedRows.length ? selectedRows.first() : orderBox.find('tr').last()
+    const existingRow = orderBox.find(`.itemCell:contains("${orderItem.item.item_name}")`).closest('tr').last()
 
-    const existingRow = orderBox.find(`.itemCell:contains("${item.item_name}")`).closest('tr').last()
+    //If accumulating, just increase the quantity of the existing row.
+    if(existingRow.length > 0 && isInMode('accumulate')){
+        incrementRowQty(existingRow, orderItem.qty)
+        scrollToElement(existingRow)
+        existingRow.pulse()
+    } else {
+        const newRow = createOrderRow(orderItem)
+        lastRow.length > 0
+            ? lastRow.after(newRow)
+            : orderBox.append(newRow)
+        scrollToElement(newRow)
+        newRow.pulse()
+    }
+
+    deselectRow(orderBox.find('tr'))
+}
+
+
+const addInstructionToOrderBox = (instruction: orderItem) => {
+    const orderBox = $('.orderBoxTable tbody')
+    let selectedRows = orderBox.find('tr.selected')
+    const newRow = createOrderRow(instruction)
+
+    //If no items are added, then you can't add an instruction row.
+    if(!orderBox.find('tr.itemRow').length) return
+
+    if(selectedRows.length > 0){
+        selectedRows.each( (_, row) => {
+            const selectedRow = $(row)
+            const parentRow = getParentRow(selectedRow)
+
+            if(parentRow.is(selectedRow) || !parentRow.hasClass('selected')) {
+                const newRow = createOrderRow(instruction)
+                getLastInstructionRow(selectedRow).after(newRow.pulse())
+            }
+        })
+        return
+    }
+
+    orderBox.append(newRow.pulse())
+}
+
+
+const addNewItem = (item: item, qty = 1) => {
+
+    const salesCategory = OrderScreen.sales_categories.where('id', item.item_category)
 
     const orderItem : orderItem = {
         id: OrderScreen.order_item_id_generator.next().value,
@@ -82,17 +128,37 @@ const addNewItem = (item: item, qty = 1) => {
         sales_category: salesCategory,
     }
 
-    if(existingRow.length > 0 && isInMode('accumulate') && orderItem.item.item_type != "instruction"){
-        incrementRowQty(existingRow, qty)
-        existingRow.pulse()
-    } else {
-        const newRow = createOrderRow(orderItem)
-        lastRow.length > 0
-            ? lastRow.after(newRow)
-            : orderBox.append(newRow)
-        newRow.pulse()
+    switch(item.item_type){
+        case 'instruction':
+            addInstructionToOrderBox(orderItem)
+            break
+        case 'item':
+        default:
+            addItemToOrderBox(orderItem)
+            break
     }
+}
 
+const getLastInstructionRow = (row: JQuery) => {
+        let stopCounting = false
+        let finalRow = row
+        row.nextAll().each(function (index, activeRow){
+            if(!stopCounting){
+                if($(activeRow).hasClass('instructionRow')){
+                    finalRow = $(activeRow)
+                } else {
+                    stopCounting = true
+                }
+            }
+        })
+
+        return $(finalRow)
+}
+
+const getParentRow = (row: JQuery) => {
+    return row.hasClass('instructionRow')
+        ? row.prevAll('.itemRow').first()
+        : row
 }
 
 const incrementRowQty = (row: JQuery, qty: number) => {
@@ -137,9 +203,6 @@ const createOrderRow = (orderItem: orderItem) => {
     return row
 }
 
-const saveOrderItem = (orderItem: orderItem) => {}
-
-
 const itemButtonClicked = (e: JQuery.TriggeredEvent) => {
     const existingItemRows = $('.itemRow')
     const button = $(e.target).closest('.posButton')
@@ -168,10 +231,6 @@ const itemRowClicked = (e: JQuery.TriggeredEvent) => {
 
 const selectRow = (row: JQuery) => {
     row.addClass('selected')
-    const id = row.data('order-item-id')
-    if(!OrderScreen.selected_item_ids.includes(id))
-        OrderScreen.selected_item_ids.push(id)
-
     const instructionRows = row.nextUntil('.itemRow')
 
     if(row.hasClass('itemRow') && instructionRows.length){
@@ -184,7 +243,6 @@ const selectRow = (row: JQuery) => {
 const deselectRow = (row: JQuery) => {
     row.removeClass('selected')
     const instructionRows = row.nextUntil('.itemRow')
-    OrderScreen.selected_item_ids = OrderScreen.selected_item_ids.filter(id => id != row.data('order-item-id'))
 
     if(row.hasClass('itemRow') && instructionRows.length){
         deselectRow(instructionRows)
@@ -194,9 +252,8 @@ const deselectRow = (row: JQuery) => {
 const deleteRow = (row: JQuery) => row.find('*:not(.hidden)').slideUp('fast', () => row.remove())
 
 const voidInstructionRow = (row: JQuery) => {
-    const parentRow = row.prevAll('.itemRow').first()
-
-    deleteRow(row)
+    if(!row.prevAll('.itemRow').first().hasClass('selected'))
+        deleteRow(row)
 }
 
 const voidItemRow = (row : JQuery) => decrementQty(row)
@@ -237,7 +294,9 @@ const calculateRowTotal = (row: JQuery) => {
 const decrementQty = (row: JQuery) => {
     const qty = getQty(row)
     if(qty <= 1){
+        const childRows = row.nextUntil('.itemRow')
         deleteRow(row)
+        deleteRow(childRows)
         return
     }
 
@@ -245,6 +304,7 @@ const decrementQty = (row: JQuery) => {
     calculateRowTotal(row)
 }
 
-const getOrderItemRow = (orderItem: orderItem) => $('tr').filterByData('order-item-id', orderItem.id)
+const scrollToElement = (element: JQuery) => element.get()[0].scrollIntoView()
+
 
 $(() => ajax('/orderScreen/getOrderScreenData/1', null, 'get', setupOrderScreen, null, null) )

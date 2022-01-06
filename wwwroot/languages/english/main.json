@@ -87,5 +87,7 @@
    "partial_table":"Partial Table",
    "paying_table":"Paying Table [1]",
    "msgbox_amount_select":"Enter Amount",
-   "msgbox_qty_select":"How many would you like to select?"
+   "msgbox_qty_select":"How many would you like to select?",
+
+    "void_mode": "Void Mode is ON."
 }

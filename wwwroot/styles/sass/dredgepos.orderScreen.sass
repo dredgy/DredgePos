@@ -29,11 +29,30 @@
         overflow-y: auto
 
     .orderBoxInfo
+        @include flex
         flex-basis: 5%
         background-color: white
 
+        .voidModeWarning
+            @include flex
+            @include flex-item
+            color: red
+            font-weight: bold
+
     .orderBoxFooter
         flex-basis: 10%
+        @include flex-column
+
+        > *
+            @include flex
+            @include flex-column-item
+            justify-content: flex-end
+            padding: 0 0.7em
+
+        > .orderBoxTotal
+            align-items: flex-end
+        > small
+            align-items: flex-start
 
 #rightColumn
     @include flex-column
@@ -238,6 +257,15 @@
         .itemCell
             text-align: center
             width: 70%
+
+        .qtyCell
+            width: 10%
+
+        .printGroupCell
+            width: 10%
+
+        .totalPriceCell
+            width: 10%
 
         td.itemCell
             text-align: left

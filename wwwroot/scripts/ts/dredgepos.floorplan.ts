@@ -221,6 +221,8 @@ const setupTableEvents = (tableGroup: Konva.Group) => {
 
     tableGroup.on('click', tableClicked)
     tableGroup.on('tap', tableClicked)
+    tableGroup.on('dbltap', tableDblClicked)
+    tableGroup.on('dblclick', tableDblClicked)
     tableGroup.on('dragend', tableGroupTransformed)
     tableShape.on('transformend',  tableShapeTransformed)
 }
@@ -438,7 +440,14 @@ const selectTable = (tableShape: Konva.Shape) => {
 
 const updateCoverText = (table:table) => $('.selectedTableCovers').text(lang('covers', table.default_covers.toString()))
 
-const tableClicked =  (event: Konva.KonvaEventObject<any>) => {
+const tableDblClicked =  (event: Konva.KonvaEventObject<any>) => {
+    let tableShape = getTableShapeFromGroup(event.currentTarget as Konva.Group)
+    const table = getTableDataFromShape(tableShape)
+    redirect(`/order/${table.table_number}`)
+}
+
+
+    const tableClicked =  (event: Konva.KonvaEventObject<any>) => {
     let tableShape = getTableShapeFromGroup(event.currentTarget as Konva.Group)
     const table = getTableDataFromShape(tableShape)
 
