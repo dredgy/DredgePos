@@ -191,7 +191,7 @@ Array.prototype.where = function<x>(this: x[], property: string, value: any) {
     return this.filter( item => (item as any)[property] === value)[0] || null
 }
 
-const money = (amount: number) => currency(amount, {fromCents: true})
+const money = (amount: number, fromCents=true) => currency(amount, {fromCents: fromCents})
 const moneyFromString = (amount: string) => currency(amount)
 
 //Id generator.

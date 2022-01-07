@@ -55,6 +55,16 @@ const setupOrderScreen = (data: OrderScreenData) => {
     turnOnMode('accumulate')
 
     $('.loadPageGroup').first().trigger('click')
+
+    let observer = new window.MutationObserver((mutations, observer) => updateOrderBoxTotals())
+
+    observer.observe($('.orderBoxTable tbody').get()[0], {
+        subtree: true,
+        attributes: true,
+        childList: true
+    });
+
+
 }
 
 /**
@@ -281,6 +291,23 @@ const voidLastItem = () => {
     const allRows = orderBox.find('tr')
     if(allRows.length < 1) return
     voidRows(allRows.last())
+}
+
+const updateOrderBoxTotals = () => {
+    const allRows = $('.orderBoxTable tbody tr')
+    const selectedRows = $('.orderBoxTable tbody tr.selected')
+    $('.orderBoxTotal').text(getTotalOfRows(allRows))
+    $('.orderBoxSelectedTotal').text(getTotalOfRows(selectedRows))
+}
+
+const getTotalOfRows = (rows: JQuery) => {
+    return money(rows
+        .find('td.totalPriceCell')
+        .get()
+        .map(cell => Number(cell.innerText))
+        .filter(number => !isNaN(number))
+        .reduce( (total, number) => total + number , 0), false)
+        .format()
 }
 
 const getQty = (row: JQuery) => Number(row.getColumnValue(lang('qty_header')))
