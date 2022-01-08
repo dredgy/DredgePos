@@ -2,6 +2,7 @@ type OrderScreenData = {
     order_screen_pages: order_screen_page[]
     sales_categories: sales_category[]
     print_groups: print_group[]
+    custom_item: item
 }
 
 type OrderScreen = {
@@ -14,6 +15,7 @@ type OrderScreen = {
     selected_item_ids: number[]
     qty_override: number
     print_group_override: print_group
+    custom_item: item,
 }
 
 let OrderScreen : OrderScreen = {
@@ -25,7 +27,8 @@ let OrderScreen : OrderScreen = {
     order_item_id_generator: newestId(),
     selected_item_ids: [],
     qty_override: 1,
-    print_group_override: null
+    print_group_override: null,
+    custom_item: null
 }
 
 const loadPageGroup = (e: Event) => {
@@ -49,12 +52,16 @@ const setupOrderScreen = (data: OrderScreenData) => {
     OrderScreen.order_screen_pages = data.order_screen_pages
     OrderScreen.sales_categories = data.sales_categories
     OrderScreen.print_groups = data.print_groups
+    OrderScreen.custom_item = data.custom_item
+
     updateOrderBoxTotals()
     let doc = $(document)
     doc.on('click', '.nextButton', goToNextPage)
     doc.on('click', '.prevButton', goToPrevPage)
     doc.on('click', '.loadPageGroup', loadPageGroup)
     doc.on('click', '[data-primary-action=item]', itemButtonClicked)
+    doc.on('click', '.freetextButton', freetext)
+    doc.on('click', '.openItemButton', openItem)
     doc.on('click', '.orderBoxTable tbody tr', itemRowClicked)
     doc.on('click', '.voidButton', voidButtonClicked)
     doc.on('dblclick', '.voidButton', voidLastItem)
@@ -131,12 +138,15 @@ const addInstructionToOrderBox = (instruction: orderItem) => {
             if(parentRow.is(selectedRow) || !parentRow.hasClass('selected')) {
                 const newRow = createOrderRow(instruction)
                 getLastInstructionRow(selectedRow).after(newRow.pulse())
+                newRow.setColumnValue(lang('printgroup_header'), selectedRow.getColumnValue(lang('printgroup_header')))
             }
         })
         return
     }
 
+    const lastRow = orderBox.find('tr').last()
     orderBox.append(newRow.pulse())
+    newRow.setColumnValue(lang('printgroup_header'), lastRow.getColumnValue(lang('printgroup_header')))
 }
 
 
@@ -363,7 +373,6 @@ const scrollToElement = (element: JQuery) => element.get()[0].scrollIntoView()
 
 const overrideQty = () => showVirtualNumpad(lang('multiplier'), 4, false, true, true, qtyOverridden)
 
-
 const qtyOverridden = (qtyString: string) => OrderScreen.qty_override = Number(qtyString)
 
 const printGroupOverride = (e: JQuery.TriggeredEvent) => {
@@ -385,6 +394,38 @@ const printGroupOverride = (e: JQuery.TriggeredEvent) => {
     } else {
         OrderScreen.print_group_override = newPrintGroup
     }
+}
+
+const freetext = () => showVirtualKeyboard('', 32,false, freetextSubmitted)
+
+const freetextSubmitted = (text: string) => {
+    if(text.trim().length < 1) return
+
+    if($('.orderBoxTable tbody tr').length < 1){
+        posAlert(lang('freetext_no_order'))
+    }
+
+    const item = OrderScreen.custom_item
+    item.item_type = 'instruction'
+    item.item_name = text
+
+    addNewItem(item)
+
+}
+
+const openItem = () => showVirtualKeyboard(lang('enter_item_name'), 32,false, openItemTextSubmitted)
+
+const openItemTextSubmitted = (text: string) => {
+    const submitFunction = (priceString: string) => {
+        const price = currency(priceString)
+        const item = OrderScreen.custom_item
+        item.item_type = 'item'
+        item.item_name = text
+        item.price1 = price.value
+
+        addNewItem(item)
+    }
+    showVirtualNumpad(lang('enter_item_price'), 4, false, true, true, submitFunction)
 }
 
 $(() => ajax('/orderScreen/getOrderScreenData/1', null, 'get', setupOrderScreen, null, null) )

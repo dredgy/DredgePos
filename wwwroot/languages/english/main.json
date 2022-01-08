@@ -90,5 +90,7 @@
    "msgbox_amount_select":"Enter Amount",
    "msgbox_qty_select":"How many would you like to select?",
 
-    "void_mode": "Void Mode is ON."
+    "void_mode": "Void Mode is ON.",
+    "enter_item_name": "Enter Item Name",
+    "enter_item_price": "Enter Item Price"
 }

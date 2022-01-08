@@ -2,6 +2,7 @@
 
 open System
 open DredgePos.Types
+open FSharp.Data
 open Microsoft.AspNetCore.Http
 open Floorplan
 open Giraffe
@@ -64,6 +65,13 @@ let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
        |> Array.map OrderScreen.getPagesHTML
        |> String.concat "\n"
 
+   let customItem =
+       Entity.getAllByColumn<item> "item_code" "OPEN000"
+       |> filterFirst
+       |> Array.map jsonEncode
+       |> String.concat ""
+
+
    let variables = map [
        "title", "Order"
        "categoryList", categoryList
@@ -72,6 +80,7 @@ let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
        "coverSelectorButton", coverSelectorButton
        "covers", coverString
        "salesCategoryOverrideButtons", OrderScreen.generateSalesCategoryOverrideButtons ()
+       "custom", OrderScreen.generateSalesCategoryOverrideButtons ()
    ]
 
    let styles = ["dredgepos.orderScreen.css"]
