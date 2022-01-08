@@ -20,6 +20,7 @@
                 <thead>
                 <tr>
                     <th class="orderBoxCell qtyCell"><!--[lang:qty_header]--></th>
+                    <th class="orderBoxCell itemIdCell hidden"><!--[lang:id_header]--></th>
                     <th class="orderBoxCell itemCell"><!--[lang:item_header]--></th>
                     <th class="orderBoxCell unitPriceCell hidden"><!--[lang:price_header]--></th>
                     <th class="orderBoxCell totalPriceCell"><!--[lang:total_price_header]--></th>
@@ -33,30 +34,31 @@
             <span class="voidModeWarning" data-visible-in-mode='["void"]'><!--[lang:void_mode]--></span>
         </div>
         <div class="orderBoxFooter">
-            <span class="orderBoxTotal">$0.00</span>
-            <small><span class="orderBoxSelectedTotal">$0.00</span></small>
+            <span class="orderBoxTotal"><!--[lang:totalPrice|0.00]--></span>
+            <small class="orderBoxSelectedTotal"><!--[lang:selectedPrice|0.00]--></small>
         </div>
     </div>
     <div id="rightColumn">
         <div id="topHalf">
-            <div class="utilityButtons">
-                <a class="posButton"></a>
-                <a class="posButton"></a>
-                <a class="posButton"></a>
-                <a class="posButton logoutButton">×</a>
-            </div>
             <div class="functionButtons">
-                <div class="functionColumn">
-                    <!--[var:salesCategoryOverrideButtons]-->
+                <div class="functionColumn toggleGroup">
+                        <input type="hidden" name="print_override" class="value" />
+                        <!--[var:salesCategoryOverrideButtons]-->
                 </div>
                 <div class="functionColumn">
-                    <a class="posButton"></a>
                     <a class="posButton accumulateButton" data-active-in-mode="accumulate"><!--[lang:accumulate_function]--></a>
+                    <a class="selectCoversButton posButton"><!--[lang:select_covers]--></a>
+                    <a class="keyboardButton posButton"><!--[lang:freetext_button]--></a>
+                    <a class="numpadButton posButton"><!--[lang:numpad_button]--></a>
+                </div>
+                <div class="functionColumn">
                     <a class="posButton voidButton" data-active-in-mode="void"><!--[lang:void]--></a>
                     <a class="posButton"></a>
                 </div>
-                <div class="functionColumn"></div>
-                <div class="functionColumn"></div>
+                <div class="functionColumn">
+                    <a class="posButton"><!--[lang:pay_function]--></a>
+                    <a class="posButton"><!--[lang:print_function]--></a>
+                </div>
             </div>
         </div>
         <div id="pageList">

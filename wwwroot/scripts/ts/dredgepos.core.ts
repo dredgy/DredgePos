@@ -79,6 +79,7 @@ const setupCore = (languageVars: Record<string, string>) => {
     Application.languageVars = languageVars
     const doc = $(document)
     doc.on('click', '#alertNo, #alertOk', hideAlerts)
+    doc.on('click', '.toggle', toggle)
     window.addEventListener('resize', resize)
     resize()
 
@@ -194,6 +195,31 @@ Array.prototype.where = function<x>(this: x[], property: string, value: any) {
 const money = (amount: number, fromCents=true) => currency(amount, {fromCents: fromCents})
 const moneyFromString = (amount: string) => currency(amount)
 
+const toggle = (e: JQuery.TriggeredEvent) => {
+    const button = $(e.target)
+    const toggleGroup =  button.closest('.toggleGroup')
+    const input = toggleGroup.find('input.value')
+    const isActive = button.hasClass('active')
+        toggleGroup
+            .find('.toggle')
+            .removeClass('active')
+
+    let value = !isActive
+        ? button.addClass('active').data('value')
+        : toggleGroup
+            .find('.toggle.default')
+            .addClass('active')
+            .data('value')
+
+    input.val(value).trigger('change')
+}
+
+const resetToggle = (input: JQuery) => {
+    input
+        .closest('.toggleGroup')
+        .find('.toggle.default')
+        .trigger('click')
+}
 //Id generator.
 function* newestId(){
     let id = 0

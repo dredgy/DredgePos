@@ -78,7 +78,7 @@ let ParseSimpleLanguageVariables (string:string) =
 
 let ParseLanguageVariablesWithReplacements (string: string) =
     Regex.Replace(string, "<!--\[lang\:(.*?)\|(.*?)\]-->",
-        new MatchEvaluator(
+        MatchEvaluator(
             fun matchedVar ->
                 let varName = matchedVar.Groups[1].ToString()
                 let replacements = matchedVar.Groups[2].ToString()

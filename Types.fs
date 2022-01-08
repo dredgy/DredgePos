@@ -41,7 +41,7 @@ type sales_category = {
     id: int
     parent: int
     name: string
-    print_group: string
+    print_group: int
     venue_id: int
 }
 

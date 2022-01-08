@@ -35,6 +35,7 @@
    "functions_header":"Functions",
    "close_order_function":"Close Without Saving",
    "accumulate_function":"Accumulate Items",
+   "multiplier":"Enter a Number",
    "void":"Void",
    "pay_function":"Pay",
    "print_function":"Save & Print",

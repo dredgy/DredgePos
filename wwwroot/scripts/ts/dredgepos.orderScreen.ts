@@ -1,25 +1,31 @@
 type OrderScreenData = {
     order_screen_pages: order_screen_page[]
     sales_categories: sales_category[]
+    print_groups: print_group[]
 }
-
 
 type OrderScreen = {
     order_screen_pages: order_screen_page[]
     last_added_item: orderItem
     order_items: orderItem[]
     sales_categories: sales_category[]
+    print_groups: print_group[]
     order_item_id_generator: Generator
     selected_item_ids: number[]
+    qty_override: number
+    print_group_override: print_group
 }
 
 let OrderScreen : OrderScreen = {
     order_screen_pages: null,
     last_added_item: null,
     order_items: [],
+    print_groups: [],
     sales_categories: [],
     order_item_id_generator: newestId(),
     selected_item_ids: [],
+    qty_override: 1,
+    print_group_override: null
 }
 
 const loadPageGroup = (e: Event) => {
@@ -42,6 +48,8 @@ const loadPageGroup = (e: Event) => {
 const setupOrderScreen = (data: OrderScreenData) => {
     OrderScreen.order_screen_pages = data.order_screen_pages
     OrderScreen.sales_categories = data.sales_categories
+    OrderScreen.print_groups = data.print_groups
+    updateOrderBoxTotals()
     let doc = $(document)
     doc.on('click', '.nextButton', goToNextPage)
     doc.on('click', '.prevButton', goToPrevPage)
@@ -50,7 +58,9 @@ const setupOrderScreen = (data: OrderScreenData) => {
     doc.on('click', '.orderBoxTable tbody tr', itemRowClicked)
     doc.on('click', '.voidButton', voidButtonClicked)
     doc.on('dblclick', '.voidButton', voidLastItem)
+    doc.on('click', '.numpadButton', overrideQty)
     doc.on('click', '.accumulateButton', () => toggleMode('accumulate'))
+    doc.on('change', '[name=print_override]', printGroupOverride)
 
     turnOnMode('accumulate')
 
@@ -63,7 +73,6 @@ const setupOrderScreen = (data: OrderScreenData) => {
         attributes: true,
         childList: true
     });
-
 
 }
 
@@ -82,7 +91,12 @@ const addItemToOrderBox = (orderItem:orderItem) => {
     const orderBox = $('.orderBoxTable tbody')
     let selectedRows = orderBox.find('tr.selected')
     let lastRow : JQuery = selectedRows.length ? selectedRows.first() : orderBox.find('tr').last()
-    const existingRow = orderBox.find(`.itemCell:contains("${orderItem.item.item_name}")`).closest('tr').last()
+    const existingRow = orderBox
+        .find('tr')
+        .filterByData('item', orderItem.item)
+        .filterByData('print_group', orderItem.print_group)
+        .last()
+
 
     //If accumulating, just increase the quantity of the existing row.
     if(existingRow.length > 0 && isInMode('accumulate')){
@@ -114,7 +128,6 @@ const addInstructionToOrderBox = (instruction: orderItem) => {
         selectedRows.each( (_, row) => {
             const selectedRow = $(row)
             const parentRow = getParentRow(selectedRow)
-
             if(parentRow.is(selectedRow) || !parentRow.hasClass('selected')) {
                 const newRow = createOrderRow(instruction)
                 getLastInstructionRow(selectedRow).after(newRow.pulse())
@@ -128,14 +141,13 @@ const addInstructionToOrderBox = (instruction: orderItem) => {
 
 
 const addNewItem = (item: item, qty = 1) => {
-
     const salesCategory = OrderScreen.sales_categories.where('id', item.item_category)
-
+    const printGroup = OrderScreen.print_group_override ?? OrderScreen.print_groups.where('id', salesCategory.print_group)
     const orderItem : orderItem = {
         id: OrderScreen.order_item_id_generator.next().value,
         item: item,
         qty: qty,
-        sales_category: salesCategory,
+        print_group: printGroup,
     }
 
     switch(item.item_type){
@@ -202,13 +214,23 @@ const createOrderRow = (orderItem: orderItem) => {
     const price = money(orderItem.item.price1)
     row.data('order-item-id', orderItem.id)
     row.addClass(`${orderItem.item.item_type}Row`)
+
     row
         .setColumnValue(lang('qty_header'), orderItem.qty)
         .setColumnValue(lang('item_header'), orderItem.item.item_name)
         .setColumnValue(lang('price_header'), price)
-        .setColumnValue(lang('total_price_header'), price)
-        .setColumnValue(lang('printgroup_header'), OrderScreen.sales_categories.where('id', orderItem.item.item_category)?.name)
+        .setColumnValue(lang('id_header'), orderItem.item.id)
+        .setColumnValue(lang('total_price_header'), price.multiply(orderItem.qty))
+        .setColumnValue(lang('printgroup_header'), orderItem.print_group?.name)
         .data('order-item-id', orderItem.id)
+        .data('print_group', orderItem.print_group)
+        .data('item', orderItem.item)
+
+    if(orderItem.item.item_type == 'instruction' && price.value <= 0){
+        row
+            .find('.totalPriceCell')
+            .css('font-size', 0)
+    }
 
     return row
 }
@@ -220,7 +242,10 @@ const itemButtonClicked = (e: JQuery.TriggeredEvent) => {
 
     if(item.item_type == 'instruction' && existingItemRows.length < 1) return
 
-    addNewItem(item)
+    const qty = OrderScreen.qty_override || 1
+    OrderScreen.qty_override = 1
+
+    addNewItem(item, qty)
 
 }
 
@@ -296,8 +321,11 @@ const voidLastItem = () => {
 const updateOrderBoxTotals = () => {
     const allRows = $('.orderBoxTable tbody tr')
     const selectedRows = $('.orderBoxTable tbody tr.selected')
-    $('.orderBoxTotal').text(getTotalOfRows(allRows))
-    $('.orderBoxSelectedTotal').text(getTotalOfRows(selectedRows))
+    const completeTotal = lang('totalPrice', getTotalOfRows(allRows))
+    const selectedTotal = lang('selectedPrice', getTotalOfRows(selectedRows))
+
+    $('.orderBoxTotal').text(completeTotal)
+    $('.orderBoxSelectedTotal').text(selectedTotal)
 }
 
 const getTotalOfRows = (rows: JQuery) => {
@@ -318,20 +346,45 @@ const calculateRowTotal = (row: JQuery) => {
     row.setColumnValue(lang('total_price_header'), price.multiply(qty))
 }
 
-const decrementQty = (row: JQuery) => {
-    const qty = getQty(row)
-    if(qty <= 1){
+const decrementQty = (row: JQuery, qty=1) => {
+    const existingQty = getQty(row)
+
+    if(existingQty <= 1){
         const childRows = row.nextUntil('.itemRow')
         deleteRow(row)
         deleteRow(childRows)
         return
     }
-
-    row.setColumnValue(lang('qty_header'), qty - 1)
+    row.setColumnValue(lang('qty_header'), existingQty - qty)
     calculateRowTotal(row)
 }
 
 const scrollToElement = (element: JQuery) => element.get()[0].scrollIntoView()
 
+const overrideQty = () => showVirtualNumpad(lang('multiplier'), 4, false, true, true, qtyOverridden)
+
+
+const qtyOverridden = (qtyString: string) => OrderScreen.qty_override = Number(qtyString)
+
+const printGroupOverride = (e: JQuery.TriggeredEvent) => {
+    const input = $(e.target)
+    const printGroupId =  Number(input.val())
+    const orderBox = $('.orderBoxTable tbody')
+    const selectedRows = orderBox.find('tr.selected')
+    const newPrintGroup = OrderScreen.print_groups.where('id', printGroupId)
+
+    if(selectedRows.length && newPrintGroup){
+        selectedRows.each((index, row) => {
+            $(row).setColumnValue(lang('printgroup_header'), newPrintGroup.name)
+            $(row).data('print_group', newPrintGroup)
+        })
+
+        OrderScreen.print_group_override = null
+        resetToggle(input)
+
+    } else {
+        OrderScreen.print_group_override = newPrintGroup
+    }
+}
 
 $(() => ajax('/orderScreen/getOrderScreenData/1', null, 'get', setupOrderScreen, null, null) )

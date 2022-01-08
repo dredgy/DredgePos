@@ -75,12 +75,13 @@ let renderPageGroup (pageGroup: order_screen_page_group) (pageHTML: string) =
     ]
     loadTemplateWithVars "orderScreen/page_group" vars
 
-let categoryPosButton (category: sales_category) = PosButton (language.getAndReplace "print_with" [category.name]) "categoryOverrideButton" ""
+let printGroupPosButton (printGroup: print_group) =
+    PosButton (language.getAndReplace "print_with" [printGroup.name]) "printGroupOverrideButton toggle" $"""data-value="{printGroup.id}" """
 
 let generateSalesCategoryOverrideButtons () =
-    Entity.getAllInVenue<sales_category>
-        |> Array.map categoryPosButton
-        |> Array.append ([|PosButton (language.getAndReplace "print_with" ["default"]) "categoryOverrideButton" ""|])
+    Entity.getAllInVenue<print_group>
+        |> Array.map printGroupPosButton
+        |> Array.append ([|PosButton (language.getAndReplace "print_with" ["default"]) "printGroupOverrideButton toggle default active" """data-value="0" """|])
         |> String.concat "\n"
 
 

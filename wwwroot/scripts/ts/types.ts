@@ -10,11 +10,11 @@ interface order {
 interface orderItem {
     id: number,
     qty: number,
-    sales_category: sales_category
+    print_group: print_group
     item: item
 }
 
-interface printGroup {
+interface print_group {
     id: number,
     name: string,
     printer: number,

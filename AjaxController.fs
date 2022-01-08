@@ -2,6 +2,7 @@
 
 open DredgeFramework
 open DredgePos
+open DredgePos.Types
 open Floorplan
 open Microsoft.AspNetCore.Http
 open Reservations
@@ -57,6 +58,7 @@ let getOrderScreenData (id: int) =
     {|
         order_screen_pages = Entity.getAllInVenue<order_screen_page_group>
         sales_categories = Entity.getAllInVenue<sales_category>
+        print_groups = Entity.getAllInVenue<print_group>
     |}
     |> ajaxSuccess
     |> json
