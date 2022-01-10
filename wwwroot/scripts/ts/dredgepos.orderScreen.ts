@@ -61,7 +61,7 @@ const setupOrderScreen = (data: OrderScreenData) => {
     doc.on('click', '.loadPageGroup', loadPageGroup)
     doc.on('click', '[data-primary-action=item]', itemButtonClicked)
     doc.on('click', '.freetextButton', freetext)
-    doc.on('click', '.openItemButton', openItem)
+    doc.on('click', '.openItemButton', customItem)
     doc.on('click', '.orderBoxTable tbody tr', itemRowClicked)
     doc.on('click', '.voidButton', voidButtonClicked)
     doc.on('dblclick', '.voidButton', voidLastItem)
@@ -405,7 +405,7 @@ const freetextSubmitted = (text: string) => {
         posAlert(lang('freetext_no_order'))
     }
 
-    const item = OrderScreen.custom_item
+    const item = Object.assign({}, OrderScreen.custom_item)
     item.item_type = 'instruction'
     item.item_name = text
 
@@ -413,15 +413,16 @@ const freetextSubmitted = (text: string) => {
 
 }
 
-const openItem = () => showVirtualKeyboard(lang('enter_item_name'), 32,false, openItemTextSubmitted)
+const customItem = () => showVirtualKeyboard(lang('enter_item_name'), 32,false, customItemTextSubmitted)
 
-const openItemTextSubmitted = (text: string) => {
+const customItemTextSubmitted = (text: string) => {
     const submitFunction = (priceString: string) => {
-        const price = currency(priceString)
-        const item = OrderScreen.custom_item
+        const price = currency(priceString, {fromCents: false})
+
+        const item = Object.assign({}, OrderScreen.custom_item)
         item.item_type = 'item'
         item.item_name = text
-        item.price1 = price.value
+        item.price1 = price.intValue
 
         addNewItem(item)
     }

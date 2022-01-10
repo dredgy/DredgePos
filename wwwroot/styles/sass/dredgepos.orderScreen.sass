@@ -75,12 +75,22 @@
             @include flex
             flex-basis: 100%
 
-            > *
+            > .functionColumn
                 @include flex-item
                 @include flex-column
-
+                flex-basis: 25%
                 > *
                     @include flex-column-item
+
+            > .printGroupButtons
+                flex-basis: 25%
+                height: 100%
+                display: grid
+                grid-template-columns: repeat(2, 1fr)
+                grid-auto-rows: auto
+
+                > *
+                    padding: 0.5em
 
 
     #pageList
