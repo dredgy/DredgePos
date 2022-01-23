@@ -2,13 +2,14 @@
 open Dapper.FSharp
 open DredgeFramework
 open Pluralize.NET.Core
+open FSharp.Reflection
 
-let getDatabaseTable<'x> =
+let GetDatabaseTable<'x> =
         let typeName = typeof<'x>.Name
         Pluralizer().Pluralize typeName
 
-let addToDatabase (record: 'x)=
-    let tableName = getDatabaseTable<'x>
+let Create (record: 'x)=
+    let tableName = GetDatabaseTable<'x>
     insert {
         table tableName
         value record
@@ -18,42 +19,50 @@ let addToDatabase (record: 'x)=
     |> first
 
 
-let inline updateInDatabase (record: ^x) =
-    let tableName = getDatabaseTable<'x>
-    let id = ((^x) : (member id : int) (record))
+let inline Update (record: ^x) =
+    let tableName = GetDatabaseTable<'x>
+    let id = ((^x) : (member id : int) record)
     update {
         table tableName
         set record
         where (eq "id" id)
+        excludeColumn "id"
     }
     |> db.Update
 
-let getAll<'x> =
-    let typeName = typeof<'x>.Name
-    let tableName = Pluralizer().Pluralize typeName
+let GetAll<'x> =
+    let tableName = GetDatabaseTable<'x>
 
     select {
         table tableName
     }
     |> db.Select<'x>
 
-let getAllByColumn<'x> (column: string) (value: obj) =
-    let typeName = typeof<'x>.Name
-    let tableName = Pluralizer().Pluralize typeName
+let GetAllByColumn<'x> (column: string) (value: obj) =
+    let tableName = GetDatabaseTable<'x>
 
     select {
         table tableName
         where (eq column value)
     } |> db.Select<'x>
 
-let getAllInVenue<'x> = getAllByColumn<'x> "venue_id" (getCurrentVenue ())
-let getById<'x> (id: int) = getAllByColumn<'x> "id" id |> first
+let GetAllInVenue<'x> = GetAllByColumn<'x> "venue_id" (getCurrentVenue ())
+let GetById<'x> (id: int) = GetAllByColumn<'x> "id" id |> first
 
-let deleteById<'x> id =
+let inline GetRelated<'x, .. > (entity: ^y) =
+    let columnName = typeof<'x>.Name + "_id"
+    let primaryKeyValue = typeof<'y>.GetProperty(columnName).GetValue(entity) :?> int
+    GetById<'x> primaryKeyValue
+
+let inline GetAllRelated<'x, .. > (entity: ^y) =
+    let id = typeof<'y>.GetProperty("id").GetValue(entity) :?> int
+    let columnName = typeof<'y>.Name + "_id"
+    GetAllByColumn<'x> columnName id
+
+let DeleteById<'x> id =
     let typeName = typeof<'x>.Name
     let tableName = Pluralizer().Pluralize typeName
-
-    let entity = getById<'x>  id
+    let entity = GetById<'x>  id
 
     delete {
         table tableName
@@ -61,3 +70,7 @@ let deleteById<'x> id =
     } |> db.Delete |> ignore
 
     entity
+
+let inline Delete< ^x when  ^x: (member id: int) > (entity: ^x) =
+    typeof<'x>.GetProperty("id").GetValue(entity) :?> int
+    |> DeleteById<'x>

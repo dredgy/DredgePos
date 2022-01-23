@@ -1,26 +1,26 @@
-  declare namespace currency {
+declare namespace currency {
     type Any = number | string | currency;
     type Format = (currency?: currency, opts?: Options) => string;
     interface Constructor {
-      (value: currency.Any, opts?: currency.Options): currency,
-      new(value: currency.Any, opts?: currency.Options): currency
+        (value: currency.Any, opts?: currency.Options): currency,
+        new(value: currency.Any, opts?: currency.Options): currency
     }
     interface Options {
-      symbol?: string,
-      separator?: string,
-      decimal?: string,
-      errorOnInvalid?: boolean,
-      precision?: number,
-      increment?: number,
-      useVedic?: boolean,
-      pattern?: string,
-      negativePattern?: string,
-      format?: currency.Format,
-      fromCents?: boolean
+        symbol?: string,
+        separator?: string,
+        decimal?: string,
+        errorOnInvalid?: boolean,
+        precision?: number,
+        increment?: number,
+        useVedic?: boolean,
+        pattern?: string,
+        negativePattern?: string,
+        format?: currency.Format,
+        fromCents?: boolean
     }
-  }
+}
 
-  interface currency {
+interface currency {
     add(number: currency.Any): currency;
     subtract(number: currency.Any): currency;
     multiply(number: currency.Any): currency;
@@ -33,6 +33,6 @@
     toJSON(): number;
     readonly intValue: number;
     readonly value: number;
-  }
+}
 
-  declare const currency: currency.Constructor;
+declare const currency: currency.Constructor;

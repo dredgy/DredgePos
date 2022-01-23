@@ -1,62 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>DredgePOS</title>
-	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-	<script src="https://unpkg.com/current-device/umd/current-device.min.js"></script>
+    <title>DredgePOS</title>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name = "viewport" content = "user-scalable = no ,shrink-to-fit=yes"  />
     <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
 
-<div id="pageContainer">
+<div id="pageContainer" <!--[var: containerAttributes]-->>
     <div id="leftColumn">
-        <h1 class="tableHeading"><!--[lang:active_table]--></h1>
+        <h1 class="tableHeading"><!--[var: orderNumber]--></h1>
         <div class="tableInfo">
-            <a href="#" class="posButton"><!--[lang:covers]--></a>
-            <a class="posHeader">Logged in as <!--[arr:clerk|clerk_name]--></a></a>
+            <!--[var: changeCoverNumberButton]-->
+            <a class="posButton">Logged in as <!--[arr:clerk|clerk_name]--></a>
         </div>
         <div class="orderBox">
-
+            <table class="orderBoxTable">
+                <thead>
+                <tr>
+                    <th class="orderBoxCell qtyCell"><!--[lang:qty_header]--></th>
+                    <th class="orderBoxCell itemIdCell hidden"><!--[lang:id_header]--></th>
+                    <th class="orderBoxCell itemCell"><!--[lang:item_header]--></th>
+                    <th class="orderBoxCell unitPriceCell hidden"><!--[lang:price_header]--></th>
+                    <th class="orderBoxCell totalPriceCell"><!--[lang:total_price_header]--></th>
+                    <th class="orderBoxCell printGroupCell"><!--[lang:printgroup_header]--></th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
-        <div class="orderBoxInfo"></div>
+        <div class="orderBoxInfo">
+            <span class="voidModeWarning" data-visible-in-mode='["void"]'><!--[lang:void_mode]--></span>
+        </div>
         <div class="orderBoxFooter">
-
+            <span class="orderBoxTotal"><!--[lang:totalPrice|0.00]--></span>
+            <small class="orderBoxSelectedTotal"><!--[lang:selectedPrice|0.00]--></small>
         </div>
     </div>
     <div id="rightColumn">
         <div id="topHalf">
-            <div class="utilityButtons">
-                <a class="posButton"></a>
-                <a class="posButton"></a>
-                <a class="posButton"></a>
-                <a class="posButton logoutButton">×</a>
-            </div>
             <div class="functionButtons">
-                <div class="functionColumn">
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
+                <div class="printGroupButtons toggleGroup">
+                        <input type="hidden" name="print_override" class="value" />
+                        <!--[var:salesCategoryOverrideButtons]-->
                 </div>
                 <div class="functionColumn">
-                    <a class="posButton"></a>
-                    <a class="posButton"></a>
-                    <a class="posButton voidButton"><!--[lang:void]--></a>
-                    <a class="posButton"></a>
+                    <a class="posButton accumulateButton" data-active-in-mode="accumulate"><!--[lang:accumulate_function]--></a>
+                    <a class="showCoverSelectorButton posButton"><!--[lang:select_covers]--></a>
                 </div>
-                <div class="functionColumn"></div>
-                <div class="functionColumn"></div>
+                <div class="functionColumn">
+                    <a class="posButton voidButton" data-active-in-mode="void"><!--[lang:void]--></a>
+                    <a class="posButton openItemButton"><!--[lang:custom_item_button]--></a>
+                    <a class="freetextButton posButton"><!--[lang:freetext_button]--></a>
+                    <a class="numpadButton posButton"><!--[lang:numpad_button]--></a>
+                </div>
+                <div class="functionColumn">
+                    <a class="posButton"><!--[lang:pay_function]--></a>
+                    <a class="posButton"><!--[lang:print_function]--></a>
+                </div>
             </div>
         </div>
         <div id="pageList">
             <!--[var:categoryList]-->
         </div>
-        <div id="pageContainer">
-                <!--[var:pageGroups]-->
+        <div id="pageGroupContainer">
+            <!--[var:pageGroups]-->
         </div>
         <div class="pageNavigation">
             <a class="posButton prevButton"><!--[lang:prev_page]--></a>
@@ -66,6 +75,10 @@
 </div>
 
 <!--[template:keyboards]-->
-
+<!--[template:orderScreen/grid_container]-->
+<!--[template:orderScreen/cover_selector]-->
+<template id="posButtonTemplate">
+    <!--[template:components/posButton]-->
+</template>
 </body>
 </html>

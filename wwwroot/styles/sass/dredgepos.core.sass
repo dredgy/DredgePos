@@ -3,6 +3,15 @@
     src: url("/fonts/OpenSans-Regular.ttf") format('truetype')
     font-style: normal
 
+@font-face
+    font-family: "manrope"
+    src: url("/fonts/OpenSans-SemiBold.ttf") format('truetype')
+    font-weight: bold
+
+@font-face
+    font-family: "manrope"
+    src: url("/fonts/OpenSans-Light.ttf") format('truetype')
+    font-weight: 100
 
 *
     margin: 0
@@ -11,8 +20,18 @@
     font-family: 'manrope', sans-serif
     scroll-behavior: smooth
 
+*:not(input, textarea)
+    -webkit-touch-callout: none
+    -webkit-user-select: none
+    -khtml-user-select: none
+    -moz-user-select: none
+    -ms-user-select: none
+    user-select: none
+
 .rtl
     direction: rtl
+
+
 
 input[type=text], select, textarea
     padding-left: 1em
@@ -28,6 +47,7 @@ input[type=text], select, textarea
     bottom: 0
     left: 0
     right: 0
+    z-index: 999
 
 @mixin mobile
     @media screen and (max-width: 900px)
@@ -80,9 +100,26 @@ body
 
 .posButton.active, .posButton:active
     border: inset 2px
+    background: var(--posbutton-background-active)
 
 .posButton.voidButton
     background: var(--void-button-background)
 
 .invisible
     visibility: hidden
+
+.hidden
+    display: none
+
+.pulse
+    animation-name: color
+    animation-duration: 300ms
+    animation-iteration-count: 1
+
+@keyframes color
+    0%
+        background-color: var(--pulse-first-color)
+    50%
+        background-color: var(--pulse-second-color)
+    100%
+        background-color: var(--pulse-final-color)

@@ -35,10 +35,12 @@
    "functions_header":"Functions",
    "close_order_function":"Close Without Saving",
    "accumulate_function":"Accumulate Items",
+   "multiplier":"Enter a Number",
    "void":"Void",
    "pay_function":"Pay",
    "print_function":"Save & Print",
-   "freetext_button":"Keyboard",
+   "freetext_button":"Custom Instruction",
+   "custom_item_button":"Custom Item",
    "numpad_button":"Numpad",
    "select_covers":"Cover #",
    "how_many_covers":"How many people are on this table?",
@@ -51,6 +53,8 @@
    "merge_table":"Merge Table",
    "unmerge_table":"Unmerge Table",
    "order_table":"Place Order",
+   "order_number": "Order [1]",
+   "new_order": "New Order",
    "view_table":"View Table",
    "reserve_table":"Reserve Table",
    "unreserve_table":"Delete Reservation",
@@ -85,5 +89,9 @@
    "partial_table":"Partial Table",
    "paying_table":"Paying Table [1]",
    "msgbox_amount_select":"Enter Amount",
-   "msgbox_qty_select":"How many would you like to select?"
+   "msgbox_qty_select":"How many would you like to select?",
+
+    "void_mode": "Void Mode is ON.",
+    "enter_item_name": "Enter Item Name",
+    "enter_item_price": "Enter Item Price"
 }

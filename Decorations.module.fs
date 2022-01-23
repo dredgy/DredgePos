@@ -8,7 +8,7 @@ open Dapper.FSharp
 open DredgePos
 open Types
 
-let decorationsInRoom (roomId: int) = Entity.getAllByColumn "decoration_room" roomId
+let decorationsInRoom (roomId: int) = Entity.GetAllByColumn "decoration_room" roomId
 
 let getImageName (image: string, path: string) =
     let imageName =

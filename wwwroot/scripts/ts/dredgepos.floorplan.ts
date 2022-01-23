@@ -10,7 +10,7 @@ interface floorplan{
     transformer: Konva.Transformer
     tableLayer: Konva.Layer
     rooms: room[]
-    tables: table[]
+    tables: floorplan_table[]
     decorations: decoration[]
     activeTableNumbers: number[]
     selectedTableNumber: number
@@ -24,7 +24,7 @@ interface floorplan{
 }
 
 interface floorplan_data{
-    tables: table[]
+    tables: floorplan_table[]
     decorations: decoration[]
     activeTableNumbers: number[]
     rooms: room[]
@@ -68,6 +68,11 @@ const setupFloorplanEvents = () => {
     doc.on('click', '.transferTableButton', toggleTransferMode)
     doc.on('click', '.reserveTableButton', reserveTable)
     doc.on('click', '.unreserveTableButton', unreserveTable)
+    doc.on('click', '.placeOrderButton', placeOrderButtonClicked)
+}
+
+const placeOrderButtonClicked = () => {
+    redirect(`/order/${Floorplan.selectedTableNumber}`)
 }
 
 const roomButtonClicked = (e: Event) => {
@@ -132,9 +137,9 @@ const getRoomById = (roomId: number) => {
     )
 }
 
-const tableIsOpen = (table: table) => Floorplan.activeTableNumbers.includes(table.table_number)
+const tableIsOpen = (table: floorplan_table) => Floorplan.activeTableNumbers.includes(table.table_number)
 
-const createTableShape = (table: table) => {
+const createTableShape = (table: floorplan_table) => {
     const draggable = isInMode('edit')
 
     const tableGroup = new Konva.Group({
@@ -216,6 +221,8 @@ const setupTableEvents = (tableGroup: Konva.Group) => {
 
     tableGroup.on('click', tableClicked)
     tableGroup.on('tap', tableClicked)
+    tableGroup.on('dbltap', tableDblClicked)
+    tableGroup.on('dblclick', tableDblClicked)
     tableGroup.on('dragend', tableGroupTransformed)
     tableShape.on('transformend',  tableShapeTransformed)
 }
@@ -236,7 +243,7 @@ const saveTableTransformation = (tableGroup: Konva.Group) => {
     const originalTable = getTableDataFromGroup(tableGroup)
     const tableShape = getTableShapeFromGroup(tableGroup)
 
-    const newTableInfo : table = {
+    const newTableInfo : floorplan_table = {
         table_number : originalTable.table_number,
         previous_state : originalTable.previous_state,
         merged_children : originalTable.merged_children,
@@ -258,7 +265,7 @@ const saveTableTransformation = (tableGroup: Konva.Group) => {
 }
 
 
-const saveTable = (tableToUpdate: table) => {
+const saveTable = (tableToUpdate: floorplan_table) => {
     const tables =
         Floorplan
             .tables
@@ -302,20 +309,20 @@ const getTableGroupFromTableNumber = (tableNumber : number) => {
     return getTableGroupFromShape(tableShape)
 }
 
-const setReservationStatus = (table: table) => {
+const setReservationStatus = (table: floorplan_table) => {
     const reservationText = $('.reservationStatus')
     const tableShape = getTableShapeFromTableNumber(table.table_number)
     reservationText.text('')
 
     if(table.status == 2) {
         tableShape.fill('lightgreen')
-        const reservations = Floorplan.reservations.filter(reservation => reservation.reservation_table_id == table.id)
+        const reservations = Floorplan.reservations.filter(reservation => reservation.floorplan_table_id == table.id)
         if (reservations.length) {
             turnOnMode('reservedTableSelected')
             reservationText.text(lang('reserved'))
             let reservation = reservations[0]
-            if (reservation.reservation_name != '') {
-                reservationText.text(lang('reserved_for', reservation.reservation_name))
+            if (reservation.name != '') {
+                reservationText.text(lang('reserved_for', reservation.name))
             }
         }
     } else {
@@ -333,11 +340,11 @@ const reserveTable = () => {
 const createEmptyReservation = (covers: number) => {
     const newReservation: reservation = {
         id: 0,
-        reservation_covers: covers,
-        reservation_created_at: 0,
-        reservation_table_id: getSelectedTableData().id,
-        reservation_name: '',
-        reservation_time: 0,
+        covers: covers,
+        created_at: 0,
+        floorplan_table_id: getSelectedTableData().id,
+        name: '',
+        time: 0,
     }
 
     ajax('/ajax/newEmptyReservation', newReservation,'post', emptyReservationCreated, null, null )
@@ -347,7 +354,7 @@ const emptyReservationCreated = (reservation: reservation) => {
     Floorplan.reservations.push(reservation)
     const selectedTable = getSelectedTableData()
     selectedTable.status = 2
-    selectedTable.default_covers = reservation.reservation_covers
+    selectedTable.default_covers = reservation.covers
     updateTableData(selectedTable)
     updateCoverText(selectedTable)
     setReservationStatus(getSelectedTableData())
@@ -357,8 +364,8 @@ const emptyReservationCreated = (reservation: reservation) => {
 
 const addReservationName = (name: string) => {
     hideVirtualKeyboard()
-    const reservation = Floorplan.reservations.filter(reservation => reservation.reservation_table_id == getSelectedTableData().id)[0]
-    reservation.reservation_name = name
+    const reservation = Floorplan.reservations.filter(reservation => reservation.floorplan_table_id == getSelectedTableData().id)[0]
+    reservation.name = name
     ajax('/ajax/updateReservation', reservation, 'post', reservationNameAdded, null, null)
 }
 
@@ -369,9 +376,9 @@ const reservationNameAdded = (updatedReservation: reservation) => {
     setReservationStatus(getSelectedTableData())
 }
 
-const getReservationsOnTable = (table: table) => Floorplan.reservations.filter(reservation => reservation.reservation_table_id == table.id)
+const getReservationsOnTable = (table: floorplan_table) => Floorplan.reservations.filter(reservation => reservation.floorplan_table_id == table.id)
 
-const updateTableData = (tableToRemove: table) => {
+const updateTableData = (tableToRemove: floorplan_table) => {
     Floorplan.tables = Floorplan.tables.filter(table => table.id != tableToRemove.id)
     Floorplan.tables.push(tableToRemove)
 }
@@ -382,8 +389,8 @@ const unreserveTable = () => {
     ajax('/ajax/unreserveTable', selectedTable, 'post', tableUnreserved, null, null)
 }
 
-const tableUnreserved = (table: table) => {
-    Floorplan.reservations = Floorplan.reservations.filter(reservation => reservation.reservation_table_id != table.id)
+const tableUnreserved = (table: floorplan_table) => {
+    Floorplan.reservations = Floorplan.reservations.filter(reservation => reservation.floorplan_table_id != table.id)
     updateTableData(table)
     setReservationStatus(table)
 }
@@ -431,9 +438,16 @@ const selectTable = (tableShape: Konva.Shape) => {
     turnOnMode('tableSelected')
 }
 
-const updateCoverText = (table:table) => $('.selectedTableCovers').text(lang('covers', table.default_covers.toString()))
+const updateCoverText = (table:floorplan_table) => $('.selectedTableCovers').text(lang('covers', table.default_covers.toString()))
 
-const tableClicked =  (event: Konva.KonvaEventObject<any>) => {
+const tableDblClicked =  (event: Konva.KonvaEventObject<any>) => {
+    let tableShape = getTableShapeFromGroup(event.currentTarget as Konva.Group)
+    const table = getTableDataFromShape(tableShape)
+    redirect(`/order/${table.table_number}`)
+}
+
+
+    const tableClicked =  (event: Konva.KonvaEventObject<any>) => {
     let tableShape = getTableShapeFromGroup(event.currentTarget as Konva.Group)
     const table = getTableDataFromShape(tableShape)
 
@@ -704,7 +718,7 @@ const redrawTable = (tableGroup: Konva.Group) => {
 const showAddTablePopup = () => showVirtualNumpad(lang('new_table_number'), 4, false, false, true, addTable);
 
 const addTable = (tableNumber: number) => {
-    const newTable : table  = {
+    const newTable : floorplan_table  = {
         id: 0,
         table_number: tableNumber,
         room_id: Floorplan.currentRoom.id,
@@ -724,7 +738,7 @@ const addTable = (tableNumber: number) => {
     ajax('/ajax/createTable', newTable, 'post', tableAdded, tableNotAdded, null)
 }
 
-const tableAdded = (table: table) => {
+const tableAdded = (table: floorplan_table) => {
     deselectTables()
     const newTableGroup = createTableShape(table)
     Floorplan.tables.push(table)
@@ -752,7 +766,7 @@ const deleteTable = (tableNumber: number) => {
     ajax(`/ajax/deleteTable`,  tableToDelete, 'post', tableDeleted, null, null);
 }
 
-const tableDeleted = (deletedTable: table) => {
+const tableDeleted = (deletedTable: floorplan_table) => {
     Floorplan.tables = Floorplan.tables.filter(table => table.table_number != deletedTable.table_number)
     const tableGroup = getTableGroupFromTableNumber(deletedTable.table_number)
     deselectTables()
@@ -762,7 +776,7 @@ const tableDeleted = (deletedTable: table) => {
 const toggleMergeMode = () => toggleMode('merge')
 
 
-const mergeTables = (table1: table, table2: table ) => {
+const mergeTables = (table1: floorplan_table, table2: floorplan_table ) => {
     toggleMergeMode()
     if(table1.table_number == table2.table_number){
         posAlert(lang('error_self_merge'))
@@ -771,7 +785,7 @@ const mergeTables = (table1: table, table2: table ) => {
     ajax('/ajax/mergeTables', [table1, table2], 'post', tablesMerged, null, null)
 }
 
-const tablesMerged = (tables: Record<'child'|'parent'|'merged', table>) => {
+const tablesMerged = (tables: Record<'child'|'parent'|'merged', floorplan_table>) => {
     tableDeleted(tables['child'])
     tableDeleted(tables['parent'])
     tableAdded(tables['merged'])
@@ -783,7 +797,7 @@ const tablesMerged = (tables: Record<'child'|'parent'|'merged', table>) => {
 
 const unmergeTable = () => ajax(`/ajax/unmergeTable/${Floorplan.selectedTableNumber}`, null, 'get', tablesUnmerged, null, null)
 
-const tablesUnmerged = (tables: Record<'child'|'parent', table>) => {
+const tablesUnmerged = (tables: Record<'child'|'parent', floorplan_table>) => {
     const parentTable = tables['parent']
     const childTable = tables['child']
 
@@ -795,7 +809,7 @@ const tablesUnmerged = (tables: Record<'child'|'parent', table>) => {
 
 const toggleTransferMode = () => toggleMode('transfer')
 
-const transferTables = (origin: table, destination: table) => {
+const transferTables = (origin: floorplan_table, destination: floorplan_table) => {
     if(origin.table_number == destination.table_number){
         posAlert(lang('transfer_self_error'))
         return
@@ -804,7 +818,7 @@ const transferTables = (origin: table, destination: table) => {
     ajax(`/ajax/transferTable/${origin.table_number}/${destination.table_number}`, null, 'get', tableTransferred, null, null)
 }
 
-const tableTransferred = (tables: Record<"origin"|"destination", table>) => {
+const tableTransferred = (tables: Record<"origin"|"destination", floorplan_table>) => {
     const origin = tables['origin']
     const destination = tables['destination']
 

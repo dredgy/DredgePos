@@ -38,8 +38,10 @@ let GetFileName (file: string) = Path.GetFileName file
 
 let length (variable: 'T[]) = variable.Length
 let first (array: 'a[]) = array[0]
+
 let last (array: 'a[]) = array[array.Length-1]
 
+let filterFirst (array:'a[]) = if array.Length > 0 then [|array[0]|] else [||]
 
 let removeFalseValues (variable: bool[]) = variable |> Array.filter id
 

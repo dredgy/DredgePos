@@ -2,6 +2,7 @@ namespace WebApplication
 
 
 open DredgePos
+open DredgePos.Types
 open Microsoft.AspNetCore.Server.Kestrel.Core
 open Reservations
 open Saturn
@@ -40,10 +41,11 @@ module Program =
         getf "/unmergeTable/%i" AjaxController.unmergeTable
         getf "/tableExists/%i" (fun tableNumber -> json <| Floorplan.tableExists tableNumber)
     }
-
     let orderScreenRouter = router {
         pipe_through browser
         getf "/getOrderScreenData/%i" AjaxController.getOrderScreenData
+        getf "/getGridHtml/%i" AjaxController.loadGrid
+        post "/updateCovers" (bindJson<floorplan_table> (fun table -> Entity.Update table |> Array.head |> DredgeFramework.ajaxSuccess |> json))
     }
 
     let pageRouter = router {
@@ -52,7 +54,8 @@ module Program =
         get "/" (redirectTo true "/login")
         get "/login" (warbler (fun _ -> PageController.loadHomePage() ))
         get "/floorplan" (warbler (fun ctx -> PageController.loadFloorplan (snd ctx)))
-        get "/order" (warbler (fun ctx -> PageController.loadOrderScreen (snd ctx)))
+        get "/order" (warbler (fun ctx -> PageController.loadOrderScreen (snd ctx) 0))
+        getf "/order/%i" (fun number -> (warbler (fun ctx -> PageController.loadOrderScreen (snd ctx) number)))
         forward "/ajax" floorplanRouter
         forward "/orderScreen" orderScreenRouter
     }

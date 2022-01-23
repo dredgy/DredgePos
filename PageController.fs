@@ -2,6 +2,7 @@
 
 open System
 open DredgePos.Types
+open FSharp.Data
 open Microsoft.AspNetCore.Http
 open Floorplan
 open Giraffe
@@ -19,7 +20,7 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
    Session.RequireClerkAuthentication ctx
 
    let roomMenu =
-       Entity.getAllInVenue<floorplan_room>
+       Entity.GetAllInVenue<floorplan_room>
          |> Array.map makeRoomButton
          |> String.concat "\n"
 
@@ -36,12 +37,28 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
 
    htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "floorplan" variables arrays scripts styles
 
-let loadOrderScreen (ctx: HttpContext) : HttpHandler =
+let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
    Session.RequireClerkAuthentication ctx
 
+   let covers = if tableNumber > 0 then (getTable tableNumber).default_covers else 0
+   let coverString = language.getAndReplace "covers" [covers]
+
+   let changeCoverNumberButton = if tableNumber > 0 then Theme.loadTemplateWithVars "orderScreen/change_cover_number_button" (map ["covers", coverString]) else ""
+
+   let orderNumber =
+       if tableNumber > 0 then language.getAndReplace "active_table" [tableNumber]
+       else language.get "new_order"
+
+   let containerAttributes =
+        if tableNumber > 0 then
+            map ["data-table", jsonEncode (getTable tableNumber)]
+                |> Theme.htmlAttributes
+        else ""
+
    let categoryList =
-       Entity.getAll<order_screen_page_group>
-        |> Array.filter (fun category -> category.id <> 0)
+       Entity.GetAllInVenue<order_screen_page_group>
+        |> Array.filter (fun page_group -> page_group.id <> 0)
+        |> Array.sortBy (fun {order=order} -> order)
         |> Array.map (fun category ->
             let categoryMap = recordToMap category
             let categoryArray = map ["page", categoryMap]
@@ -54,19 +71,33 @@ let loadOrderScreen (ctx: HttpContext) : HttpHandler =
        |> Array.map OrderScreen.getPagesHTML
        |> String.concat "\n"
 
+   let coverSelectorButtons =
+        Array.init (covers+1) id
+            |> Array.map(fun coverNumber ->
+                let text = if coverNumber > 0 then language.getAndReplace "selected_cover" [coverNumber]
+                           else language.get "cover_zero"
+                Theme.PosButton text "coverSelectorButton" $"""data-cover="{coverNumber}" """)
+            |> String.concat "\n"
 
    let variables = map [
        "title", "Order"
+       "containerAttributes", containerAttributes
        "categoryList", categoryList
        "pageGroups", grids
+       "orderNumber", orderNumber
+       "changeCoverNumberButton", changeCoverNumberButton
+       "covers", coverString
+       "salesCategoryOverrideButtons", OrderScreen.generateSalesCategoryOverrideButtons ()
+       "coverSelectorButtons", coverSelectorButtons
    ]
 
    let styles = ["dredgepos.orderScreen.css"]
-   let scripts = ["dredgepos.orderScreen.js"]
+   let scripts = ["dredgepos.tables.js";"../external/currency.min.js";"dredgepos.orderScreen.js"; ]
    let currentClerk = recordToMap <| Session.getCurrentClerk ctx
    let arrays = map ["clerk", currentClerk]
 
-   htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "orderScreen" variables arrays scripts styles
+   Theme.loadTemplateWithVarsArraysScriptsAndStyles "orderScreen" variables arrays scripts styles
+    |> htmlString
 
 let getOpenTables() =
     let rows = openTables()
