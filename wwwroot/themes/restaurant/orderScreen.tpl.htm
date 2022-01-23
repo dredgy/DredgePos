@@ -8,11 +8,11 @@
 </head>
 <body>
 
-<div id="pageContainer">
+<div id="pageContainer" <!--[var: containerAttributes]-->>
     <div id="leftColumn">
         <h1 class="tableHeading"><!--[var: orderNumber]--></h1>
         <div class="tableInfo">
-            <!--[var: coverSelectorButton]-->
+            <!--[var: changeCoverNumberButton]-->
             <a class="posButton">Logged in as <!--[arr:clerk|clerk_name]--></a>
         </div>
         <div class="orderBox">
@@ -47,7 +47,7 @@
                 </div>
                 <div class="functionColumn">
                     <a class="posButton accumulateButton" data-active-in-mode="accumulate"><!--[lang:accumulate_function]--></a>
-                    <a class="selectCoversButton posButton"><!--[lang:select_covers]--></a>
+                    <a class="showCoverSelectorButton posButton"><!--[lang:select_covers]--></a>
                 </div>
                 <div class="functionColumn">
                     <a class="posButton voidButton" data-active-in-mode="void"><!--[lang:void]--></a>
@@ -75,6 +75,10 @@
 </div>
 
 <!--[template:keyboards]-->
-
+<!--[template:orderScreen/grid_container]-->
+<!--[template:orderScreen/cover_selector]-->
+<template id="posButtonTemplate">
+    <!--[template:components/posButton]-->
+</template>
 </body>
 </html>

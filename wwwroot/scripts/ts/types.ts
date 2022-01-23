@@ -8,10 +8,11 @@ interface order {
 }
 
 interface orderItem {
-    id: number,
-    qty: number,
+    id: number
+    qty: number
     print_group: print_group
     item: item
+    cover: number
 }
 
 interface print_group {
@@ -32,7 +33,7 @@ interface ApplicationState {
     languageVars: Record<any, string>
 }
 
-interface table {
+interface floorplan_table {
     table_number: number,
     room_id: number
     venue_id: number
@@ -71,11 +72,11 @@ interface room {
 
 interface reservation {
     id: number,
-    reservation_name: string,
-    reservation_time: number,
-    reservation_covers: number,
-    reservation_created_at: number,
-    reservation_table_id: number,
+    name: string,
+    time: number,
+    covers: number,
+    created_at: number,
+    floorplan_table_id: number,
 }
 
 interface keyboard {

@@ -16,6 +16,8 @@ type OrderScreen = {
     qty_override: number
     print_group_override: print_group
     custom_item: item,
+    selected_cover: number
+    table: floorplan_table,
 }
 
 let OrderScreen : OrderScreen = {
@@ -28,17 +30,24 @@ let OrderScreen : OrderScreen = {
     selected_item_ids: [],
     qty_override: 1,
     print_group_override: null,
-    custom_item: null
+    custom_item: null,
+    selected_cover: 0,
+    table: null,
 }
 
 const loadPageGroup = (e: Event) => {
-    let button = $(e.target)
+    const button = $(e.target)
+    const container = $('#pageGroupContainer')
+
     $('.loadPageGroup').removeClass('active')
     button.addClass('active')
+
     let pageGroupId = button.data('page-group-id')
-    $('.pageGroup').hide()
+
+    container.find('.pageGroup').hide()
+
     let activeGrid = $(`.pageGroup[data-page-group-id=${pageGroupId}]`)
-    let navButtons = $('.pageNavigation')
+    let navButtons = container.next('.pageNavigation')
     navButtons.css('display', 'flex')
 
     activeGrid.find('.gridPage').length > 1
@@ -49,6 +58,9 @@ const loadPageGroup = (e: Event) => {
 }
 
 const setupOrderScreen = (data: OrderScreenData) => {
+
+    $('.coverSelector, .gridContainer').hide()
+
     OrderScreen.order_screen_pages = data.order_screen_pages
     OrderScreen.sales_categories = data.sales_categories
     OrderScreen.print_groups = data.print_groups
@@ -60,6 +72,8 @@ const setupOrderScreen = (data: OrderScreenData) => {
     doc.on('click', '.prevButton', goToPrevPage)
     doc.on('click', '.loadPageGroup', loadPageGroup)
     doc.on('click', '[data-primary-action=item]', itemButtonClicked)
+    doc.on('click', '[data-primary-action=grid],[data-secondary-action=grid]', gridButtonClicked)
+    doc.on('click', '.closeGrid', hideGrids)
     doc.on('click', '.freetextButton', freetext)
     doc.on('click', '.openItemButton', customItem)
     doc.on('click', '.orderBoxTable tbody tr', itemRowClicked)
@@ -67,6 +81,9 @@ const setupOrderScreen = (data: OrderScreenData) => {
     doc.on('dblclick', '.voidButton', voidLastItem)
     doc.on('click', '.numpadButton', overrideQty)
     doc.on('click', '.accumulateButton', () => toggleMode('accumulate'))
+    doc.on('click', '.changeCoverNumberButton', changeCoverNumberPrompt)
+    doc.on('click', '.showCoverSelectorButton', showCoverSelector)
+    doc.on('click', '.coverSelectorButton', coverSelected)
     doc.on('change', '[name=print_override]', printGroupOverride)
 
     turnOnMode('accumulate')
@@ -85,23 +102,29 @@ const setupOrderScreen = (data: OrderScreenData) => {
 
 /**
  * @param direction 1 for forward, -1 for backwards.
+ * @param button
  */
-const navigatePage = (direction: number) => {
-    let grid = $('.pageGroup:visible')
+const navigatePage = (direction: number, button: JQuery) => {
+    const grid =
+        button
+            .parent()
+            .parent()
+            .find('.pageGroup:visible')
     grid.get()[0].scrollLeft += grid.width() * direction
 }
 
-const goToNextPage = () => navigatePage(1)
-const goToPrevPage = () => navigatePage(-1)
+const goToNextPage = (e: JQuery.TriggeredEvent) => navigatePage(1, $(e.target))
+const goToPrevPage = (e: JQuery.TriggeredEvent) => navigatePage(-1, $(e.target))
 
 const addItemToOrderBox = (orderItem:orderItem) => {
     const orderBox = $('.orderBoxTable tbody')
     let selectedRows = orderBox.find('tr.selected')
-    let lastRow : JQuery = selectedRows.length ? selectedRows.first() : orderBox.find('tr').last()
+    let lastRow : JQuery = selectedRows.length ? getLastInstructionRow(selectedRows.first()) : orderBox.find('tr').last()
     const existingRow = orderBox
         .find('tr')
         .filterByData('item', orderItem.item)
         .filterByData('print_group', orderItem.print_group)
+        .filterByData('cover', orderItem.cover)
         .last()
 
 
@@ -137,16 +160,28 @@ const addInstructionToOrderBox = (instruction: orderItem) => {
             const parentRow = getParentRow(selectedRow)
             if(parentRow.is(selectedRow) || !parentRow.hasClass('selected')) {
                 const newRow = createOrderRow(instruction)
-                getLastInstructionRow(selectedRow).after(newRow.pulse())
-                newRow.setColumnValue(lang('printgroup_header'), selectedRow.getColumnValue(lang('printgroup_header')))
+                getLastInstructionRow(selectedRow).after(newRow)
+                newRow
+                    .setColumnValue( lang('printgroup_header'), selectedRow.getColumnValue(lang('printgroup_header')) )
+
+
+                if(parentRow.hasClass('selected')){
+                    selectRow(newRow)
+                } else {
+                    newRow.pulse()
+                }
+
+                scrollToElement(newRow)
             }
         })
-        return
     }
 
     const lastRow = orderBox.find('tr').last()
-    orderBox.append(newRow.pulse())
-    newRow.setColumnValue(lang('printgroup_header'), lastRow.getColumnValue(lang('printgroup_header')))
+    newRow
+        .setColumnValue(lang('printgroup_header'), lastRow.getColumnValue(lang('printgroup_header')))
+        .appendTo(orderBox)
+        .pulse()
+    scrollToElement(newRow)
 }
 
 
@@ -158,6 +193,7 @@ const addNewItem = (item: item, qty = 1) => {
         item: item,
         qty: qty,
         print_group: printGroup,
+        cover: OrderScreen.selected_cover,
     }
 
     switch(item.item_type){
@@ -222,19 +258,23 @@ const renderOrderBox = () => {
 const createOrderRow = (orderItem: orderItem) => {
     const row = $('.orderBoxTable').EmptyRow()
     const price = money(orderItem.item.price1)
-    row.data('order-item-id', orderItem.id)
-    row.addClass(`${orderItem.item.item_type}Row`)
-
+    const itemCellText = $('<span/>').text(orderItem.item.item_name)
     row
+        .addClass(`${orderItem.item.item_type}Row`)
         .setColumnValue(lang('qty_header'), orderItem.qty)
-        .setColumnValue(lang('item_header'), orderItem.item.item_name)
         .setColumnValue(lang('price_header'), price)
         .setColumnValue(lang('id_header'), orderItem.item.id)
         .setColumnValue(lang('total_price_header'), price.multiply(orderItem.qty))
         .setColumnValue(lang('printgroup_header'), orderItem.print_group?.name)
         .data('order-item-id', orderItem.id)
+        .data('order-item-id', orderItem.id)
         .data('print_group', orderItem.print_group)
+        .data('cover', orderItem.cover)
         .data('item', orderItem.item)
+        .find('td.itemCell')
+        .append(itemCellText)
+
+    changeCoverOnRow(row, orderItem.cover)
 
     if(orderItem.item.item_type == 'instruction' && price.value <= 0){
         row
@@ -246,6 +286,7 @@ const createOrderRow = (orderItem: orderItem) => {
 }
 
 const itemButtonClicked = (e: JQuery.TriggeredEvent) => {
+    hideGrids()
     const existingItemRows = $('.itemRow')
     const button = $(e.target).closest('.posButton')
     const item : item = button.data('item')
@@ -259,6 +300,41 @@ const itemButtonClicked = (e: JQuery.TriggeredEvent) => {
 
 }
 
+const gridButtonClicked = (e: JQuery.TriggeredEvent) => {
+    const button = $(e.target).closest('.posButton')
+    const grid : number = button.data('grid')
+    ajax(`/orderScreen/getGridHtml/${grid}`, null, null,gridHtmlGenerated, null, null)
+}
+
+
+const hideGrids = () => $('.gridContainer').hide()
+
+
+const gridHtmlGenerated = (gridData: {gridHtml:string, grid: grid}) => {
+    const gridContainer = $('.gridContainer')
+    const gridCellWidth = getGridCellWidth()
+    const gridCellHeight = getGridCellHeight()
+    const grid = gridData.grid
+    const gridHtml = gridData.gridHtml
+
+    gridContainer
+        .show()
+        .width(gridCellWidth * grid.grid_cols)
+        .children('.gridContainerHeader')
+        .children('span')
+        .text(grid.grid_name)
+        .parent()
+        .parent()
+        .find('.pageGroup')
+        .html(gridHtml)
+        .show()
+        .parent()
+        .height(gridCellHeight * grid.grid_rows)
+        .closest('.gridContainer')
+        .find('.pageNavigation')
+        .toggle(gridContainer.find('.gridPage').length >  1)
+        .height(gridCellHeight)
+}
 
 const itemRowClicked = (e: JQuery.TriggeredEvent) => {
     const row = $(e.target).closest('tr')
@@ -369,7 +445,19 @@ const decrementQty = (row: JQuery, qty=1) => {
     calculateRowTotal(row)
 }
 
-const scrollToElement = (element: JQuery) => element.get()[0].scrollIntoView()
+const scrollToElement = (JQueryElement: JQuery) => {
+    const element = JQueryElement.get()[0]
+    const container = JQueryElement.closest('.orderBox').get()[0]
+    const containerTop = $(container).scrollTop()
+    const containerBottom = containerTop + $(container).height();
+    const elemTop = element.offsetTop
+    const elemBottom = elemTop + $(element).height();
+    if (elemTop < containerTop) {
+        $(container).scrollTop(elemTop);
+    } else if (elemBottom > containerBottom) {
+        $(container).scrollTop(elemBottom - $(container).height());
+    }
+}
 
 const overrideQty = () => showVirtualNumpad(lang('multiplier'), 4, false, true, true, qtyOverridden)
 
@@ -429,4 +517,88 @@ const customItemTextSubmitted = (text: string) => {
     showVirtualNumpad(lang('enter_item_price'), 4, false, true, true, submitFunction)
 }
 
-$(() => ajax('/orderScreen/getOrderScreenData/1', null, 'get', setupOrderScreen, null, null) )
+const getGridCellHeight = () => $('#pageGroupContainer').height()/8
+const getGridCellWidth = () => $('#pageGroupContainer').width()/6
+
+
+const showCoverSelector = (event: JQuery.TriggeredEvent) => {
+    const button = $(event.target)
+    const gridHeight = getGridCellHeight()
+
+    const coverSelector = $('.coverSelector')
+    coverSelector
+        .toggle(!coverSelector.is(':visible'))
+        .width(button.width())
+        .css({
+            left: button.offset().left + 'px',
+            top: button.offset().top + button.height() + 'px',
+        })
+        .find('.coverSelectorButton')
+        .height(gridHeight)
+
+}
+
+const coverSelected = (event: JQuery.TriggeredEvent) => {
+    $('.coverSelector').hide()
+    const button = $(event.target)
+    const cover = Number(button.data('cover'))
+    const selectedRows = $('.orderBoxTable tbody').find('tr.itemRow.selected')
+
+    selectedRows.each( (_, selectedRow) => changeCoverOnRow($(selectedRow), cover))
+    OrderScreen.selected_cover = cover
+}
+
+const changeCoverOnRow = (row: JQuery, cover: number) => {
+    row.data('cover', cover)
+    const itemCell = row.find('.itemCell')
+    const existingCoverSpan = itemCell.find('small')
+    const coverSpan = existingCoverSpan.length > 0
+                        ? existingCoverSpan
+                        : $('<small/>').appendTo(itemCell)
+
+    coverSpan.text(lang('selected_cover', cover.toString()))
+    if(cover < 1 || !row.hasClass('itemRow')) {
+        coverSpan.remove()
+    }
+}
+
+const changeCoverNumberPrompt = () =>
+    showVirtualNumpad(lang('how_many_covers'), 3, false, false, true, changeCoverNumberPromptSubmitted)
+
+
+const changeCoverNumberPromptSubmitted = (value: string) => updateCoverNumbers(Number(value))
+
+const updateCoverNumbers = (covers: number) => {
+    let newTable = Object.assign({}, OrderScreen.table)
+    newTable.default_covers = covers
+    ajax('/orderScreen/updateCovers', newTable, 'post', coverNumbersUpdated, null, null)
+}
+
+const coverNumbersUpdated = (newTable: floorplan_table) => {
+    const covers = newTable.default_covers
+    OrderScreen.table = newTable
+    $('.changeCoverNumberButton').text(lang('covers', covers.toString()))
+    generateCoverSelector()
+}
+
+const generateCoverSelector = () => {
+    const covers = OrderScreen.table.default_covers
+    const coverSelector = $('.coverSelector')
+    coverSelector.hide().children().remove()
+
+    for(let cover=0; cover<=covers; cover++) {
+        const buttonText = cover==0 ? lang('cover_zero') : lang('selected_cover', cover.toString())
+        loadTemplate('#posButtonTemplate')
+            .find('a')
+            .first()
+            .addClass('coverSelectorButton')
+            .text(buttonText)
+            .data('cover', cover)
+            .appendTo(coverSelector)
+    }
+}
+
+$(() => {
+    OrderScreen.table = $('#pageContainer').data('table') || null
+    ajax('/orderScreen/getOrderScreenData/1', null, 'get', setupOrderScreen, null, null)
+})

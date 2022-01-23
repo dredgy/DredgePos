@@ -42,24 +42,25 @@ let unmergeTable tableNumber =
 
 
 let getFloorplanData (id: int) =
-    let tableList = Entity.getAllInVenue<floorplan_table>
+    let tableList = Entity.GetAllInVenue<floorplan_table>
     let reservationList = getReservationList tableList
     {|
         tables = tableList
-        decorations = Entity.getAllInVenue<floorplan_decoration>
+        decorations = Entity.GetAllInVenue<floorplan_decoration>
         activeTableNumbers = Floorplan.getActiveTables (getCurrentVenue())
-        rooms = Entity.getAllInVenue<floorplan_room>
+        rooms = Entity.GetAllInVenue<floorplan_room>
         reservations = reservationList
     |}
     |> ajaxSuccess
     |> json
 
-let getOrderScreenData (id: int) =
+let getOrderScreenData (tableNumber: int) =
     {|
-        order_screen_pages = Entity.getAllInVenue<order_screen_page_group>
-        sales_categories = Entity.getAllInVenue<sales_category>
-        print_groups = Entity.getAllInVenue<print_group>
-        custom_item = Entity.getAllByColumn<item> "item_code" "OPEN000" |> first
+        order_screen_pages = Entity.GetAllInVenue<order_screen_page_group>
+        sales_categories = Entity.GetAllInVenue<sales_category>
+        print_groups = Entity.GetAllInVenue<print_group>
+        custom_item = Entity.GetAllByColumn<item> "item_code" "OPEN000" |> first
+        table = getTable tableNumber
     |}
     |> ajaxSuccess
     |> json
@@ -73,21 +74,18 @@ let getKeyboardLayout (language: string) =
         ] |> json
 
 let transformTable (table: floorplan_table) =
-        Entity.updateInDatabase table
+        Entity.Update table
         |> ajaxSuccess
         |> json
 
 let createTable (tableData: floorplan_table) =
-
-    let result =
-        if tableExists tableData.table_number = "False" then
-            ajaxSuccess (addNewTable tableData)
-        else ajaxFail (tableExists tableData.table_number)
-
-    result |> json
+    if tableExists tableData.table_number = "False" then
+        ajaxSuccess (addNewTable tableData)
+    else ajaxFail (tableExists tableData.table_number)
+    |> json
 
 let deleteTable (table: floorplan_table) =
-    Entity.deleteById<floorplan_table> table.id
+    Entity.DeleteById<floorplan_table> table.id
         |> ignore
     table |> ajaxSuccess |> json
 
@@ -113,30 +111,30 @@ let AddDecoration (data: floorplan_decoration) =
         venue_id = data.venue_id
     }
 
-    Entity.addToDatabase decoration
+    Entity.Create decoration
         |> ajaxSuccess
         |> json
 
 let UpdateDecoration (data: floorplan_decoration) =
-    Entity.updateInDatabase data
+    Entity.Update data
         |> ignore
     ajaxSuccess "true" |> json
 
 let DeleteDecoration (decorationToDelete: floorplan_decoration) =
-    Entity.deleteById<floorplan_decoration> decorationToDelete.id
+    Entity.DeleteById<floorplan_decoration> decorationToDelete.id
     |> ajaxSuccess
     |> json
 
 let newEmptyReservation (reservation: reservation) =
     let newReservation = {reservation with
-                            reservation_created_at = CurrentTime()
-                            reservation_time = CurrentTime()
+                            created_at = CurrentTime()
+                            time = CurrentTime()
                           }
 
-    if reservation.reservation_table_id > 0 then
-        let table = {(getTableById reservation.reservation_table_id) with
+    if reservation.floorplan_table_id > 0 then
+        let table = {(getTableById reservation.floorplan_table_id) with
                         status = 2
-                        default_covers = reservation.reservation_covers}
+                        default_covers = reservation.covers}
         updateTablePosition table |> ignore
 
     let createdReservation = Floorplan.createEmptyReservation newReservation
@@ -149,3 +147,10 @@ let unreserveTable (table: floorplan_table) =
     updateTablePosition newTable |> ignore
     DeleteReservation newTable.id
     newTable |> ajaxSuccess |> json
+
+let loadGrid (gridId: int) =
+    let grid = Entity.GetById<grid> gridId
+    let gridHtml = OrderScreen.loadGrid gridId
+    if gridHtml = "Error" then ajaxFail gridHtml
+    else ajaxSuccess {|grid=grid;gridHtml=gridHtml|}
+    |> json

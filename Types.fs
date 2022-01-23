@@ -3,11 +3,17 @@ module DredgePos.Types
 [<CLIMutable>]
 type reservation = {
     id: int
-    reservation_name: string
-    reservation_time: int
-    reservation_covers: int
-    reservation_table_id: int
-    reservation_created_at: int
+    name: string
+    time: int
+    covers: int
+    floorplan_table_id: int
+    created_at: int
+}
+
+[<CLIMutable>]
+type venue = {
+    id: int
+    venue_name: string
 }
 
 [<CLIMutable>]

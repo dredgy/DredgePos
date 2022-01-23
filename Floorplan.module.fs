@@ -1,6 +1,7 @@
 ﻿module Floorplan
 
 open DredgePos
+open DredgePos.Types
 open Org.BouncyCastle.Asn1.X509
 open Reservations
 
@@ -116,16 +117,16 @@ let getRoom (roomId: int) =
         where (eq "id" roomId)
     } |> db.Select<floorplan_room> |> first
 
-let updateTablePosition (floorplanTable: floorplan_table) = Entity.updateInDatabase floorplanTable
+let updateTablePosition (floorplanTable: floorplan_table) = Entity.Update floorplanTable
 
 let createEmptyReservation (reservation: reservation) =
     update {
         table "floorplan_tables"
         set {| status = 2  |}
-        where(eq "id" reservation.reservation_table_id)
+        where(eq "id" reservation.floorplan_table_id)
     } |> db.Update |> ignore
 
-    Entity.addToDatabase reservation
+    Entity.Create reservation
 
 let getChildTables tableNumber =
     let table = getTable tableNumber
@@ -165,7 +166,7 @@ let tableExists (tableNumber: int) =
     match numberOfResults with
        | 0 ->
             let allTables =
-                Entity.getAllInVenue<floorplan_table>
+                Entity.GetAllInVenue<floorplan_table>
                     |> Array.map(findChildTable tableNumber)
                     |> Array.filter(fun tableNumber -> tableNumber <> 0)
 
@@ -192,7 +193,7 @@ let addNewTableWithoutOutput (newTable: floorplan_table) =
     }
     |> db.Insert
 
-let addNewTable (newTable: floorplan_table) = Entity.addToDatabase newTable
+let addNewTable (newTable: floorplan_table) = Entity.Create newTable
 
 let mergeTables parent child = //Merge two tables together
     if parent = child then false else
@@ -246,7 +247,7 @@ let mergeTables parent child = //Merge two tables together
             where (eq "table_number" parent + eq "venue_id" (getCurrentVenue()))
         } |> db.Update |> ignore
 
-        Entity.deleteById<floorplan_table> newChildTable.id
+        Entity.DeleteById<floorplan_table> newChildTable.id
             |> ignore
 
         true
@@ -289,30 +290,19 @@ let makeRoomButton (room: floorplan_room) =
     Theme.loadTemplateWithVars "roomButton" vars
 
 let getReservationList (tableList: floorplan_table[]) =
-    let tableIds =
-        tableList
-            |> Array.map(fun table -> box table.id)
-            |> List.ofArray
-
-    if tableIds.Length > 0 then
-        select {
-            table "reservations"
-            where (isIn "reservation_table_id" tableIds)
-        }
-        |> db.Select<reservation>
-    else [||]
+    tableList |> Array.collect Entity.GetAllRelated<reservation, floorplan_table>
 
 let newReservation name time covers =
     let reservation = {
         id = 0
-        reservation_name = name
-        reservation_time = time
-        reservation_covers = covers
-        reservation_table_id = 0
-        reservation_created_at = CurrentTime()
+        name = name
+        time = time
+        covers = covers
+        floorplan_table_id = 0
+        created_at = CurrentTime()
     }
 
-    Entity.addToDatabase reservation
+    Entity.Create reservation
 
 
-let tableList () = Entity.getAllInVenue<floorplan_table>
+let tableList () = Entity.GetAllInVenue<floorplan_table>

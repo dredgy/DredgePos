@@ -45,8 +45,6 @@ const ajax = (endpoint: string, data: any, method = 'POST', successFunction: Fun
         beforeSend: beforeFunction
     })
 }
-
-
 /*
     For the flow of the app, synchronous is commonly preferred
     though trying to keep its usage as low as possible.
@@ -227,6 +225,14 @@ function* newestId(){
         id++
         yield id
     }
+}
+
+const loadTemplate = (templateSelector: string) => {
+    const content = $(templateSelector)
+            .clone()
+            .removeAttr('id')
+            .prop('content')
+    return $(content)
 }
 
 

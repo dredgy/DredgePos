@@ -120,108 +120,120 @@
         ::-webkit-scrollbar
             display: none
 
-        .pageGroup
-            /*display: inline-flex*/
-            @include flex-column-item
-            flex-basis: 100%
-            flex-grow: 0
-            overflow-x: auto
-            display: none
+.pageGroup
+    /*display: inline-flex*/
+    @include flex-column-item
+    flex-basis: 100%
+    flex-grow: 0
+    overflow-x: auto
+    display: none
 
-            .gridPage
-                width: 100%
-                height: 100%
-                flex-shrink: 0
-                flex-grow: 0
-                display: grid
-                grid-template-columns: repeat(6, 1fr)
-                grid-template-rows: repeat(8, 1fr)
+    .gridPage
+        width: 100%
+        height: 100%
+        flex-shrink: 0
+        flex-grow: 0
+        display: grid
 
-                .doubleWidth
-                    width: calc(200%)
-                    z-index: 10
+.doubleWidth
+    width: calc(200%)
+    z-index: 10
 
-                .doubleHeight
-                    height: calc(200%)
-                    z-index: 10
+.doubleHeight
+    height: calc(200%)
+    z-index: 10
 
-                .hasImage
-                    .buttonImg
-                        background-repeat: no-repeat
-                        background-size: contain
-                        background-position: center
-                        background-origin: content-box
+.hasImage
+    .buttonImg
+        background-repeat: no-repeat
+        background-size: contain
+        background-position: center
+        background-origin: content-box
 
-                .hasImage.normal
-                    font-size: 0.8em
-                    .buttonImg
-                        flex-basis: 40%
-                        height: 100%
-                        padding: 0.7em
-                        justify-content: flex-end
+.hasImage.normal
+    font-size: 0.8em
+    .buttonImg
+        flex-basis: 40%
+        height: 100%
+        padding: 0.7em
+        justify-content: flex-end
 
-                    .text
-                        @include flex
-                        justify-content: flex-start
-                        flex-basis: 60%
-                        height: 100%
-
-                .hasImage.doubleHeight
-                    @include flex-column
-
-                    .buttonImg
-                        padding: 0.6em
-                        flex-basis: 65%
-                        width: 100%
-                        flex-shrink: 0
-                        flex-grow: 0
-
-                    .text
-                        @include flex
-                        align-items: flex-start
-                        flex-grow: 0
-                        flex-shrink: 0
-                        flex-basis: 35%
-                        width: 100%
-                        overflow: hidden
-                        font-size: 0.9em
-
-                .hasImage.doubleWidth
-                    flex-direction: row
-                    .buttonImg
-                        @include flex
-                        flex-basis: 30%
-                        height: 100%
-                        padding-top: 2%
-
-                    .text
-                        @include flex
-                        flex-basis: 70%
-                        height: 100%
-                        justify-content: flex-start
-
-                .hasImage.doubleHeight.doubleWidth
-                    flex-direction: row
-
-                    .buttonImg
-                        @include flex
-                        flex-basis: 50%
-                        height: 100%
-
-
-                    .text
-                        @include flex
-                        flex-basis: 50%
-                        height: 100%
-
-
-    .pageNavigation
+    .text
         @include flex
-        @include flex-column-item
-        display: none
+        justify-content: flex-start
+        flex-basis: 60%
+        height: 100%
 
-        > *
-            @include flex-item
+.hasImage.doubleHeight
+    @include flex-column
+
+    .buttonImg
+        padding: 0.6em
+        flex-basis: 65%
+        width: 100%
+        flex-shrink: 0
+        flex-grow: 0
+
+    .text
+        @include flex
+        align-items: flex-start
+        flex-grow: 0
+        flex-shrink: 0
+        flex-basis: 35%
+        width: 100%
+        overflow: hidden
+        font-size: 0.9em
+
+.hasImage.doubleWidth
+    flex-direction: row
+    .buttonImg
+        @include flex
+        flex-basis: 30%
+        height: 100%
+        padding-top: 2%
+
+    .text
+        @include flex
+        flex-basis: 70%
+        height: 100%
+        justify-content: flex-start
+
+.hasImage.doubleHeight.doubleWidth
+    flex-direction: row
+
+    .buttonImg
+        @include flex
+        flex-basis: 50%
+        height: 100%
+
+
+    .text
+        @include flex
+        flex-basis: 50%
+        height: 100%
+
+
+.pageNavigation
+    @include flex
+    @include flex-column-item
+
+    > *
+        @include flex-item
+
+
+.coverSelector
+    display: flex
+    flex-wrap: wrap
+    border: 2px solid var(--global-border-color)
+    background: var(--global-bgcolor)
+    position: absolute
+    z-index: 100
+
+    .coverSelectorButton
+        flex-basis: 50%
+
+    .coverSelectorButton:first-of-type
+        flex-basis: 100%
 
 
 .orderBoxTable
@@ -267,12 +279,65 @@
 
         td.itemCell
             text-align: left
+            display: flex
+            flex-direction: column
 
     tr.instructionRow
         td
             font-weight: 100
         td.itemCell
             padding-left: 2em
+            small
+                font-size: 0
 
         .qtyCell, .printGroupCell
             font-size: 0
+
+.gridContainer
+    background: var(--global-bgcolor)
+    border: var(--global-border-color) solid 2px
+    z-index: 500
+    margin: auto
+    position: absolute
+    left: 0
+    right: 0
+    top: 50%
+    transform: translateY(-50%)
+
+    .gridContainerHeader
+        height: 3em
+        width: 100%
+        @include flex
+        background-color: var(--global-secondary-bgcolor)
+        border-bottom: solid 1px var(--global-border-color)
+
+        > *
+            @include flex
+            height: 100%
+
+        span
+            flex-basis: 90%
+        .closeGrid
+            flex-basis: 10%
+
+    .gridContainerGrid
+        width: 100%
+        @include flex-column
+        scrollbar-width: none
+        -ms-overflow-style: none
+
+        ::-webkit-scrollbar
+            display: none
+
+        .pageGroup
+            display: inline-flex
+            flex-basis: 100%
+            flex-grow: 0
+            overflow-x: auto
+
+            .gridPage
+                width: 100%
+                height: 100%
+                flex-shrink: 0
+                flex-grow: 0
+                display: grid

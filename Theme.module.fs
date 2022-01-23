@@ -49,7 +49,7 @@ let ParseVariables (varArray: Map<string, string>) (html:string) =
                     if varName |> ToLowerCase = "title" then titlePrefix varArray[varName]
                     else varArray[varName]
                 else
-                    "<!--[Undefined Variable: " + varName + "]-->"
+                    ""
     ))
 
 let ParseArrays (arrayArray: Map<string, Map<string, string>>) (string:string) =
