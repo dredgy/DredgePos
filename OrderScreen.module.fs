@@ -109,7 +109,7 @@ let generateSalesCategoryOverrideButtons () =
     Entity.GetAllInVenue<print_group>
         |> Array.map printGroupPosButton
         |> Array.append [|PosButton (language.getAndReplace "print_with" ["default"]) "printGroupOverrideButton toggle default active" """data-value="0" """|]
-        |> String.concat "\n"
+        |> joinWithNewLine
 
 
 let renderGrid (grid: grid) =
@@ -123,7 +123,7 @@ let renderGrid (grid: grid) =
                 |> Array.map snd
                 |> Array.map(fun row -> row |> Array.map renderButton |> String.concat "\n")
                 |> Array.map (renderPage grid)
-                |> String.concat "\n"
+                |> joinWithNewLine
 
 let loadGrid gridId = renderGrid (Entity.GetById<grid> gridId)
 

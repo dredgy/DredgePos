@@ -22,7 +22,7 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
    let roomMenu =
        Entity.GetAllInVenue<floorplan_room>
          |> Array.map makeRoomButton
-         |> String.concat "\n"
+         |> joinWithNewLine
 
    let variables = map [
        "title", "Floorplan"
@@ -64,12 +64,12 @@ let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
             let categoryArray = map ["page", categoryMap]
             Theme.loadTemplateWithArrays "orderScreen/page_group_button" categoryArray
             )
-        |> String.concat "\n"
+        |> joinWithNewLine
 
    let grids =
        OrderScreen.getAllPageGrids ()
        |> Array.map OrderScreen.getPagesHTML
-       |> String.concat "\n"
+       |> joinWithNewLine
 
    let coverSelectorButtons =
         Array.init (covers+1) id
