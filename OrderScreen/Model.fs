@@ -1,4 +1,5 @@
-module OrderScreen
+﻿module DredgePos.OrderScreen.Model
+
 open DredgeFramework
 open DredgePos
 open DredgePos.Types
@@ -133,5 +134,3 @@ let getPagesHTML (gridInfo: grid * order_screen_page_group) =
 
     renderGrid grid
     |> renderPageGroup pageGroup
-
-

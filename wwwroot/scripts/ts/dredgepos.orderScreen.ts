@@ -303,7 +303,7 @@ const itemButtonClicked = (e: JQuery.TriggeredEvent) => {
 const gridButtonClicked = (e: JQuery.TriggeredEvent) => {
     const button = $(e.target).closest('.posButton')
     const grid : number = button.data('grid')
-    ajax(`/orderScreen/getGridHtml/${grid}`, null, null,gridHtmlGenerated, null, null)
+    ajax(`/order/getGridHtml/${grid}`, null, null,gridHtmlGenerated, null, null)
 }
 
 
@@ -571,7 +571,7 @@ const changeCoverNumberPromptSubmitted = (value: string) => updateCoverNumbers(N
 const updateCoverNumbers = (covers: number) => {
     let newTable = Object.assign({}, OrderScreen.table)
     newTable.default_covers = covers
-    ajax('/orderScreen/updateCovers', newTable, 'post', coverNumbersUpdated, null, null)
+    ajax('/order/updateCovers', newTable, 'post', coverNumbersUpdated, null, null)
 }
 
 const coverNumbersUpdated = (newTable: floorplan_table) => {
@@ -600,5 +600,5 @@ const generateCoverSelector = () => {
 
 $(() => {
     OrderScreen.table = $('#pageContainer').data('table') || null
-    ajax('/orderScreen/getOrderScreenData/1', null, 'get', setupOrderScreen, null, null)
+    ajax('/order/getOrderScreenData/1', null, 'get', setupOrderScreen, null, null)
 })
