@@ -50,7 +50,7 @@ const Floorplan: floorplan = {
     selectedDecorationId: 0
 };
 
-$(() => ajax('/ajax/getFloorplanData/1', null, 'get', setupFloorplan, null, null) )
+$(() => ajax('/floorplan/getFloorplanData/1', null, 'get', setupFloorplan, null, null) )
 
 
 const setupFloorplanEvents = () => {
@@ -276,7 +276,7 @@ const saveTable = (tableToUpdate: floorplan_table) => {
     tables.push(tableToUpdate)
 
     Floorplan.tables = tables
-    ajax("/ajax/transformTable", tableToUpdate, 'post', null,null,null)
+    ajax("/floorplan/transformTable", tableToUpdate, 'post', null,null,null)
 }
 
 const setTransformerNodes = (nodes: Konva.Shape[]) => {
@@ -347,7 +347,7 @@ const createEmptyReservation = (covers: number) => {
         time: 0,
     }
 
-    ajax('/ajax/newEmptyReservation', newReservation,'post', emptyReservationCreated, null, null )
+    ajax('/reservations/newEmptyReservation', newReservation,'post', emptyReservationCreated, null, null )
 }
 
 const emptyReservationCreated = (reservation: reservation) => {
@@ -366,7 +366,7 @@ const addReservationName = (name: string) => {
     hideVirtualKeyboard()
     const reservation = Floorplan.reservations.filter(reservation => reservation.floorplan_table_id == getSelectedTableData().id)[0]
     reservation.name = name
-    ajax('/ajax/updateReservation', reservation, 'post', reservationNameAdded, null, null)
+    ajax('/reservations/updateReservation', reservation, 'post', reservationNameAdded, null, null)
 }
 
 const reservationNameAdded = (updatedReservation: reservation) => {
@@ -386,7 +386,7 @@ const updateTableData = (tableToRemove: floorplan_table) => {
 const unreserveTable = () => {
     const selectedTable = getSelectedTableData()
     selectedTable.status = 0
-    ajax('/ajax/unreserveTable', selectedTable, 'post', tableUnreserved, null, null)
+    ajax('/reservations/unreserveTable', selectedTable, 'post', tableUnreserved, null, null)
 }
 
 const tableUnreserved = (table: floorplan_table) => {
@@ -500,7 +500,7 @@ const createDecorationShape =  (decoration:decoration, select?: boolean) => {
             }
         }
 
-        decorationShape.src = 'images/decorations/' + decoration.decoration_image
+        decorationShape.src = '/images/decorations/' + decoration.decoration_image
 }
 
 const setupDecorationEvents = (decorationShape: Konva.Image) => {
@@ -567,7 +567,7 @@ const saveDecoration = (decorationToUpdate: decoration) => {
     decorations.push(decorationToUpdate)
 
     Floorplan.decorations = decorations
-    ajax("/ajax/updateDecoration", decorationToUpdate, 'post', null,null,null)
+    ajax("/floorplan/updateDecoration", decorationToUpdate, 'post', null,null,null)
 }
 
 const showDecorator = () => $('#decorator').css('display', 'flex')
@@ -588,7 +588,7 @@ const addDecoration = (e: Event) => {
         venue_id: Floorplan.currentRoom.venue_id
     }
 
-   ajax('/ajax/addDecoration', newDecoration, 'post', decorationAdded, null, null)
+   ajax('/floorplan/addDecoration', newDecoration, 'post', decorationAdded, null, null)
 }
 
 const decorationAdded = (decoration: decoration) => {
@@ -600,7 +600,7 @@ const decorationAdded = (decoration: decoration) => {
 
 
 const deleteDecoration = () => ajax(
-                        '/ajax/deleteDecoration',
+                        '/floorplan/deleteDecoration',
                          getDecorationDataById(Floorplan.selectedDecorationId),
                         'post', decorationDeleted, null, null)
 
@@ -616,7 +616,7 @@ const setRoomBackground = (roomToLoad: room) => {
     const height = Floorplan.floorplanDiv.height()
 
     if(roomToLoad.background_image) {
-        Floorplan.floorplanDiv.css("background-image", `url(images/rooms/${roomToLoad?.background_image})`)
+        Floorplan.floorplanDiv.css("background-image", `url(/images/rooms/${roomToLoad?.background_image})`)
         Floorplan.floorplanDiv.css("background-size", `${width}px ${height}px`)
     }
 }
@@ -735,7 +735,7 @@ const addTable = (tableNumber: number) => {
         venue_id: 1
     };
 
-    ajax('/ajax/createTable', newTable, 'post', tableAdded, tableNotAdded, null)
+    ajax('/floorplan/createTable', newTable, 'post', tableAdded, tableNotAdded, null)
 }
 
 const tableAdded = (table: floorplan_table) => {
@@ -763,7 +763,7 @@ const deleteTable = (tableNumber: number) => {
         return false
     }
 
-    ajax(`/ajax/deleteTable`,  tableToDelete, 'post', tableDeleted, null, null);
+    ajax(`/floorplan/deleteTable`,  tableToDelete, 'post', tableDeleted, null, null);
 }
 
 const tableDeleted = (deletedTable: floorplan_table) => {
@@ -782,7 +782,7 @@ const mergeTables = (table1: floorplan_table, table2: floorplan_table ) => {
         posAlert(lang('error_self_merge'))
         return false;
     }
-    ajax('/ajax/mergeTables', [table1, table2], 'post', tablesMerged, null, null)
+    ajax('/floorplan/mergeTables', [table1, table2], 'post', tablesMerged, null, null)
 }
 
 const tablesMerged = (tables: Record<'child'|'parent'|'merged', floorplan_table>) => {
@@ -795,7 +795,7 @@ const tablesMerged = (tables: Record<'child'|'parent'|'merged', floorplan_table>
     tableGroup.draggable(true)
 }
 
-const unmergeTable = () => ajax(`/ajax/unmergeTable/${Floorplan.selectedTableNumber}`, null, 'get', tablesUnmerged, null, null)
+const unmergeTable = () => ajax(`/floorplan/unmergeTable/${Floorplan.selectedTableNumber}`, null, 'get', tablesUnmerged, null, null)
 
 const tablesUnmerged = (tables: Record<'child'|'parent', floorplan_table>) => {
     const parentTable = tables['parent']
@@ -815,7 +815,7 @@ const transferTables = (origin: floorplan_table, destination: floorplan_table) =
         return
     }
 
-    ajax(`/ajax/transferTable/${origin.table_number}/${destination.table_number}`, null, 'get', tableTransferred, null, null)
+    ajax(`/floorplan/transferTable/${origin.table_number}/${destination.table_number}`, null, 'get', tableTransferred, null, null)
 }
 
 const tableTransferred = (tables: Record<"origin"|"destination", floorplan_table>) => {

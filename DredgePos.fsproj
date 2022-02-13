@@ -5,23 +5,31 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Types.fs" />
-        <Compile Include="DredgeFramework.module.fs" />
-        <Compile Include="Browser.module.fs" />
-        <Compile Include="Database.module.fs" />
-        <Compile Include="GenericEntities.module.fs" />
-        <Compile Include="Language.module.fs" />
-        <Compile Include="Theme.module.fs" />
-        <Compile Include="Reservations.module.fs" />
-        <Compile Include="Floorplan.module.fs" />
+        <Compile Include="Core\Types.fs" />
+        <Compile Include="Core\DredgeFramework.module.fs" />
+        <Compile Include="Core\Browser.module.fs" />
+        <Compile Include="Core\Database.module.fs" />
+        <Compile Include="Core\GenericEntities.module.fs" />
+        <Compile Include="Core\Language.module.fs" />
+        <Compile Include="Core\Theme.module.fs" />
         <Compile Include="Printer.module.fs" />
-        <Compile Include="Orders.module.fs" />
-        <Compile Include="OrderScreen.module.fs" />
-        <Compile Include="Decorations.module.fs" />
-        <Compile Include="Clerk.module.fs" />
-        <Compile Include="Session.module.fs" />
-        <Compile Include="PageController.fs" />
-        <Compile Include="AjaxController.fs" />
+        <Compile Include="Entities\Floorplan_Decorations\Model.fs" />
+        <Compile Include="Entities\Floorplan_Decorations\Controller.fs" />
+        <Compile Include="Entities\Floorplan_Decorations\Router.fs" />
+        <Compile Include="Authenticate\Model.fs" />
+        <Compile Include="Authenticate\Controller.fs" />
+        <Compile Include="Authenticate\Router.fs" />
+        <Compile Include="Ajax\Controller.fs" />
+        <Compile Include="Ajax\Router.fs" />
+        <Compile Include="Floorplan\Model.fs" />
+        <Compile Include="Floorplan\Controller.fs" />
+        <Compile Include="Floorplan\Router.fs" />
+        <Compile Include="OrderScreen\Model.fs" />
+        <Compile Include="OrderScreen\Controller.fs" />
+        <Compile Include="OrderScreen\Router.fs" />
+        <Compile Include="Reservations\Model.fs" />
+        <Compile Include="Reservations\Controller.fs" />
+        <Compile Include="Reservations\Router.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

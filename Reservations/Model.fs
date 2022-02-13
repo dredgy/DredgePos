@@ -1,18 +1,9 @@
-﻿module Reservations
+﻿module DredgePos.Reservations.Model
 
-open System
 open DredgeFramework
 open Dapper.FSharp
 open DredgePos
 open Types
-
-let GetReservationById (id: int) =
-    select {
-        table "reservations"
-        where (eq "id" id)
-    }
-    |> db.Select<reservation>
-    |> first
 
 let updateReservation (reservation: reservation) =
     update{
@@ -25,5 +16,5 @@ let updateReservation (reservation: reservation) =
 let DeleteReservation (tableId: int) =
     delete {
         table "reservations"
-        where (eq "reservation_table_id" tableId)
+        where (eq "floorplan_table_id" tableId)
     } |> db.Delete |> ignore

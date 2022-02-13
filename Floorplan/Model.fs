@@ -1,19 +1,12 @@
-﻿module Floorplan
+﻿module DredgePos.Floorplan.Model
 
-open DredgePos
 open DredgePos.Types
-open Org.BouncyCastle.Asn1.X509
-open Reservations
-
 open System
 open System.IO
 open System.Xml.Linq
 open DredgeFramework
-open Dapper
 open Dapper.FSharp
 open Thoth.Json.Net
-open Types
-
 let activeTablePath = "tables/active/"
 
 let getTableFile (tableNumber: int) =
@@ -281,13 +274,7 @@ let unmergeTable tableNumber = //Separates a merged table into itself and the la
             Some (getTable currentTable.table_number, unmergedChild)
         | Error _ -> None
 
-let makeRoomButton (room: floorplan_room) =
-    let vars = map [
-        "roomId", room.id |> string
-        "roomName", room.room_name
-    ]
 
-    Theme.loadTemplateWithVars "roomButton" vars
 
 let getReservationList (tableList: floorplan_table[]) =
     tableList |> Array.collect Entity.GetAllRelated<reservation, floorplan_table>

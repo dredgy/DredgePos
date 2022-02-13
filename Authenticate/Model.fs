@@ -1,12 +1,26 @@
-﻿module Session
+﻿module DredgePos.Authenticate.Model
 
 open System
 open DredgeFramework
 open Dapper.FSharp
-open Clerk
 open DredgePos
 open Thoth.Json.Net
 open Types
+
+let getClerkByLoginCode (loginCode: int) =
+    let clerk =
+        select {
+            table "clerks"
+            where (eq "clerk_login_code" loginCode)
+            take 1
+        }
+        |> db.Select<clerk>
+        |> EnumerableToArray
+
+    if (clerk |> length) > 0 then
+        Some (first clerk)
+    else
+        None
 
 let deleteSession sessionId context =
     delete {
@@ -65,12 +79,10 @@ let sessionExists (sessionId: string) context =
 
 let checkAuthentication clerk =
     let existingClerk = getClerkByLoginCode clerk.clerk_login_code
-    if existingClerk.IsSome
-       && existingClerk.Value.id = clerk.id
-       && existingClerk.Value.clerk_name = clerk.clerk_name
-       && existingClerk.Value.clerk_login_code = clerk.clerk_login_code
-       then true
-       else false
+    existingClerk.IsSome
+    && existingClerk.Value.id = clerk.id
+    && existingClerk.Value.clerk_name = clerk.clerk_name
+    && existingClerk.Value.clerk_login_code = clerk.clerk_login_code
 
 let getLoginCookie context = Browser.getCookie "dredgepos_clerk_logged_in" context
 
