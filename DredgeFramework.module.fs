@@ -16,6 +16,8 @@ open Thoth.Json.Net
 
 let (|?) lhs rhs = if lhs = null then rhs else lhs
 
+let joinWithNewLine (arr: string[]) = arr |> String.concat "\n"
+
 let getCurrentVenue () = 1
 
 let map list = list |> Map.ofList
