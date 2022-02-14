@@ -119,7 +119,7 @@ let loadFloorplan (ctx: HttpContext) : HttpHandler =
        "decorator", Entities.Floorplan_Decorations.Controller.generateDecorator()
    ]
    let styles = ["dredgepos.floorplan.css"]
-   let scripts = ["../external/konva.min.js" ; "dredgepos.floorplan.js"]
+   let scripts = ["./external/konva.min.js" ; "dredgepos.floorplan.js"]
    let currentClerk = recordToMap <| Authenticate.Model.getCurrentClerk ctx
 
    let arrays = map ["clerk", currentClerk]
