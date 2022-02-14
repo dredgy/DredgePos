@@ -7,9 +7,15 @@
         "currency.js": "^2.0.4",
         "konva": "^8.2.2",
         "sass": "^1.43.4",
+        "tsc": "^2.0.4",
         "typescript": "^4.4.4"
     },
     "description": "",
     "license": "",
-    "repository": ""
+    "repository": "",
+    "scripts": {
+        "sass":  "sass sass:wwwroot/styles",
+        "typescript": "tsc",
+        "build" : "npm run sass && npm run typescript"
+    }
 }

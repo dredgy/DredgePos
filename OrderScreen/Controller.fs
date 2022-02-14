@@ -81,7 +81,7 @@ let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
    ]
 
    let styles = ["dredgepos.orderScreen.css"]
-   let scripts = ["dredgepos.tables.js";"../external/currency.min.js";"dredgepos.orderScreen.js"; ]
+   let scripts = ["dredgepos.tables.js";"./external/currency.min.js";"dredgepos.orderScreen.js"; ]
    let currentClerk = recordToMap <| Authenticate.Model.getCurrentClerk ctx
    let arrays = map ["clerk", currentClerk]
 
