@@ -7,5 +7,6 @@
 /Properties/
 /.idea/
 /wwwroot/scripts/*.js
+/wwwroot/scripts/*.js.map
 /wwwroot/styles/*
 /Folder.DotSettings.user
