@@ -173,7 +173,7 @@ const createTableShape = (table: floorplan_table) => {
                 stroke: "black",
                 strokeWidth: 4,
                 draggable: false,
-                listening: true
+                listening: true,
             });
             break;
         default:

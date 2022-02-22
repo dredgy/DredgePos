@@ -2,10 +2,13 @@
 
 open DredgeFramework
 open DredgePos
+open DredgePos.Global.Controller
+open DredgePos.Entities
 open DredgePos.Types
 open Giraffe
 open Microsoft.AspNetCore.Http
 open Model
+open System.IO
 
 let makeRoomButton (room: floorplan_room) =
     let vars = map [
@@ -70,7 +73,7 @@ let deleteTable (table: floorplan_table) =
     table |> ajaxSuccess |> json
 
 let transferTable (origin, destination) =
-    Model.transferTable origin destination
+    transferTable origin destination
     let data = map ["origin", getTable origin ; "destination", getTable destination]
     ajaxSuccess data |> json
 
@@ -105,23 +108,12 @@ let DeleteDecoration (decorationToDelete: floorplan_decoration) =
     |> ajaxSuccess
     |> json
 
-let loadFloorplan (ctx: HttpContext) : HttpHandler =
+let loadFloorplanView (ctx: HttpContext) =
    Authenticate.Model.RequireClerkAuthentication ctx
+   let roomMenu = Entity.GetAllInVenue<floorplan_room> |> Array.map View.roomButton
+   let currentClerk = Authenticate.Model.getCurrentClerk ctx
+   let styles = [|"dredgepos.floorplan.css"|] |> addDefaultStyles
+   let scripts = [|"./external/konva.min.js" ; "dredgepos.floorplan.js"|] |> addDefaultScripts
+   let metaTags = [|"viewport", "user-scalable = no, initial-scale=0.8,maximum-scale=0.8 ,shrink-to-fit=yes"|] |> addDefaultMetaTags
 
-   let roomMenu =
-       Entity.GetAllInVenue<floorplan_room>
-         |> Array.map makeRoomButton
-         |> joinWithNewLine
-
-   let variables = map [
-       "title", "Floorplan"
-       "roomMenu", roomMenu
-       "decorator", Entities.Floorplan_Decorations.Controller.generateDecorator()
-   ]
-   let styles = ["dredgepos.floorplan.css"]
-   let scripts = ["./external/konva.min.js" ; "dredgepos.floorplan.js"]
-   let currentClerk = recordToMap <| Authenticate.Model.getCurrentClerk ctx
-
-   let arrays = map ["clerk", currentClerk]
-
-   htmlString <| Theme.loadTemplateWithVarsArraysScriptsAndStyles "floorplan" variables arrays scripts styles
+   View.index styles scripts metaTags currentClerk (Floorplan_Decorations.Controller.generateDecorator ()) roomMenu

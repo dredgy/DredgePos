@@ -228,7 +228,6 @@ let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, al
             index = index + 1
 
             let currentRow : string[] = layoutToLoad[`row${index}${modifier}`]
-
             $(row).children('a').each((keyIndex, button) => {
                 let key = $(button);
                 let keyValue: string = currentRow[keyIndex];

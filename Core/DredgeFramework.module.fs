@@ -2,7 +2,6 @@
 
 open System.Collections.Generic
 open System.Globalization
-open FSharp.Data.Sql
 open System
 open System.Drawing
 open System.IO
@@ -35,8 +34,9 @@ let EnumerableToArray (enumerable: IEnumerable<'T>) =  enumerable.ToArray()
 
 let getFileExtension (file: string) =  Path.GetExtension file
 
-let GetFileContents (file: string) = File.ReadAllText file
+let GetFileContents = File.ReadAllText
 let GetFileName (file: string) = Path.GetFileName file
+let FileExists = File.Exists
 
 let length (variable: 'T[]) = variable.Length
 let first (array: 'a[]) = array[0]

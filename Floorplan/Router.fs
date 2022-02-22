@@ -1,16 +1,17 @@
 ﻿module DredgePos.Floorplan.Router
 
 open DredgePos
+open DredgePos.Global.Router
 open DredgePos.Types
 open Saturn
 open Giraffe
 
-let floorplan = (warbler (fun ctx -> DredgePos.Floorplan.Controller.loadFloorplan (snd ctx)))
+let floorplan = (htmlViewWithContext Controller.loadFloorplanView)
 
 let router = router {
     pipe_through Ajax.Router.pipeline
-    get "/" floorplan
     get "" floorplan
+    get "/" floorplan
     post "/mergeTables" (bindJson<floorplan_table[]> Controller.mergeTables)
     post "/transformTable" (bindJson<floorplan_table> Controller.transformTable)
     post "/createTable" (bindJson<floorplan_table> Controller.createTable)
