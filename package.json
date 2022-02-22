@@ -14,8 +14,8 @@
     "license": "",
     "repository": "",
     "scripts": {
-        "sass":  "sass sass:wwwroot/styles",
+        "sass": "sass sass:wwwroot/styles",
         "typescript": "tsc",
-        "build" : "npm run sass && npm run typescript"
+        "build": "npm run sass && npm run typescript"
     }
 }

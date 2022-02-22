@@ -13,15 +13,21 @@
         <Compile Include="Core\Language.module.fs" />
         <Compile Include="Core\Theme.module.fs" />
         <Compile Include="Printer.module.fs" />
+        <Compile Include="Global\View.fs" />
+        <Compile Include="Global\Controller.fs" />
+        <Compile Include="Global\Router.fs" />
         <Compile Include="Entities\Floorplan_Decorations\Model.fs" />
+        <Compile Include="Entities\Floorplan_Decorations\View.fs" />
         <Compile Include="Entities\Floorplan_Decorations\Controller.fs" />
         <Compile Include="Entities\Floorplan_Decorations\Router.fs" />
         <Compile Include="Authenticate\Model.fs" />
+        <Compile Include="Authenticate\View.fs" />
         <Compile Include="Authenticate\Controller.fs" />
         <Compile Include="Authenticate\Router.fs" />
         <Compile Include="Ajax\Controller.fs" />
         <Compile Include="Ajax\Router.fs" />
         <Compile Include="Floorplan\Model.fs" />
+        <Compile Include="Floorplan\View.fs" />
         <Compile Include="Floorplan\Controller.fs" />
         <Compile Include="Floorplan\Router.fs" />
         <Compile Include="OrderScreen\Model.fs" />
@@ -106,168 +112,15 @@
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
-      <Content Include="views\restaurant\alert.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\authenticate.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\backupPayentsplitter.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\button.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\buttonWithImage.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\categories\BeerPage1.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\categories\BeerPage2.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\categories\DessertsPage1.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\categories\MainsPage1.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\categories\StartersPage1.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\categories\WinePage1.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\categoryButton.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\categoryMenu.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\components\posButton.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\decoratorItem.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\decoratorRow.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\floorplan.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\keyboards.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderBox.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderBoxTable.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen.tpl - Copy.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen\button_image.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen\change_cover_number_button.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen\cover_selector.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen\grid_button.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen\grid_container.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen\page.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen\page_group.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\orderScreen\page_group_button.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\paymentSplitter.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\popupBoxItems.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\roomButton.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\virtualKeyboard.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
-      <Content Include="views\restaurant\virtualNumpad.tpl.htm">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </Content>
       <Folder Include="wwwroot\styles" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Dapper" Version="2.0.78" />
-      <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
       <PackageReference Include="Dapper.FSharp" Version="2.4.1" />
-      <PackageReference Include="FSharp.Data" Version="4.0.1" />
       <PackageReference Include="Giraffe" Version="6.0.0-alpha-2" />
       <PackageReference Include="Npgsql" Version="6.0.0" />
       <PackageReference Include="Pluralize.NET.Core" Version="1.0.0" />
-      <PackageReference Include="Saturn" Version="0.15.0-preview03" />
-	  <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
-      <PackageReference Include="FSharp.Data.SqlClient" Version="2.1.0-beta1" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-preview.2.21154.2" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.0-preview.2.21154.2">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="MySql.Data" Version="8.0.23" />
-      <PackageReference Include="MySql.Data.EntityFrameworkCore" Version="8.0.22" />
-      <PackageReference Include="SQLProvider" Version="1.2.1" />
+      <PackageReference Include="Saturn" Version="0.15.0" />
       <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.5.21301.5" />
       <PackageReference Include="Thoth.Json.Net" Version="5.0.0" />
       <PackageReference Update="FSharp.Core" Version="6.0.2-beta.21631.1" />

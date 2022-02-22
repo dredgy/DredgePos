@@ -3,7 +3,7 @@
 open Saturn
 open Giraffe
 
-let homepage = (warbler (fun _ -> Controller.loadAuthenticatePage() ))
+let homepage = (warbler (fun _ -> htmlView Controller.loadAuthenticatePage  ))
 let handlePostRoute<'a> handlerFunction post next ctx = json (handlerFunction ctx post) next ctx
 
 let pipeline = pipeline{
