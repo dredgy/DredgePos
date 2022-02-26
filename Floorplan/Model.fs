@@ -39,7 +39,7 @@ let tablesInRoom (roomId: int) = //Get a list of all tables in a particular room
         table "floorplan_tables"
         where (eq "room_id" roomId)
     }
-    |> db.Select<floorplan_table>
+    |> Database.Select<floorplan_table>
 
 
 let getActiveTables (venueId: int) =
@@ -47,7 +47,7 @@ let getActiveTables (venueId: int) =
         table "floorplan_tables"
         where (eq "venue_id" venueId)
     }
-    |> db.Select
+    |> Database.Select
     |> Array.filter tableIsOpen
     |> Array.map (fun table -> table.table_number)
 
@@ -93,7 +93,7 @@ let getTable (tableNumber : int) =
         where (eq "table_number" tableNumber + eq "venue_id" (getCurrentVenue()))
     }
 
-    let result = query |> db.Select<floorplan_table>
+    let result = query |> Database.Select<floorplan_table>
     result |> first
 
 let getTableById (id : int) =
@@ -101,14 +101,14 @@ let getTableById (id : int) =
         table "floorplan_tables"
         where (eq "id" id)
     }
-      |> db.Select<floorplan_table>
+      |> Database.Select<floorplan_table>
       |> first
 
 let getRoom (roomId: int) =
     select {
         table "floorplan_rooms"
         where (eq "id" roomId)
-    } |> db.Select<floorplan_room> |> first
+    } |> Database.Select<room> |> first
 
 let updateTablePosition (floorplanTable: floorplan_table) = Entity.Update floorplanTable
 
@@ -117,7 +117,7 @@ let createEmptyReservation (reservation: reservation) =
         table "floorplan_tables"
         set {| status = 2  |}
         where(eq "id" reservation.floorplan_table_id)
-    } |> db.Update |> ignore
+    } |> Database.Update |> ignore
 
     Entity.Create reservation
 
@@ -154,7 +154,7 @@ let tableExists (tableNumber: int) =
        select{
            table "floorplan_tables"
            where (eq "table_number" tableNumber + eq "venue_id" (getCurrentVenue()))
-       } |> db.Select<floorplan_table> |> length
+       } |> Database.Select<floorplan_table> |> length
 
     match numberOfResults with
        | 0 ->
@@ -169,14 +169,14 @@ let tableExists (tableNumber: int) =
                 | _ ->
                     let parentTableData = getTable allTables[0]
                     let parentRoom = getRoom parentTableData.room_id
-                    let parentRoomName = parentRoom.room_name
+                    let parentRoomName = parentRoom.name
                     language.getAndReplace "error_table_exists_merged" [parentRoomName; parentTableData.table_number.ToString()]
 
 
        | _  ->
                 let tableData = getTable tableNumber
                 let room = getRoom tableData.room_id
-                language.getAndReplace "error_table_exists" [room.room_name]
+                language.getAndReplace "error_table_exists" [room.name]
 
 
 let addNewTableWithoutOutput (newTable: floorplan_table) =
@@ -184,7 +184,7 @@ let addNewTableWithoutOutput (newTable: floorplan_table) =
         table "floorplan_tables"
         value newTable
     }
-    |> db.Insert
+    |> Database.Insert
 
 let addNewTable (newTable: floorplan_table) = Entity.Create newTable
 
@@ -238,7 +238,7 @@ let mergeTables parent child = //Merge two tables together
                    default_covers = parentTable.default_covers + childTable.default_covers
                 |}
             where (eq "table_number" parent + eq "venue_id" (getCurrentVenue()))
-        } |> db.Update |> ignore
+        } |> Database.Update |> ignore
 
         Entity.DeleteById<floorplan_table> newChildTable.id
             |> ignore
@@ -251,7 +251,7 @@ let updateUnmergedTables parentTable childTable =
        table "floorplan_tables"
        set parentTable
        where(eq "table_number" parentTable.table_number + eq "venue_id" (getCurrentVenue()))
-    } |> db.Update |> ignore
+    } |> Database.Update |> ignore
 
     addNewTableWithoutOutput childTable |> ignore
     true

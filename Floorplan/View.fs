@@ -14,7 +14,7 @@ let ActiveInMode (value: string) = value |> (attr "data-active-in-mode")
 
 
 let pageContainer (clerk: clerk) roomMenu =
-    let loggedInText = str (language.getAndReplace "logged_in_as" [clerk.clerk_name])
+    let loggedInText = str (language.getAndReplace "logged_in_as" [clerk.name])
 
     div [_id "pageContainer"] [
         div [_id "floorplanLeftColumn"] [
@@ -77,7 +77,7 @@ let pageContainer (clerk: clerk) roomMenu =
         ]
     ]
 
-let roomButton (room: floorplan_room) = a [_class "posButton roomButton"; Value (string room.id)] [str room.room_name ]
+let roomButton (room: room) = a [_class "posButton roomButton"; Value (string room.id)] [str room.name ]
 
 let index styles scripts tags clerk decoratorRows roomMenu =
     [|

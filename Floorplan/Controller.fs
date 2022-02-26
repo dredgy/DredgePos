@@ -10,10 +10,10 @@ open Microsoft.AspNetCore.Http
 open Model
 open System.IO
 
-let makeRoomButton (room: floorplan_room) =
+let makeRoomButton (room: room) =
     let vars = map [
         "roomId", room.id |> string
-        "roomName", room.room_name
+        "roomName", room.name
     ]
 
     Theme.loadTemplateWithVars "roomButton" vars
@@ -50,7 +50,7 @@ let getFloorplanData (id: int) =
         tables = tableList
         decorations = Entity.GetAllInVenue<floorplan_decoration>
         activeTableNumbers = Model.getActiveTables (getCurrentVenue())
-        rooms = Entity.GetAllInVenue<floorplan_room>
+        rooms = Entity.GetAllInVenue<room>
         reservations = reservationList
     |}
     |> ajaxSuccess
@@ -78,19 +78,19 @@ let transferTable (origin, destination) =
     ajaxSuccess data |> json
 
 let AddDecoration (data: floorplan_decoration) =
-    let image = "wwwroot/images/decorations/" + data.decoration_image
+    let image = "wwwroot/images/decorations/" + data.image
     let width, height = image |> GetImageSize
     let aspectRatio = decimal width /  decimal height
 
     let decoration : floorplan_decoration = {
         id = 0
-        decoration_height = (200m / aspectRatio) |> int
-        decoration_width = 200
-        decoration_rotation = 0
-        decoration_image = data.decoration_image
-        decoration_pos_x = data.decoration_pos_x
-        decoration_pos_y = data.decoration_pos_y
-        decoration_room = data.decoration_room
+        height = (200m / aspectRatio) |> int
+        width = 200
+        rotation = 0
+        image = data.image
+        pos_x = data.pos_x
+        pos_y = data.pos_y
+        room_id = data.room_id
         venue_id = data.venue_id
     }
 
@@ -110,7 +110,7 @@ let DeleteDecoration (decorationToDelete: floorplan_decoration) =
 
 let loadFloorplanView (ctx: HttpContext) =
    Authenticate.Model.RequireClerkAuthentication ctx
-   let roomMenu = Entity.GetAllInVenue<floorplan_room> |> Array.map View.roomButton
+   let roomMenu = Entity.GetAllInVenue<room> |> Array.map View.roomButton
    let currentClerk = Authenticate.Model.getCurrentClerk ctx
    let styles = [|"dredgepos.floorplan.css"|] |> addDefaultStyles
    let scripts = [|"./external/konva.min.js" ; "dredgepos.floorplan.js"|] |> addDefaultScripts

@@ -10,11 +10,11 @@ let updateReservation (reservation: reservation) =
         table "reservations"
         set reservation
         where(eq "id" reservation.id)
-    } |> db.Update |> ignore
+    } |> Database.Update |> ignore
     reservation
 
 let DeleteReservation (tableId: int) =
     delete {
         table "reservations"
         where (eq "floorplan_table_id" tableId)
-    } |> db.Delete |> ignore
+    } |> Database.Delete |> ignore

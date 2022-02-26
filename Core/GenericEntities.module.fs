@@ -1,4 +1,5 @@
 ﻿module Entity
+open Dapper
 open Dapper.FSharp
 open DredgeFramework
 open Pluralize.NET.Core
@@ -15,7 +16,7 @@ let Create (record: 'x)=
         value record
         excludeColumn "id"
     }
-    |> db.InsertOutput
+    |> Database.InsertOutput
     |> first
 
 
@@ -28,7 +29,7 @@ let inline Update (record: ^x) =
         where (eq "id" id)
         excludeColumn "id"
     }
-    |> db.Update
+    |> Database.Update
 
 let GetAll<'x> =
     let tableName = GetDatabaseTable<'x>
@@ -36,7 +37,7 @@ let GetAll<'x> =
     select {
         table tableName
     }
-    |> db.Select<'x>
+    |> Database.Select<'x>
 
 let GetAllByColumn<'x> (column: string) (value: obj) =
     let tableName = GetDatabaseTable<'x>
@@ -44,7 +45,9 @@ let GetAllByColumn<'x> (column: string) (value: obj) =
     select {
         table tableName
         where (eq column value)
-    } |> db.Select<'x>
+    } |> Database.Select<'x>
+
+let GetFirstByColumn<'x> (column: string) (value: obj) = (GetAllByColumn<'x> column value) |> first
 
 let GetAllInVenue<'x> = GetAllByColumn<'x> "venue_id" (getCurrentVenue ())
 let GetById<'x> (id: int) = GetAllByColumn<'x> "id" id |> first
@@ -67,7 +70,7 @@ let DeleteById<'x> id =
     delete {
         table tableName
         where (eq "id" id)
-    } |> db.Delete |> ignore
+    } |> Database.Delete |> ignore
 
     entity
 

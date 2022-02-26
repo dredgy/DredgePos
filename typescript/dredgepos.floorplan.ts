@@ -11,7 +11,7 @@ interface floorplan{
     tableLayer: Konva.Layer
     rooms: room[]
     tables: floorplan_table[]
-    decorations: decoration[]
+    decorations: floorplan_decoration[]
     activeTableNumbers: number[]
     selectedTableNumber: number
     selectedDecorationId: number
@@ -25,7 +25,7 @@ interface floorplan{
 
 interface floorplan_data{
     tables: floorplan_table[]
-    decorations: decoration[]
+    decorations: floorplan_decoration[]
     activeTableNumbers: number[]
     rooms: room[]
     reservations:reservation[]
@@ -122,7 +122,7 @@ const loadRoom = (roomToLoad: room) => {
     button.addClass('active')
 
     const tablesInRoom = Floorplan.tables.filter(table => table.room_id == roomToLoad.id)
-    const decorationsInRoom = Floorplan.decorations.filter(decoration => decoration.decoration_room == roomToLoad.id)
+    const decorationsInRoom = Floorplan.decorations.filter(decoration => decoration.room_id == roomToLoad.id)
     decorationsInRoom.forEach(decoration => createDecorationShape(decoration, false))
     tablesInRoom.forEach(createTableShape)
     if(!isInMode('transfer')) {
@@ -469,21 +469,21 @@ const tableDblClicked =  (event: Konva.KonvaEventObject<any>) => {
 
 }
 
-const createDecorationShape =  (decoration:decoration, select?: boolean) => {
+const createDecorationShape =  (decoration:floorplan_decoration, select?: boolean) => {
         const draggable = isInMode('edit')
         const decorationShape = new Image()
 
         decorationShape.onload = () => {
             const decorationImage = new Konva.Image({
                 id: decoration.id.toString(),
-                x: decoration.decoration_pos_x * Floorplan.visualScale,
-                y: decoration.decoration_pos_y *  Floorplan.visualScale,
+                x: decoration.pos_x * Floorplan.visualScale,
+                y: decoration.pos_y *  Floorplan.visualScale,
                 image: decorationShape,
-                offsetX: decoration.decoration_width * 0.5 *  Floorplan.visualScale,
-                offsetY: decoration.decoration_height * 0.5 *  Floorplan.visualScale,
-                rotation: decoration.decoration_rotation,
-                width: decoration.decoration_width *  Floorplan.visualScale,
-                height: decoration.decoration_height *  Floorplan.visualScale,
+                offsetX: decoration.width * 0.5 *  Floorplan.visualScale,
+                offsetY: decoration.height * 0.5 *  Floorplan.visualScale,
+                rotation: decoration.rotation,
+                width: decoration.width *  Floorplan.visualScale,
+                height: decoration.height *  Floorplan.visualScale,
                 draggable: draggable,
             });
 
@@ -500,7 +500,7 @@ const createDecorationShape =  (decoration:decoration, select?: boolean) => {
             }
         }
 
-        decorationShape.src = '/images/decorations/' + decoration.decoration_image
+        decorationShape.src = '/images/decorations/' + decoration.image
 }
 
 const setupDecorationEvents = (decorationShape: Konva.Image) => {
@@ -541,22 +541,22 @@ const getDecorationDataById = (id: number) => {
 const decorationTransformed = (event: Konva.KonvaEventObject<MouseEvent>|Konva.KonvaEventObject<TouchEvent|DragEvent|MouseEvent>) => {
     let decorationShape = event.currentTarget as Konva.Image
     const oldDecorationData = getDecorationDataById(Number(decorationShape.id()))
-    const newDecoration: decoration = {
+    const newDecoration: floorplan_decoration = {
         id: oldDecorationData.id,
-        decoration_room: oldDecorationData.decoration_room,
-        decoration_pos_x: Math.round(decorationShape.x() / Floorplan.visualScale),
-        decoration_pos_y:  Math.round(decorationShape.y() / Floorplan.visualScale),
-        decoration_rotation:  Math.round(decorationShape.rotation()),
-        decoration_width:  Math.round((decorationShape.scaleX() * decorationShape.width()) / Floorplan.visualScale),
-        decoration_height:  Math.round((decorationShape.scaleY() * decorationShape.height()) / Floorplan.visualScale),
-        decoration_image: oldDecorationData.decoration_image,
+        room_id: oldDecorationData.room_id,
+        pos_x: Math.round(decorationShape.x() / Floorplan.visualScale),
+        pos_y:  Math.round(decorationShape.y() / Floorplan.visualScale),
+        rotation:  Math.round(decorationShape.rotation()),
+        width:  Math.round((decorationShape.scaleX() * decorationShape.width()) / Floorplan.visualScale),
+        height:  Math.round((decorationShape.scaleY() * decorationShape.height()) / Floorplan.visualScale),
+        image: oldDecorationData.image,
         venue_id: oldDecorationData.venue_id,
     }
 
     saveDecoration(newDecoration)
 }
 
-const saveDecoration = (decorationToUpdate: decoration) => {
+const saveDecoration = (decorationToUpdate: floorplan_decoration) => {
     const decorations =
         Floorplan
             .decorations
@@ -576,22 +576,22 @@ const hideDecorator = () => $('#decorator').css('display', 'flex').hide()
 const addDecoration = (e: Event) => {
     const button = $(e.currentTarget)
 
-    const newDecoration: decoration = {
+    const newDecoration: floorplan_decoration = {
         id: 0,
-        decoration_room: Floorplan.currentRoom.id,
-        decoration_pos_x: Floorplan.visualScaleBasis / 2,
-        decoration_pos_y: Floorplan.visualScaleBasis / 2,
-        decoration_rotation: 0,
-        decoration_width: 200,
-        decoration_height: 200,
-        decoration_image: button.data('image'),
+        room_id: Floorplan.currentRoom.id,
+        pos_x: Floorplan.visualScaleBasis / 2,
+        pos_y: Floorplan.visualScaleBasis / 2,
+        rotation: 0,
+        width: 200,
+        height: 200,
+        image: button.data('image'),
         venue_id: Floorplan.currentRoom.venue_id
     }
 
    ajax('/floorplan/addDecoration', newDecoration, 'post', decorationAdded, null, null)
 }
 
-const decorationAdded = (decoration: decoration) => {
+const decorationAdded = (decoration: floorplan_decoration) => {
     Floorplan.decorations.push(decoration)
     createDecorationShape(decoration, true)
 
@@ -604,7 +604,7 @@ const deleteDecoration = () => ajax(
                          getDecorationDataById(Floorplan.selectedDecorationId),
                         'post', decorationDeleted, null, null)
 
-const decorationDeleted = (deletedDecoration:decoration) => {
+const decorationDeleted = (deletedDecoration:floorplan_decoration) => {
     Floorplan.decorations = Floorplan.decorations.filter(decoration => decoration.id != deletedDecoration.id)
     const decorationShape = Floorplan.stage.findOne(`#${deletedDecoration.id}`)
     decorationShape.destroy()
@@ -616,8 +616,10 @@ const setRoomBackground = (roomToLoad: room) => {
     const height = Floorplan.floorplanDiv.height()
 
     if(roomToLoad.background_image) {
-        Floorplan.floorplanDiv.css("background-image", `url(/images/rooms/${roomToLoad?.background_image})`)
+        Floorplan.floorplanDiv.css("background-image", `url(/images/rooms/${roomToLoad.background_image})`)
         Floorplan.floorplanDiv.css("background-size", `${width}px ${height}px`)
+    } else {
+        Floorplan.floorplanDiv.css("background-image", "none")
     }
 }
 
