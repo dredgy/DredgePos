@@ -14,6 +14,7 @@ module Program =
         forward "/order" DredgePos.OrderScreen.Router.router
         forward "/login" DredgePos.Authenticate.Router.router
         forward "/reservations" DredgePos.Reservations.Router.router
+        forward "/install" DredgePos.Installer.Router.router
     }
 
     let app = application {

@@ -27,7 +27,7 @@ let getImageButtonData (button: button) =
 
     {|
         extra_data = extraData
-        text = item.item_name
+        text = item.name
     |}
 
 let getGridButtonData (button: button) =
@@ -39,7 +39,7 @@ let getGridButtonData (button: button) =
     let grid = Entity.GetById<grid> gridId
     {|
         extra_data = map ["data-grid", jsonEncode gridId] |> htmlAttributes
-        text = grid.grid_name
+        text = grid.name
     |}
 
 let getActionData (button: button) (action: string) =
@@ -93,7 +93,7 @@ let renderButton (buttonId: int) =
     loadTemplateWithVars "orderScreen/grid_button" vars
 
 let renderPage (grid: grid)  (buttonHTML: string) =
-    let vars = map ["pageButtons", buttonHTML; "rows", string grid.grid_rows; "cols", string grid.grid_cols]
+    let vars = map ["pageButtons", buttonHTML; "rows", string grid.rows; "cols", string grid.cols]
     loadTemplateWithVars "orderScreen/page" vars
 
 let renderPageGroup (pageGroup: order_screen_page_group) (pageHTML: string) =
@@ -114,7 +114,7 @@ let generateSalesCategoryOverrideButtons () =
 
 
 let renderGrid (grid: grid) =
-    let gridData = grid.grid_data |> Decode.Auto.fromString<Map<string, int[]>>
+    let gridData = grid.data |> Decode.Auto.fromString<Map<string, int[]>>
 
     match gridData with
         | Error _ -> "Error"

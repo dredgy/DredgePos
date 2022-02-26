@@ -13,7 +13,7 @@ type reservation = {
 [<CLIMutable>]
 type venue = {
     id: int
-    venue_name: string
+    name: string
 }
 
 [<CLIMutable>]
@@ -38,7 +38,7 @@ type floorplan_table = {
 type print_group = {
     id: int
     name: string
-    printer: int
+    printer_id: int
     venue_id: int
 }
 
@@ -47,14 +47,14 @@ type sales_category = {
     id: int
     parent: int
     name: string
-    print_group: int
+    print_group_id: int
     venue_id: int
 }
 
 [<CLIMutable>]
-type floorplan_room = {
+type room = {
     id: int
-    room_name: string
+    name: string
     background_image: string
     venue_id: int
 }
@@ -62,18 +62,23 @@ type floorplan_room = {
 [<CLIMutable>]
 type floorplan_decoration = {
     id: int
-    decoration_room: int
-    decoration_pos_x: int
-    decoration_pos_y: int
-    decoration_rotation: int
-    decoration_width: int
-    decoration_height: int
-    decoration_image: string
+    room_id: int
+    pos_x: int
+    pos_y: int
+    rotation: int
+    width: int
+    height: int
+    image: string
     venue_id: int
 }
 
 [<CLIMutable>]
-type clerk = {id: int; clerk_name: string; clerk_login_code: int; clerk_usergroup: int}
+type clerk = {
+    id: int
+    name: string
+    login_code: int
+    user_group_id: int
+}
 
 [<CLIMutable>]
 type session = {id: int; session_id: string; clerk_json: string; clerk_id: int; expires: int}
@@ -82,7 +87,7 @@ type session = {id: int; session_id: string; clerk_json: string; clerk_id: int; 
 type order_screen_page_group = {id: int; order: int; venue_id: int; label: string; grid_id: int}
 
 [<CLIMutable>]
-type grid = {id: int; grid_name: string; grid_rows: int; grid_cols: int; grid_data: string}
+type grid = {id: int; name: string; rows: int; cols: int; data: string}
 
 [<CLIMutable>]
 type button = {
@@ -100,13 +105,30 @@ type button = {
 [<CLIMutable>]
 type item = {
     id: int
-    item_code: string
-    item_category: int
-    item_name: string
+    code: string
+    sales_category_id: int
+    name: string
     item_type: string
     price1: int
-    price2: int
-    price3: int
-    price4: int
-    price5: int
+}
+
+[<CLIMutable>]
+type db_config = {
+    db_name: string
+    username: string
+    password: string
+    host: string
+    port: int
+}
+
+[<CLIMutable>]
+type config = {
+    database: db_config
+}
+
+[<CLIMutable>]
+type migration = {
+    id: int
+    name: string
+    timestamp: int
 }

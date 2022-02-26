@@ -123,7 +123,7 @@ const addItemToOrderBox = (orderItem:orderItem) => {
     const existingRow = orderBox
         .find('tr')
         .filterByData('item', orderItem.item)
-        .filterByData('print_group', orderItem.print_group)
+        .filterByData('print_group', orderItem.print_group_id)
         .filterByData('cover', orderItem.cover)
         .last()
 
@@ -186,13 +186,13 @@ const addInstructionToOrderBox = (instruction: orderItem) => {
 
 
 const addNewItem = (item: item, qty = 1) => {
-    const salesCategory = OrderScreen.sales_categories.where('id', item.item_category)
-    const printGroup = OrderScreen.print_group_override ?? OrderScreen.print_groups.where('id', salesCategory.print_group)
+    const salesCategory = OrderScreen.sales_categories.where('id', item.category)
+    const printGroup = OrderScreen.print_group_override ?? OrderScreen.print_groups.where('id', salesCategory.print_group_id)
     const orderItem : orderItem = {
         id: OrderScreen.order_item_id_generator.next().value,
         item: item,
         qty: qty,
-        print_group: printGroup,
+        print_group_id: printGroup,
         cover: OrderScreen.selected_cover,
     }
 
@@ -258,17 +258,17 @@ const renderOrderBox = () => {
 const createOrderRow = (orderItem: orderItem) => {
     const row = $('.orderBoxTable').EmptyRow()
     const price = money(orderItem.item.price1)
-    const itemCellText = $('<span/>').text(orderItem.item.item_name)
+    const itemCellText = $('<span/>').text(orderItem.item.name)
     row
         .addClass(`${orderItem.item.item_type}Row`)
         .setColumnValue(lang('qty_header'), orderItem.qty)
         .setColumnValue(lang('price_header'), price)
         .setColumnValue(lang('id_header'), orderItem.item.id)
         .setColumnValue(lang('total_price_header'), price.multiply(orderItem.qty))
-        .setColumnValue(lang('printgroup_header'), orderItem.print_group?.name)
+        .setColumnValue(lang('printgroup_header'), orderItem.print_group_id?.name)
         .data('order-item-id', orderItem.id)
         .data('order-item-id', orderItem.id)
-        .data('print_group', orderItem.print_group)
+        .data('print_group', orderItem.print_group_id)
         .data('cover', orderItem.cover)
         .data('item', orderItem.item)
         .find('td.itemCell')
@@ -319,17 +319,17 @@ const gridHtmlGenerated = (gridData: {gridHtml:string, grid: grid}) => {
 
     gridContainer
         .show()
-        .width(gridCellWidth * grid.grid_cols)
+        .width(gridCellWidth * grid.cols)
         .children('.gridContainerHeader')
         .children('span')
-        .text(grid.grid_name)
+        .text(grid.name)
         .parent()
         .parent()
         .find('.pageGroup')
         .html(gridHtml)
         .show()
         .parent()
-        .height(gridCellHeight * grid.grid_rows)
+        .height(gridCellHeight * grid.rows)
         .closest('.gridContainer')
         .find('.pageNavigation')
         .toggle(gridContainer.find('.gridPage').length >  1)
@@ -495,7 +495,7 @@ const freetextSubmitted = (text: string) => {
 
     const item = Object.assign({}, OrderScreen.custom_item)
     item.item_type = 'instruction'
-    item.item_name = text
+    item.name = text
 
     addNewItem(item)
 
@@ -509,7 +509,7 @@ const customItemTextSubmitted = (text: string) => {
 
         const item = Object.assign({}, OrderScreen.custom_item)
         item.item_type = 'item'
-        item.item_name = text
+        item.name = text
         item.price1 = price.intValue
 
         addNewItem(item)

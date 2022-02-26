@@ -26,6 +26,11 @@
         <Compile Include="Authenticate\Router.fs" />
         <Compile Include="Ajax\Controller.fs" />
         <Compile Include="Ajax\Router.fs" />
+        <Compile Include="Migrations\CreateDatabaseSchema.fs" />
+        <Compile Include="Migrations\PopulateTestData.fs" />
+        <Compile Include="Installer\Model.fs" />
+        <Compile Include="Installer\Controller.fs" />
+        <Compile Include="Installer\Router.fs" />
         <Compile Include="Floorplan\Model.fs" />
         <Compile Include="Floorplan\View.fs" />
         <Compile Include="Floorplan\Controller.fs" />

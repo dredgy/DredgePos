@@ -11,10 +11,10 @@ let getClerkByLoginCode (loginCode: int) =
     let clerk =
         select {
             table "clerks"
-            where (eq "clerk_login_code" loginCode)
+            where (eq "login_code" loginCode)
             take 1
         }
-        |> db.Select<clerk>
+        |> Database.Select<clerk>
         |> EnumerableToArray
 
     if (clerk |> length) > 0 then
@@ -26,19 +26,19 @@ let deleteSession sessionId context =
     delete {
         table "sessions"
         where (eq "session_id" sessionId)
-    } |> db.Delete |> ignore
+    } |> Database.Delete |> ignore
     Browser.deleteCookie "dredgepos_clerk_logged_in" context
 
 let deleteSessionByClerkId clerk_id context =
     delete {
         table "sessions"
         where (eq "clerk_id" clerk_id)
-    } |> db.Delete |> ignore
+    } |> Database.Delete |> ignore
 
     Browser.deleteCookie "dredgepos_clerk_logged_in" context
 
 let createNewSession (clerk: clerk) context =
-    if (getClerkByLoginCode clerk.clerk_login_code).IsSome then
+    if (getClerkByLoginCode clerk.login_code).IsSome then
         deleteSessionByClerkId clerk.id context
         let newSessionId = (Guid.NewGuid().ToString "N") + (Guid.NewGuid().ToString "N")
 
@@ -53,18 +53,14 @@ let createNewSession (clerk: clerk) context =
             table "sessions"
             value newSession
         }
-        |> db.Insert
+        |> Database.Insert
         |> ignore
 
         Browser.setCookie "dredgepos_clerk_logged_in" newSessionId (DateTimeOffset.UtcNow.AddHours(24.0)) context
 
 
 let sessionExists (sessionId: string) context =
-    let sessions =
-        select {
-            table "sessions"
-            where (eq "session_id" sessionId)
-        } |> db.Select<session>
+    let sessions = Entity.GetAllByColumn<session> "session_id" sessionId
 
     match sessions |> length with
     | 0 -> false
@@ -78,11 +74,11 @@ let sessionExists (sessionId: string) context =
         false
 
 let checkAuthentication clerk =
-    let existingClerk = getClerkByLoginCode clerk.clerk_login_code
+    let existingClerk = getClerkByLoginCode clerk.login_code
     existingClerk.IsSome
     && existingClerk.Value.id = clerk.id
-    && existingClerk.Value.clerk_name = clerk.clerk_name
-    && existingClerk.Value.clerk_login_code = clerk.clerk_login_code
+    && existingClerk.Value.name = clerk.name
+    && existingClerk.Value.login_code = clerk.login_code
 
 let getLoginCookie context = Browser.getCookie "dredgepos_clerk_logged_in" context
 
@@ -91,7 +87,7 @@ let getSession (sessionId: string) =
         select {
             table "sessions"
             where (eq "session_id" sessionId)
-        } |> db.Select<session>
+        } |> Database.Select<session>
 
     match sessions |> length with
     | 0 -> {session_id = ""; clerk_json = ""; clerk_id= 0; expires= 0; id=0}
@@ -99,7 +95,7 @@ let getSession (sessionId: string) =
 
 let getCurrentClerk context =
     let cookie = getLoginCookie context
-    let emptyClerk = {id=0; clerk_login_code=0; clerk_usergroup=0; clerk_name=""}
+    let emptyClerk = {id=0; login_code=0; user_group_id=0; name=""}
     match cookie with
     | "" ->
         Browser.redirect "/login" context

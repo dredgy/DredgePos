@@ -7,8 +7,8 @@ open System.Drawing
 open System.IO
 open System.Linq
 open System.Xml;
-open System.Xml.XPath;
 open System.Xml.Xsl
+open DredgePos.Types
 open FSharp.Reflection
 
 open Thoth.Json.Net
@@ -101,3 +101,13 @@ let GetImageSize image =
     loadedImage.Width, loadedImage.Height
 
 let CurrentTime() = DateTimeOffset.Now.ToUnixTimeSeconds() |> int
+
+let getConfig () =
+    "config.json"
+    |> GetFileContents
+    |> Decode.Auto.fromString<config>
+    |> (fun result ->
+            match result with
+            | Ok config -> config
+            | Error message -> failwith ("config.json is not valid :" + message)
+        )
