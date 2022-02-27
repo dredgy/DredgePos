@@ -615,7 +615,7 @@ const setRoomBackground = (roomToLoad: room) => {
     const width = Floorplan.floorplanDiv.width()
     const height = Floorplan.floorplanDiv.height()
 
-    if(roomToLoad.background_image) {
+    if(roomToLoad.background_image != "") {
         Floorplan.floorplanDiv.css("background-image", `url('/images/rooms/${roomToLoad.background_image}')`)
         Floorplan.floorplanDiv.css("background-size", `${width}px ${height}px`)
     } else {
