@@ -11,7 +11,7 @@ let getOrderScreenData (tableNumber: int) =
         order_screen_pages = Entity.GetAllInVenue<order_screen_page_group>
         sales_categories = Entity.GetAllInVenue<sales_category>
         print_groups = Entity.GetAllInVenue<print_group>
-        custom_item = Entity.GetAllByColumn<item> "item_code" "OPEN000" |> first
+        custom_item = Entity.GetAllByColumn<item> "code" "OPEN000" |> first
         table = Floorplan.Model.getTable tableNumber
     |}
     |> ajaxSuccess

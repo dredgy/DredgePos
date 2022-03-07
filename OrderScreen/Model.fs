@@ -17,7 +17,7 @@ let getImageButtonData (button: button) =
         if button.primary_action = "item" then button.primary_action_value
         else button.secondary_action_value
 
-    let item = Entity.GetAllByColumn<item> "item_code" itemCode
+    let item = Entity.GetAllByColumn<item> "code" itemCode
                 |> first
 
     let extraData =

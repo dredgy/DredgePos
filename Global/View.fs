@@ -1,11 +1,17 @@
 ﻿module DredgePos.Global.View
 
-open Giraffe.ViewEngine
 open DredgeFramework
+open Giraffe.ViewEngine
 
 let Value = attr "data-value"
+
+let VisibleInMode (value: string list) = value |> jsonEncode |> (attr "data-visible-in-mode")
+let InvisibleInMode (value: string list) = value |> jsonEncode |> (attr "data-invisible-in-mode")
+let ActiveInMode (value: string) = value |> (attr "data-active-in-mode")
 let innerText = str
 let lang key =  language.get key |> str
+
+let template = tag "template"
 
 let scriptToHTML (scriptFile: string) =
     let scriptPath = $"/scripts/{scriptFile}"
@@ -88,6 +94,10 @@ let keyboards = [|
     VirtualNumpad
     alert
 |]
+
+let posButton (extraClasses: string) attrs content =
+    let allAttrs = [_class $"posButton {extraClasses}"] |> List.append attrs
+    a allAttrs content
 
 let HtmlPage pageTitle scripts styles tags content =
     html [] [
