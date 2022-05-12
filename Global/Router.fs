@@ -9,3 +9,10 @@ let htmlViewWithContext func =
             |> htmlView
     )
     |> warbler
+
+let htmlViewWithContextAndId (id: int) func =
+    (fun ctx ->
+        func (snd ctx) id
+            |> htmlView
+    )
+    |> warbler

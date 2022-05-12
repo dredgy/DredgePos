@@ -59,7 +59,6 @@ const loadPageGroup = (e: Event) => {
 
 const setupOrderScreen = (data: OrderScreenData) => {
 
-    $('.coverSelector, .gridContainer').hide()
 
     OrderScreen.order_screen_pages = data.order_screen_pages
     OrderScreen.sales_categories = data.sales_categories
@@ -426,6 +425,7 @@ const getTotalOfRows = (rows: JQuery) => {
 
 const getQty = (row: JQuery) => Number(row.getColumnValue(lang('qty_header')))
 const getUnitPrice = (row: JQuery) => moneyFromString(row.getColumnValue(lang('price_header')))
+
 const calculateRowTotal = (row: JQuery) => {
     let price = getUnitPrice(row)
     let qty = getQty(row)
@@ -600,5 +600,7 @@ const generateCoverSelector = () => {
 
 $(() => {
     OrderScreen.table = $('#pageContainer').data('table') || null
-    ajax('/order/getOrderScreenData/1', null, 'get', setupOrderScreen, null, null)
+    $('.coverSelector, .gridContainer').hide()
+    if(OrderScreen.table)
+        ajax(`/order/getOrderScreenData/${OrderScreen.table.table_number}`, null, 'get', setupOrderScreen, null, null)
 })

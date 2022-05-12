@@ -1,9 +1,11 @@
 ﻿module DredgePos.Global.View
 
 open DredgeFramework
+open DredgePos.Types
 open Giraffe.ViewEngine
 
 let Value = attr "data-value"
+let _table (value: floorplan_table) = value |> jsonEncode |> (attr "data-table")
 
 let VisibleInMode (value: string list) = value |> jsonEncode |> (attr "data-visible-in-mode")
 let InvisibleInMode (value: string list) = value |> jsonEncode |> (attr "data-invisible-in-mode")

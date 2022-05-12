@@ -128,7 +128,6 @@ let renderGrid (grid: grid) =
 
 let loadGrid gridId = renderGrid (Entity.GetById<grid> gridId)
 
-
 let getPagesHTML (gridInfo: grid * order_screen_page_group) =
     let grid, pageGroup = gridInfo
 

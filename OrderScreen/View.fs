@@ -6,12 +6,14 @@ open DredgePos.Global.Controller
 open Giraffe.ViewEngine
 open language
 
-let pageContainer orderNumber (clerk: clerk) =
-    div [_id "pageContainer"] [
+let coverSelector = div [_class "coverSelector"] []
+
+let pageContainer floorplanTable (clerk: clerk) orderScreenPageGroups =
+    div [_id "pageContainer" ; _table floorplanTable] [
         div [_id "leftColumn"] [
-            h1 [_class "tableHeading"] [str (string orderNumber)]
+            h1 [_class "tableHeading"] [str (getAndReplace "active_table" [floorplanTable.table_number])]
             div [_class "tableInfo"] [
-                (* Cover Change Button *)
+                coverSelector
                 posButton "" [] [str (getAndReplace "logged_in_as" [clerk.name])]
             ]
             div [_class "orderBox"] [
@@ -61,7 +63,7 @@ let pageContainer orderNumber (clerk: clerk) =
                     ]
                  ]
                 div [_id "pageList"] [
-                    (* Category List *)
+                    yield! orderScreenPageGroups
                 ]
                 div [_id "pageGroupContainer"] [
                     (* Page Groups *)
@@ -95,12 +97,16 @@ let gridContainer =
         ]
     ]
 
-let coverSelector =
-    div [_class "coverSelector"] []
+let pageGroupButton (pageGroup: order_screen_page_group) = posButton "loadPageGroup" [] [str pageGroup.label]
 
-let index orderNumber clerk styles scripts tags =
+let index orderNumber styles scripts tags clerk (orderScreenPageGroups: order_screen_page_group[])  =
+
+    let orderScreenPageGroupButtons =
+        orderScreenPageGroups
+        |> Array.map pageGroupButton
+
     [|
-        pageContainer orderNumber clerk
+        pageContainer (DredgePos.Floorplan.Model.getTable orderNumber) clerk orderScreenPageGroupButtons
         posButtonTemplate
         gridContainer
         coverSelector
