@@ -37,6 +37,13 @@ let loadOrderScreenView (ctx: HttpContext)  (tableNumber: int) =
         |> Array.filter (fun page_group -> page_group.id <> 0)
         |> Array.sortBy (fun {order=order} -> order)
 
+(*    let grids =
+        Model.getAllPageGridsInVenue ()
+        |> Array.map(fun (grid, page_group) ->
+
+        )
+        |>*)
+
     View.index tableNumber styles scripts metaTags currentClerk orderScreenPageGroups
 
 let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
@@ -71,7 +78,7 @@ let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
         |> joinWithNewLine
 
    let grids =
-       Model.getAllPageGrids ()
+       Model.getAllPageGridsInVenue ()
        |> Array.map Model.getPagesHTML
        |> joinWithNewLine
 

@@ -66,7 +66,7 @@ let pageContainer floorplanTable (clerk: clerk) orderScreenPageGroups =
                     yield! orderScreenPageGroups
                 ]
                 div [_id "pageGroupContainer"] [
-                    (* Page Groups *)
+
                 ]
                 div [_class "pagNavigation"] [
                     posButton "prevButton" [] ["prev_page" |> get |> str]
@@ -98,6 +98,11 @@ let gridContainer =
     ]
 
 let pageGroupButton (pageGroup: order_screen_page_group) = posButton "loadPageGroup" [] [str pageGroup.label]
+
+let pageGroup grids =
+    div [_class "pageGroup"] [
+        yield! grids
+    ]
 
 let index orderNumber styles scripts tags clerk (orderScreenPageGroups: order_screen_page_group[])  =
 

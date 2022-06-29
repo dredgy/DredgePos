@@ -8,9 +8,10 @@ open Thoth.Json.Net
 open Theme
 
 
-let getAllPageGrids () = Entity.GetAllInVenue<order_screen_page_group>
-                         |> Array.filter(fun pageGroup -> pageGroup.grid_id <> 0)
-                         |> Array.map(fun pageGroup -> (Entity.GetById<grid> pageGroup.grid_id), pageGroup)
+let getAllPageGridsInVenue () =
+    Entity.GetAllInVenue<order_screen_page_group>
+    |> Array.filter(fun pageGroup -> pageGroup.grid_id <> 0)
+    |> Array.map(fun pageGroup -> (Entity.GetById<grid> pageGroup.grid_id), pageGroup)
 
 let getImageButtonData (button: button) =
     let itemCode =
