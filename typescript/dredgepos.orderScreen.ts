@@ -43,7 +43,6 @@ const loadPageGroup = (e: Event) => {
     button.addClass('active')
 
     let pageGroupId = button.data('page-group-id')
-
     container.find('.pageGroup').hide()
 
     let activeGrid = $(`.pageGroup[data-page-group-id=${pageGroupId}]`)

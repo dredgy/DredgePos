@@ -310,7 +310,7 @@ let CreateItemFromFileName (index: int) (dirName: string) (file: string) =
             | "beer" | "dessert" -> "doubleHeight"
             | "mains" | "wine" | "steak temperatures" -> "doubleHeight doubleWidth"
             | "entrees" -> "doubleWidth"
-            | _ -> ""
+            | _ -> "normal"
 
     Entity.Create {
         id=0

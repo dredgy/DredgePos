@@ -8,7 +8,7 @@ open language
 
 let coverSelector = div [_class "coverSelector"] []
 
-let pageContainer floorplanTable (clerk: clerk) orderScreenPageGroups =
+let pageContainer floorplanTable (clerk: clerk) printGroupButtons orderScreenPageGroupButtons pageGroups =
     div [_id "pageContainer" ; _table floorplanTable] [
         div [_id "leftColumn"] [
             h1 [_class "tableHeading"] [str (getAndReplace "active_table" [floorplanTable.table_number])]
@@ -45,7 +45,7 @@ let pageContainer floorplanTable (clerk: clerk) orderScreenPageGroups =
                 div [_class "functionButtons"] [
                     div [_class "printGroupButtons toggleGroup"] [
                         input [_type "hidden"; _class "value"]
-                        (* Sales category override buttons *)
+                        yield! printGroupButtons
                     ]
                     div [_class "functionColumn"] [
                         posButton "accumulateButton" [ActiveInMode "accumulate"] [str (get "accumulate_function")]
@@ -62,17 +62,18 @@ let pageContainer floorplanTable (clerk: clerk) orderScreenPageGroups =
                         posButton "" [] ["print_function" |> get |> str]
                     ]
                  ]
-                div [_id "pageList"] [
-                    yield! orderScreenPageGroups
-                ]
-                div [_id "pageGroupContainer"] [
-
-                ]
-                div [_class "pagNavigation"] [
-                    posButton "prevButton" [] ["prev_page" |> get |> str]
-                    posButton "nextButton" [] ["next_page" |> get |> str]
-                ]
             ]
+            div [_id "pageList"] [
+                yield! orderScreenPageGroupButtons
+            ]
+            div [_id "pageGroupContainer"] [
+                yield! pageGroups
+            ]
+            div [_class "pageNavigation"] [
+                posButton "prevButton" [] ["prev_page" |> get |> str]
+                posButton "nextButton" [] ["next_page" |> get |> str]
+            ]
+
         ]
     ]
     (* Grid Container, Cover Selector *)
@@ -97,21 +98,54 @@ let gridContainer =
         ]
     ]
 
-let pageGroupButton (pageGroup: order_screen_page_group) = posButton "loadPageGroup" [] [str pageGroup.label]
+let pageGroupButton (pageGroup: order_screen_page_group) = posButton "loadPageGroup" [(attr "data-page-group-id") (string pageGroup.id)] [str pageGroup.label]
+let printGroupButton (printGroup: sales_category) = posButton "" [(attr "data-print-group-id") (string printGroup.id)] [str printGroup.name]
 
-let pageGroup grids =
-    div [_class "pageGroup"] [
-        yield! grids
+let itemButton (button: button) =
+    let extraClasses =
+        if button.primary_action = "spacer" then button.extra_classes + " invisible"
+        elif button.image.Length > 0 then button.extra_classes + " hasImage"
+        else button.extra_classes
+
+    let image =
+        if button.image.Length = 0 then str ""
+        else
+            span [
+                _class "buttonImg"
+                _style $"background-image:url('/images/items/{button.image}');"
+            ] []
+
+    posButton extraClasses [
+        (attr "data-primary-action") button.primary_action
+        (attr "data-secondary-action") button.secondary_action
+    ] [
+        image
+        span [_class "text "] [str button.text]
     ]
 
-let index orderNumber styles scripts tags clerk (orderScreenPageGroups: order_screen_page_group[])  =
+let _dataPageGroup = attr "data-page-group"
+let _dataPageGroupId = attr "data-page-group-id"
 
-    let orderScreenPageGroupButtons =
-        orderScreenPageGroups
-        |> Array.map pageGroupButton
+let pageGroup (page_group: order_screen_page_group) gridNodes  =
+    div [_class "pageGroup"; _dataPageGroupId (string page_group.id); ] [
+        yield! gridNodes
+    ]
+
+let gridPage (grid: grid) buttonNodes =
+    div [
+        _class "gridPage"
+        _style $"
+        grid-template-columns: repeat({grid.cols}, 1fr);
+        grid-template-rows: repeat({grid.rows}, 1fr);"
+    ] [
+        yield! buttonNodes
+    ]
+
+
+let index orderNumber styles scripts tags clerk printGroupButtons orderScreenPageGroupButtons pageGroupNodes  =
 
     [|
-        pageContainer (DredgePos.Floorplan.Model.getTable orderNumber) clerk orderScreenPageGroupButtons
+        pageContainer (DredgePos.Floorplan.Model.getTable orderNumber) clerk printGroupButtons orderScreenPageGroupButtons pageGroupNodes
         posButtonTemplate
         gridContainer
         coverSelector

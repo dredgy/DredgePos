@@ -4,8 +4,10 @@ open DredgePos
 open DredgeFramework
 open DredgePos.Types
 open DredgePos.Global.Controller
+open Thoth.Json.Net
 open Giraffe
 open Microsoft.AspNetCore.Http
+open FSharp.Collections
 
 let getOrderScreenData (tableNumber: int) =
     {|
@@ -25,6 +27,24 @@ let loadGrid (gridId: int) =
     else ajaxSuccess {|grid=grid;gridHtml=gridHtml|}
     |> json
 
+
+let renderGrid (grid: grid) =
+    let gridData = grid.data |> Decode.Auto.fromString<Map<string, int[]>>
+    match gridData with
+    | Error message -> failwith message
+    | Ok data ->
+        data
+        |> Map.toArray
+        |> Array.map snd
+        |> Array.map(
+            fun buttonIds ->
+                buttonIds
+                    |> Array.map Entity.GetById<button>
+                    |> Array.map View.itemButton
+                    |> View.gridPage grid
+        )
+
+
 let loadOrderScreenView (ctx: HttpContext)  (tableNumber: int) =
     Authenticate.Model.RequireClerkAuthentication ctx
     let currentClerk = Authenticate.Model.getCurrentClerk ctx
@@ -32,19 +52,27 @@ let loadOrderScreenView (ctx: HttpContext)  (tableNumber: int) =
     let scripts = [|"dredgepos.tables.js";"./external/currency.min.js";"dredgepos.orderScreen.js"; |] |> addDefaultScripts
     let metaTags = [|"viewport", "user-scalable = no, initial-scale=0.8,maximum-scale=0.8 ,shrink-to-fit=yes"|] |> addDefaultMetaTags
 
-    let orderScreenPageGroups =
+    let printGroupButtons =
+        Entity.GetAllInVenue<sales_category>
+            |> Array.map View.printGroupButton
+
+    let orderScreenPageGroupButtons =
        Entity.GetAllInVenue<order_screen_page_group>
         |> Array.filter (fun page_group -> page_group.id <> 0)
         |> Array.sortBy (fun {order=order} -> order)
+        |> Array.map View.pageGroupButton
 
-(*    let grids =
-        Model.getAllPageGridsInVenue ()
+    let grids =  Model.getAllPageGridsInVenue ()
+    let pageGroupNodes =
+        grids
         |> Array.map(fun (grid, page_group) ->
-
+            renderGrid grid
+            |> View.pageGroup page_group
         )
-        |>*)
 
-    View.index tableNumber styles scripts metaTags currentClerk orderScreenPageGroups
+
+
+    View.index tableNumber styles scripts metaTags currentClerk printGroupButtons orderScreenPageGroupButtons pageGroupNodes
 
 let loadOrderScreen (ctx: HttpContext)  (tableNumber: int) : HttpHandler =
    Authenticate.Model.RequireClerkAuthentication ctx
