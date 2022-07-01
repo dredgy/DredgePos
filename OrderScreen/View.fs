@@ -112,7 +112,7 @@ let itemButton (button: button) =
         else
             span [
                 _class "buttonImg"
-                _style $"background-image:url('/images/items/{button.image}');"
+                _style $"background-image:url(\"/images/items/{button.image}\");"
             ] []
 
     posButton extraClasses [
