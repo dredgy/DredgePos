@@ -62,7 +62,7 @@ let loadOrderScreenView (ctx: HttpContext)  (tableNumber: int) =
             let metaTags = [|"viewport", "user-scalable = no, initial-scale=0.8,maximum-scale=0.8 ,shrink-to-fit=yes"|] |> addDefaultMetaTags
 
             let printGroupButtons =
-                Entity.GetAllInVenue<sales_category>
+                Entity.GetAllInVenue<print_group>
                     |> Array.map View.printGroupButton
 
             let orderScreenPageGroupButtons =

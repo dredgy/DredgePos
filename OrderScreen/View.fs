@@ -39,8 +39,8 @@ let pageContainer floorplanTable (clerk: clerk) printGroupButtons orderScreenPag
                 span [_class "voidModeWarning"; VisibleInMode ["void"]] [str (get "void_mode")]
             ]
             div [_class "orderBoxFooter"] [
-                span [_class "totalPrice"] [str (getAndReplace "totalPrice" ["0.00"])]
-                small [_class "selectedPrice"] [str (getAndReplace "selectedPrice" ["0.00"])]
+                span [_class "orderBoxTotal"] [str (getAndReplace "totalPrice" ["0.00"])]
+                small [_class "orderBoxSelectedTotal"] [str (getAndReplace "selectedPrice" ["0.00"])]
 
             ]
         ]
@@ -48,7 +48,12 @@ let pageContainer floorplanTable (clerk: clerk) printGroupButtons orderScreenPag
             div [_id "topHalf"] [
                 div [_class "functionButtons"] [
                     div [_class "printGroupButtons toggleGroup"] [
-                        input [_type "hidden"; _class "value"]
+                        input [_type "hidden"; _class "value"; _name "print_override"]
+                        posButton "printGroupOverrideButton toggle default" [
+                            (attr "data-value") (string 0)
+                        ] [
+                            ["default"] |> getAndReplace "print_with" |> str
+                        ]
                         yield! printGroupButtons
                     ]
                     div [_class "functionColumn"] [
@@ -103,7 +108,7 @@ let gridContainer =
     ]
 
 let pageGroupButton (pageGroup: order_screen_page_group) = posButton "loadPageGroup" [(attr "data-page-group-id") (string pageGroup.id)] [str pageGroup.label]
-let printGroupButton (printGroup: sales_category) = posButton "" [(attr "data-print-group-id") (string printGroup.id)] [str printGroup.name]
+let printGroupButton (printGroup: print_group) = posButton "toggle printGroupOverrideButton" [(attr "data-value") (string printGroup.id)] [ [printGroup.name] |> getAndReplace "print_with" |> str ]
 
 let itemButtonImage (button: button) =
     span [
