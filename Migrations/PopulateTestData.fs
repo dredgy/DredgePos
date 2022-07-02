@@ -4,6 +4,8 @@ open DredgeFramework
 open DredgePos.Types
 open System.IO
 
+let spaceButton () = (Entity.GetFirstByColumn<button> "primary_action" "spacer").id
+
 let CreatePageFromDirectory index (dir: string) =
     let dirName = DirectoryInfo(dir).Name
 
@@ -103,6 +105,33 @@ let CreateDefaultSalesCategories (path: string) =
 
     path
 
+let CreateDefaultButtons (path: string) =
+    Entity.Create {
+        id = 0
+        text = ""
+        primary_action = "spacer"
+        secondary_action = ""
+        primary_action_value = ""
+        secondary_action_value = ""
+        image = ""
+        extra_classes = "invisible"
+        extra_styles = ""
+    }
+    |> ignore
+    path
+
+let CreateDefaultItems (path: string) =
+    Entity.Create {
+        id = 0
+        name = "Custom Item"
+        code = "OPEN000"
+        sales_category_id = (Entity.GetFirstByColumn<sales_category> "name" "Food").id
+        item_type = "item"
+        price1 = 0
+    }
+    |> ignore
+    path
+
 let CreateRooms () =
     "wwwroot/images/rooms"
     |> Directory.GetFiles
@@ -122,23 +151,24 @@ let populateEntreeGrid () =
     let DipSalesCategory = Entity.GetFirstByColumn<sales_category> "name" "Dips"
     let Entrees = Entity.GetAllByColumn<item> "sales_category_id" SalesCategory.id
     let Dips = Entity.GetAllByColumn<item> "sales_category_id" DipSalesCategory.id
+    let space = spaceButton()
     let GridData =
         [|
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
         |]
         |> Array.mapi (fun index current ->
          let isFirstColumn = (index % 6) = 0
          if not isFirstColumn then current else
              let entree = Entrees |> Array.tryItem (index/6)
              match entree with
-             | None -> 0
+             | None -> space
              | Some x -> x.id
         )
         |> Array.mapi (fun index current ->
@@ -146,7 +176,7 @@ let populateEntreeGrid () =
          if not isSecondRow then current else
              let entree = Dips |> Array.tryItem (index-7)
              match entree with
-             | None -> 0
+             | None -> space
              | Some x -> x.id
         )
 
@@ -162,20 +192,21 @@ let populateEntreeGrid () =
 let populateMainGrid (category: string) () =
     let SalesCategory = Entity.GetFirstByColumn<sales_category> "name" category
     let Mains = Entity.GetAllByColumn<item> "sales_category_id" SalesCategory.id
+    let space = spaceButton()
     let getId index =
         match Mains |> Array.tryItem index with
-            | None -> 0
+            | None -> space
             | Some x -> x.id
     let GridData =
         [|
-            getId 0; 0; getId 1; 0; getId 2; 0;
-            0; 0; 0; 0; 0; 0;
-            getId 3; 0; getId 4; 0; getId 5; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
+            getId 0; space; getId 1; space; getId 2; space;
+            space; space; space; space; space; space;
+            getId 3; space; getId 4; space; getId 5; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
         |]
 
     let grid =
@@ -186,22 +217,23 @@ let populateMainGrid (category: string) () =
     Entity.Update newGrid |> ignore
 
 let populateDessertGrid () =
+    let space = spaceButton()
     let SalesCategory = Entity.GetFirstByColumn<sales_category> "name" "Dessert"
     let Desserts = Entity.GetAllByColumn<item> "sales_category_id" SalesCategory.id
     let getId index =
         match Desserts |> Array.tryItem index with
-            | None -> 0
+            | None -> space
             | Some x -> x.id
     let GridData =
         [|
-            getId 0; 0; getId 1; 0; 0 ; 0;
-            0; 0; 0; 0; 0; 0;
-            0; getId 2; 0; getId 4; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
+            getId 0; space; getId 1; space; space ; space;
+            space; space; space; space; space; space;
+            space; getId 2; space; getId 4; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
+            space; space; space; space; space; space;
         |]
 
     let grid =
@@ -212,38 +244,43 @@ let populateDessertGrid () =
     Entity.Update newGrid |> ignore
 
 let populateBeerGrid () =
+    let space = spaceButton()
     let SalesCategory = Entity.GetFirstByColumn<sales_category> "name" "Beer"
     let Beers = Entity.GetAllByColumn<item> "sales_category_id" SalesCategory.id
     let grid =
         Entity.GetFirstByColumn<order_screen_page_group> "label" "Beer"
         |> Entity.GetRelated<grid, order_screen_page_group>
 
-    let GridData =
-        Beers
-        |> Array.chunkBySize 24
-        |> Array.map (fun beerPage ->
-            let getId index =
-                match beerPage |> Array.tryItem index with
-                    | None -> 0
-                    | Some x -> x.id
-            [|
-                getId 0; getId 1; getId 2; getId 3; getId 4 ; getId 5;
-                0; 0; 0; 0; 0 ;0;
-                getId 6; getId 7; getId 8; getId 9; getId 10 ; getId 11;
-                0; 0; 0; 0; 0 ;0;
-                getId 12; getId 13; getId 14; getId 15; getId 16 ; getId 17;
-                0; 0; 0; 0; 0 ;0;
-                getId 18; getId 19; getId 20; getId 21; getId 22 ; getId 23;
-                0; 0; 0; 0; 0 ;0;
-            |]
-        )
-        |> Array.mapi (fun index beerpage -> (map [$"page{index+1}", beerpage]))
-        |> jsonEncode
+    let mutable buttonMap = Map.empty<string, int[]>
+    Beers
+    |> Array.chunkBySize 24
+    |> Array.map (fun beerPage ->
+        let getId index =
+            match beerPage |> Array.tryItem index with
+                | None -> space
+                | Some x -> x.id
+        [|
+            getId 0; getId 1; getId 2; getId 3; getId 4 ; getId 5;
+            space; space; space; space; space; space;
+            getId 6; getId 7; getId 8; getId 9; getId 10 ; getId 11;
+            space; space; space; space; space; space;
+            getId 12; getId 13; getId 14; getId 15; getId 16 ; getId 17;
+            space; space; space; space; space; space;
+            getId 18; getId 19; getId 20; getId 21; getId 22 ; getId 23;
+            space; space; space; space; space; space;
+        |]
+    )
+    |> Array.iteri (fun index buttonIds ->
+        buttonMap <- buttonMap |> Map.add $"page{index+1}" buttonIds
+    )
+
+    let GridData = buttonMap |> jsonEncode
 
     let newGrid = {grid with data=GridData}
     Entity.Update newGrid |> ignore
 
 let populateSteakTemperaturesGrid () =
+    let space = spaceButton()
     let SalesCategory = Entity.GetFirstByColumn<sales_category> "name" "Steak Temperatures"
     let Temps = Entity.GetAllByColumn<item> "sales_category_id" SalesCategory.id
     let grid =
@@ -252,18 +289,14 @@ let populateSteakTemperaturesGrid () =
 
     let getId index =
         match Temps |> Array.tryItem index with
-            | None -> 0
+            | None -> space
             | Some x -> x.id
     let GridData =
         [|
-            getId 0; 0; getId 1; 0; getId 2; 0;
-            0; 0; 0; 0; 0; 0;
-            getId 3; 0; getId 4; 0; getId 5; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
-            0; 0; 0; 0; 0; 0;
+            getId 0; space; getId 1; space; getId 2; space;
+            space; space; space; space; space; space;
+            getId 3; space; getId 4; space; getId 5; space;
+            space; space; space; space; space; space;
         |]
 
     let newGrid = {grid with data=(jsonEncode {|page1=GridData|}); rows=4; cols=6}
@@ -310,7 +343,7 @@ let CreateItemFromFileName (index: int) (dirName: string) (file: string) =
             | "beer" | "dessert" -> "doubleHeight"
             | "mains" | "wine" | "steak temperatures" -> "doubleHeight doubleWidth"
             | "entrees" -> "doubleWidth"
-            | _ -> ""
+            | _ -> "normal"
 
     Entity.Create {
         id=0
@@ -338,6 +371,8 @@ let run () =
         |> CreateDefaultClerk
         |> CreateDefaultPrintGroups
         |> CreateDefaultSalesCategories
+        |> CreateDefaultItems
+        |> CreateDefaultButtons
         |> Directory.GetDirectories
         |> Array.mapi CreatePageFromDirectory
         |> Array.iter CreateItemsAndButtons

@@ -87,14 +87,20 @@ let saveOrderToTable orderXML tableNumber =
 
     File.WriteAllText(tableFile, tableXML)
 
-let getTable (tableNumber : int) =
+let getTableSafely (tableNumber: int) =
     let query = select {
         table "floorplan_tables"
         where (eq "table_number" tableNumber + eq "venue_id" (getCurrentVenue()))
     }
 
-    let result = query |> Database.Select<floorplan_table>
-    result |> first
+    query
+        |> Database.Select<floorplan_table>
+        |> Array.tryItem 0
+
+let getTable (tableNumber : int) =
+    match getTableSafely tableNumber with
+        | None -> failwith $"Table {tableNumber} not found in current venue"
+        | Some table -> table
 
 let getTableById (id : int) =
     select {

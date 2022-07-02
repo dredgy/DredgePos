@@ -20,6 +20,7 @@
         <Compile Include="Entities\Floorplan_Decorations\View.fs" />
         <Compile Include="Entities\Floorplan_Decorations\Controller.fs" />
         <Compile Include="Entities\Floorplan_Decorations\Router.fs" />
+        <Compile Include="Entities\Buttons\Model.fs" />
         <Compile Include="Authenticate\Model.fs" />
         <Compile Include="Authenticate\View.fs" />
         <Compile Include="Authenticate\Controller.fs" />
@@ -36,6 +37,7 @@
         <Compile Include="Floorplan\Controller.fs" />
         <Compile Include="Floorplan\Router.fs" />
         <Compile Include="OrderScreen\Model.fs" />
+        <Compile Include="OrderScreen\View.fs" />
         <Compile Include="OrderScreen\Controller.fs" />
         <Compile Include="OrderScreen\Router.fs" />
         <Compile Include="Reservations\Model.fs" />

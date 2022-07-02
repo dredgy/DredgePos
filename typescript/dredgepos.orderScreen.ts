@@ -43,7 +43,6 @@ const loadPageGroup = (e: Event) => {
     button.addClass('active')
 
     let pageGroupId = button.data('page-group-id')
-
     container.find('.pageGroup').hide()
 
     let activeGrid = $(`.pageGroup[data-page-group-id=${pageGroupId}]`)
@@ -59,7 +58,6 @@ const loadPageGroup = (e: Event) => {
 
 const setupOrderScreen = (data: OrderScreenData) => {
 
-    $('.coverSelector, .gridContainer').hide()
 
     OrderScreen.order_screen_pages = data.order_screen_pages
     OrderScreen.sales_categories = data.sales_categories
@@ -186,7 +184,7 @@ const addInstructionToOrderBox = (instruction: orderItem) => {
 
 
 const addNewItem = (item: item, qty = 1) => {
-    const salesCategory = OrderScreen.sales_categories.where('id', item.category)
+    const salesCategory = OrderScreen.sales_categories.where('id', item.sales_category_id)
     const printGroup = OrderScreen.print_group_override ?? OrderScreen.print_groups.where('id', salesCategory.print_group_id)
     const orderItem : orderItem = {
         id: OrderScreen.order_item_id_generator.next().value,
@@ -223,11 +221,11 @@ const getLastInstructionRow = (row: JQuery) => {
         return $(finalRow)
 }
 
-const getParentRow = (row: JQuery) => {
-    return row.hasClass('instructionRow')
+const getParentRow = (row: JQuery) =>
+    row.hasClass('instructionRow')
         ? row.prevAll('.itemRow').first()
         : row
-}
+
 
 const incrementRowQty = (row: JQuery, qty: number) => {
     const existingQty = Number(row.getColumnValue(lang('qty_header')))
@@ -305,7 +303,6 @@ const gridButtonClicked = (e: JQuery.TriggeredEvent) => {
     const grid : number = button.data('grid')
     ajax(`/order/getGridHtml/${grid}`, null, null,gridHtmlGenerated, null, null)
 }
-
 
 const hideGrids = () => $('.gridContainer').hide()
 
@@ -426,6 +423,7 @@ const getTotalOfRows = (rows: JQuery) => {
 
 const getQty = (row: JQuery) => Number(row.getColumnValue(lang('qty_header')))
 const getUnitPrice = (row: JQuery) => moneyFromString(row.getColumnValue(lang('price_header')))
+
 const calculateRowTotal = (row: JQuery) => {
     let price = getUnitPrice(row)
     let qty = getQty(row)
@@ -600,5 +598,7 @@ const generateCoverSelector = () => {
 
 $(() => {
     OrderScreen.table = $('#pageContainer').data('table') || null
-    ajax('/order/getOrderScreenData/1', null, 'get', setupOrderScreen, null, null)
+    $('.coverSelector, .gridContainer').hide()
+    if(OrderScreen.table)
+        ajax(`/order/getOrderScreenData/${OrderScreen.table.table_number}`, null, 'get', setupOrderScreen, null, null)
 })

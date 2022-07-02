@@ -8,9 +8,7 @@ open Giraffe.ViewEngine
 open DredgeFramework
 
 
-let VisibleInMode (value: string list) = value |> jsonEncode |> (attr "data-visible-in-mode")
-let InvisibleInMode (value: string list) = value |> jsonEncode |> (attr "data-invisible-in-mode")
-let ActiveInMode (value: string) = value |> (attr "data-active-in-mode")
+
 
 
 let pageContainer (clerk: clerk) roomMenu =

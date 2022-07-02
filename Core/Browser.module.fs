@@ -25,5 +25,4 @@ let setCookie name value (expiry: DateTimeOffset) (context: HttpContext) =
     options.Expires <- expiry
     context.Response.Cookies.Append(name, value, options);
 
-let redirect url (context: HttpContext) =
-    context.Response.Redirect url
+let redirect url (context: HttpContext) = context.Response.Redirect url
