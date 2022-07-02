@@ -112,7 +112,7 @@ let getTableById (id : int) =
 
 let getRoom (roomId: int) =
     select {
-        table "floorplan_rooms"
+        table "rooms"
         where (eq "id" roomId)
     } |> Database.Select<room> |> first
 
