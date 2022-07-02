@@ -1,19 +1,23 @@
 ﻿module DredgePos.OrderScreen.View
 
+open DredgeFramework
 open DredgePos.Types
 open DredgePos.Global.View
-open DredgePos.Global.Controller
+open DredgePos.Entities.Buttons.Model
+open Thoth.Json.Net
 open Giraffe.ViewEngine
 open language
 
-let coverSelector = div [_class "coverSelector"] []
+let coverSelector buttons = div [_class "coverSelector"] [
+    yield! buttons
+]
 
 let pageContainer floorplanTable (clerk: clerk) printGroupButtons orderScreenPageGroupButtons pageGroups =
     div [_id "pageContainer" ; _table floorplanTable] [
         div [_id "leftColumn"] [
             h1 [_class "tableHeading"] [str (getAndReplace "active_table" [floorplanTable.table_number])]
             div [_class "tableInfo"] [
-                coverSelector
+                posButton "changeCoverNumberButton" [] [str (getAndReplace "covers" [floorplanTable.default_covers])]
                 posButton "" [] [str (getAndReplace "logged_in_as" [clerk.name])]
             ]
             div [_class "orderBox"] [
@@ -53,7 +57,7 @@ let pageContainer floorplanTable (clerk: clerk) printGroupButtons orderScreenPag
                     ]
                     div [_class "functionColumn"] [
                         posButton "voidButton"  [ActiveInMode "void"] [str (get "void")]
-                        posButton "open_item_button"  [] [str (get "custom_item_button")]
+                        posButton "openItemButton"  [] [str (get "custom_item_button")]
                         posButton "freetextButton"  [] [str (get "freetext_button")]
                         posButton "numpadButton"  [] [str (get "numpad_button")]
                     ]
@@ -101,25 +105,28 @@ let gridContainer =
 let pageGroupButton (pageGroup: order_screen_page_group) = posButton "loadPageGroup" [(attr "data-page-group-id") (string pageGroup.id)] [str pageGroup.label]
 let printGroupButton (printGroup: sales_category) = posButton "" [(attr "data-print-group-id") (string printGroup.id)] [str printGroup.name]
 
+let itemButtonImage (button: button) =
+    span [
+        _class "buttonImg"
+        _style $"background-image:url(\"/images/items/{button.image}\");"
+    ] []
+
 let itemButton (button: button) =
     let extraClasses =
-        if button.primary_action = "spacer" then button.extra_classes + " invisible"
-        elif button.image.Length > 0 then button.extra_classes + " hasImage"
+        if button.image.Length > 0 then button.extra_classes + " hasImage"
         else button.extra_classes
 
-    let image =
-        if button.image.Length = 0 then str ""
-        else
-            span [
-                _class "buttonImg"
-                _style $"background-image:url(\"/images/items/{button.image}\");"
-            ] []
+    let primaryAttributes = getActionAttributes button.primary_action button.primary_action_value
+    let secondaryAttributes = getActionAttributes button.secondary_action button.secondary_action_value
 
     posButton extraClasses [
+        yield! primaryAttributes
+        yield! secondaryAttributes
+        _style button.extra_styles
         (attr "data-primary-action") button.primary_action
         (attr "data-secondary-action") button.secondary_action
     ] [
-        image
+        if button.image.Length > 0 then itemButtonImage button
         span [_class "text "] [str button.text]
     ]
 
@@ -142,12 +149,11 @@ let gridPage (grid: grid) buttonNodes =
     ]
 
 
-let index orderNumber styles scripts tags clerk printGroupButtons orderScreenPageGroupButtons pageGroupNodes  =
-
+let index orderNumber styles scripts tags clerk printGroupButtons orderScreenPageGroupButtons pageGroupNodes coverSelectorButtons  =
     [|
         pageContainer (DredgePos.Floorplan.Model.getTable orderNumber) clerk printGroupButtons orderScreenPageGroupButtons pageGroupNodes
         posButtonTemplate
         gridContainer
-        coverSelector
+        coverSelector coverSelectorButtons
     |]
     |> HtmlPage "Order" (GetScripts scripts) (GetStyles styles) (GetMetaTags tags)

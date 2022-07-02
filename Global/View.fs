@@ -101,6 +101,19 @@ let posButton (extraClasses: string) attrs content =
     let allAttrs = [_class $"posButton {extraClasses}"] |> List.append attrs
     a allAttrs content
 
+let PosButton classes (attrs: Map<string, 'x>) text =
+    let attrArray =
+        attrs
+            |> Map.map (fun key value ->
+                (attr key) (string value)
+            )
+            |> Map.values
+            |> Array.ofSeq
+
+    posButton classes [
+        yield! attrArray
+    ] [str text]
+
 let HtmlPage pageTitle scripts styles tags content =
     html [] [
         head [] [

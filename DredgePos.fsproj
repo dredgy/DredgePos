@@ -20,6 +20,7 @@
         <Compile Include="Entities\Floorplan_Decorations\View.fs" />
         <Compile Include="Entities\Floorplan_Decorations\Controller.fs" />
         <Compile Include="Entities\Floorplan_Decorations\Router.fs" />
+        <Compile Include="Entities\Buttons\Model.fs" />
         <Compile Include="Authenticate\Model.fs" />
         <Compile Include="Authenticate\View.fs" />
         <Compile Include="Authenticate\Controller.fs" />

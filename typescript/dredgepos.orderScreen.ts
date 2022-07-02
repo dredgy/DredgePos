@@ -184,7 +184,7 @@ const addInstructionToOrderBox = (instruction: orderItem) => {
 
 
 const addNewItem = (item: item, qty = 1) => {
-    const salesCategory = OrderScreen.sales_categories.where('id', item.category)
+    const salesCategory = OrderScreen.sales_categories.where('id', item.sales_category_id)
     const printGroup = OrderScreen.print_group_override ?? OrderScreen.print_groups.where('id', salesCategory.print_group_id)
     const orderItem : orderItem = {
         id: OrderScreen.order_item_id_generator.next().value,
@@ -221,11 +221,11 @@ const getLastInstructionRow = (row: JQuery) => {
         return $(finalRow)
 }
 
-const getParentRow = (row: JQuery) => {
-    return row.hasClass('instructionRow')
+const getParentRow = (row: JQuery) =>
+    row.hasClass('instructionRow')
         ? row.prevAll('.itemRow').first()
         : row
-}
+
 
 const incrementRowQty = (row: JQuery, qty: number) => {
     const existingQty = Number(row.getColumnValue(lang('qty_header')))
@@ -303,7 +303,6 @@ const gridButtonClicked = (e: JQuery.TriggeredEvent) => {
     const grid : number = button.data('grid')
     ajax(`/order/getGridHtml/${grid}`, null, null,gridHtmlGenerated, null, null)
 }
-
 
 const hideGrids = () => $('.gridContainer').hide()
 

@@ -92,7 +92,7 @@ interface grid {id: number; name: string; rows: number; cols: number; data: stri
 interface item {
     id: number
     code: string
-    category: number
+    sales_category_id: number
     name: string
     item_type: string
     price1: number
