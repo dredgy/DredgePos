@@ -276,7 +276,7 @@ const createOrderRow = (orderItem: orderItem) => {
 
     if(orderItem.item.item_type == 'instruction' && price.value <= 0){
         row
-            .find('.totalPriceCell')
+            .find('.totalPriceCell,.unitPriceCell')
             .css('font-size', 0)
     }
 
@@ -496,7 +496,6 @@ const freetextSubmitted = (text: string) => {
     item.name = text
 
     addNewItem(item)
-
 }
 
 const customItem = () => showVirtualKeyboard(lang('enter_item_name'), 32,false, customItemTextSubmitted)
