@@ -1,0 +1,10 @@
+
+    create table if not exists migrations
+        (
+            id serial
+            constraint migrations_pk
+            primary key,
+             "name" varchar(100) not null,
+			 "timestamp" int not null
+        );
+    

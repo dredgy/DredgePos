@@ -10,3 +10,4 @@
 /wwwroot/scripts/*.js.map
 /wwwroot/styles/*
 /Folder.DotSettings.user
+sql.log
