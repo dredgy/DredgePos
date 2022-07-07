@@ -184,6 +184,8 @@ const setElementVisibilityByMode = () => {
 
 }
 
+const getPercentageOfPageContainerWidth = (pixels: number) => ( (pixels / $('#pageContainer').width()) * 100) + '%'
+
 const pulseElement = (element: JQuery) => element.addClass('pulse').on('animationend', () => element.removeClass('pulse'))
 
 Array.prototype.where = function<x>(this: x[], property: string, value: any) {
