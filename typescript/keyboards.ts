@@ -25,9 +25,9 @@ let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, al
         inputBox.text('');
 
         numpad.data('maxlength', maxlength)
-        numpad.data('submitfunction', submitFunction)
+        numpad.data('submit-function', submitFunction)
         numpad.data('password', isPassword);
-        numpad.data('allowdecimals', allowDecimals);
+        numpad.data('allow-decimals', allowDecimals);
 
         $(document).off('keyup');
         $(document).on('keyup', e => {
@@ -64,9 +64,9 @@ let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, al
      let virtualNumpadInput = (input: string) => {
         let inputBox = $('#virtualNumpadInput')
         let numpad = $('#virtualNumpad')
-        let maxlength = numpad.data('maxlength')
-        let allowDecimals = numpad.data('allowdecimals')
-        let submitFunction = numpad.data('submitfunction')
+        let maxlength : number = numpad.data('maxlength')
+        let allowDecimals: boolean = numpad.data('allow-decimals')
+        let submitFunction : Function = numpad.data('submit-function')
         let allowedValues = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'submit', 'clear']
         let currentValue = numpad.data('value').toString()
 
@@ -144,7 +144,7 @@ let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, al
         inputBox.val('')
         keyboard.data('maxlength', maxlength)
         keyboard.data('password', isPassword)
-        keyboard.data('submitfunction', submitFunction)
+        keyboard.data('submit-function', submitFunction)
         inputBox.attr('autofocus', 'autofocus');
         inputBox.trigger('focus')
         inputBox.trigger('click')
@@ -175,7 +175,7 @@ let showVirtualNumpad = (heading: string, maxlength = 4, isPassword: boolean, al
                 break;
             case 'submit':
                 hideVirtualKeyboard();
-                let submitFunction = keyboard.data('submitfunction')
+                let submitFunction = keyboard.data('submit-function')
                 submitFunction(inputBox.val());
                 break;
             case 'shift':

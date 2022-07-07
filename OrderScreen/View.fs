@@ -116,6 +116,9 @@ let itemButtonImage (button: button) =
         _style $"background-image:url(\"/images/items/{button.image}\");"
     ] []
 
+let _data_primary_action = attr "data-primary-action"
+let _data_secondary_action = attr "data-secondary-action"
+
 let itemButton (button: button) =
     let extraClasses =
         if button.image.Length > 0 then button.extra_classes + " hasImage"
@@ -128,8 +131,8 @@ let itemButton (button: button) =
         yield! primaryAttributes
         yield! secondaryAttributes
         _style button.extra_styles
-        (attr "data-primary-action") button.primary_action
-        (attr "data-secondary-action") button.secondary_action
+        _data_primary_action button.primary_action
+        _data_secondary_action button.secondary_action
     ] [
         if button.image.Length > 0 then itemButtonImage button
         span [_class "text "] [str button.text]

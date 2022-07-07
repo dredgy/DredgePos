@@ -69,8 +69,8 @@ const setupOrderScreen = (data: OrderScreenData) => {
     doc.on('click', '.nextButton', goToNextPage)
     doc.on('click', '.prevButton', goToPrevPage)
     doc.on('click', '.loadPageGroup', loadPageGroup)
-    doc.on('click', '[data-primary-action=item]', itemButtonClicked)
-    doc.on('click', '[data-primary-action=grid],[data-secondary-action=grid]', gridButtonClicked)
+    doc.on('click', getElementsByAction('item'), itemButtonClicked)
+    doc.on('click', getElementsByAction('grid'), gridButtonClicked)
     doc.on('click', '.closeGrid', hideGrids)
     doc.on('click', '.freetextButton', freetext)
     doc.on('click', '.openItemButton', customItem)
@@ -97,6 +97,8 @@ const setupOrderScreen = (data: OrderScreenData) => {
     });
 
 }
+
+const getElementsByAction = (action: string) => `[data-primary-action=${action}], [data-secondary-action=${action}]`
 
 /**
  * @param direction 1 for forward, -1 for backwards.
@@ -309,14 +311,13 @@ const hideGrids = () => $('.gridContainer').hide()
 
 const gridHtmlGenerated = (gridData: {gridHtml:string, grid: grid}) => {
     const gridContainer = $('.gridContainer')
-    const gridCellWidth = getGridCellWidth()
-    const gridCellHeight = getGridCellHeight()
+    const cellDimensions = getGridCellDimensions()
     const grid = gridData.grid
     const gridHtml = gridData.gridHtml
 
     gridContainer
         .show()
-        .width(gridCellWidth * grid.cols)
+        .width(cellDimensions.width * grid.cols)
         .children('.gridContainerHeader')
         .children('span')
         .text(grid.name)
@@ -326,11 +327,11 @@ const gridHtmlGenerated = (gridData: {gridHtml:string, grid: grid}) => {
         .html(gridHtml)
         .show()
         .parent()
-        .height(gridCellHeight * grid.rows)
+        .height(cellDimensions.height * grid.rows)
         .closest('.gridContainer')
         .find('.pageNavigation')
         .toggle(gridContainer.find('.gridPage').length >  1)
-        .height(gridCellHeight)
+        .height(cellDimensions.height)
 }
 
 const itemRowClicked = (e: JQuery.TriggeredEvent) => {
@@ -514,21 +515,28 @@ const customItemTextSubmitted = (text: string) => {
     showVirtualNumpad(lang('enter_item_price'), 4, false, true, true, submitFunction)
 }
 
-const getGridCellHeight = () => $('#pageGroupContainer').height()/8
-const getGridCellWidth = () => $('#pageGroupContainer').width()/6
-
+const getGridCellDimensions = () => {
+    const container = $('#pageGroupContainer')
+    return {
+        height: container.height()/8,
+        width: container.width()/6
+    }
+}
 
 const showCoverSelector = (event: JQuery.TriggeredEvent) => {
     const button = $(event.target)
-    const gridHeight = getGridCellHeight()
-
+    const gridHeight = getGridCellDimensions().height
     const coverSelector = $('.coverSelector')
+    
+    const buttonPositionLeftPercent = getPercentageOfPageContainerWidth(button.offset().left)
+    const buttonWidthPercent = getPercentageOfPageContainerWidth(button.width())
+    
     coverSelector
         .toggle(!coverSelector.is(':visible'))
-        .width(button.width())
         .css({
-            left: button.offset().left + 'px',
-            top: button.offset().top + button.height() + 'px',
+            width: buttonWidthPercent,
+            left: buttonPositionLeftPercent,
+            top: (button.offset().top + button.height()) + 'px'
         })
         .find('.coverSelectorButton')
         .height(gridHeight)
