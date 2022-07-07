@@ -253,6 +253,12 @@ const renderOrderBox = () => {
     const element = orderBox.find('tbody tr').last().get()[0]
     element.scrollIntoView()
     OrderScreen.last_added_item = null
+    updateOrderBoxTotals()
+}
+
+const setOrderItems = (orderItems: orderItem[]) => {
+    OrderScreen.order_items = orderItems
+    renderOrderBox()
 }
 
 const createOrderRow = (orderItem: orderItem) => {
@@ -527,10 +533,10 @@ const showCoverSelector = (event: JQuery.TriggeredEvent) => {
     const button = $(event.target)
     const gridHeight = getGridCellDimensions().height
     const coverSelector = $('.coverSelector')
-    
+
     const buttonPositionLeftPercent = getPercentageOfPageContainerWidth(button.offset().left)
     const buttonWidthPercent = getPercentageOfPageContainerWidth(button.width())
-    
+
     coverSelector
         .toggle(!coverSelector.is(':visible'))
         .css({
