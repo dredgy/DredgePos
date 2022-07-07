@@ -69,8 +69,8 @@ const setupOrderScreen = (data: OrderScreenData) => {
     doc.on('click', '.nextButton', goToNextPage)
     doc.on('click', '.prevButton', goToPrevPage)
     doc.on('click', '.loadPageGroup', loadPageGroup)
-    doc.on('click', '[data-primary-action=item]', itemButtonClicked)
-    doc.on('click', '[data-primary-action=grid],[data-secondary-action=grid]', gridButtonClicked)
+    doc.on('click', getElementsByAction('item'), itemButtonClicked)
+    doc.on('click', getElementsByAction('grid'), gridButtonClicked)
     doc.on('click', '.closeGrid', hideGrids)
     doc.on('click', '.freetextButton', freetext)
     doc.on('click', '.openItemButton', customItem)
@@ -97,6 +97,8 @@ const setupOrderScreen = (data: OrderScreenData) => {
     });
 
 }
+
+const getElementsByAction = (action: string) => `[data-primary-action=${action}], [data-secondary-action=${action}]`
 
 /**
  * @param direction 1 for forward, -1 for backwards.
@@ -325,7 +327,7 @@ const gridHtmlGenerated = (gridData: {gridHtml:string, grid: grid}) => {
         .html(gridHtml)
         .show()
         .parent()
-        .height(cellDimensions.width * grid.rows)
+        .height(cellDimensions.height * grid.rows)
         .closest('.gridContainer')
         .find('.pageNavigation')
         .toggle(gridContainer.find('.gridPage').length >  1)
