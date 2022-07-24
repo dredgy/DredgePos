@@ -13,6 +13,7 @@ type OrderScreen = {
     print_groups: print_group[]
     order_item_id_generator: Generator
     selected_item_ids: number[]
+    pulse_order_item_ids: number[]
     qty_override: number
     print_group_override: print_group
     custom_item: item,
@@ -28,6 +29,7 @@ let OrderScreen : OrderScreen = {
     sales_categories: [],
     order_item_id_generator: newestId(),
     selected_item_ids: [],
+    pulse_order_item_ids: [],
     qty_override: 1,
     print_group_override: null,
     custom_item: null,
@@ -57,32 +59,30 @@ const loadPageGroup = (e: Event) => {
 }
 
 const setupOrderScreen = (data: OrderScreenData) => {
-
-
     OrderScreen.order_screen_pages = data.order_screen_pages
     OrderScreen.sales_categories = data.sales_categories
     OrderScreen.print_groups = data.print_groups
     OrderScreen.custom_item = data.custom_item
 
     updateOrderBoxTotals()
-    let doc = $(document)
-    doc.on('click', '.nextButton', goToNextPage)
-    doc.on('click', '.prevButton', goToPrevPage)
-    doc.on('click', '.loadPageGroup', loadPageGroup)
-    doc.on('click', getElementsByAction('item'), itemButtonClicked)
-    doc.on('click', getElementsByAction('grid'), gridButtonClicked)
-    doc.on('click', '.closeGrid', hideGrids)
-    doc.on('click', '.freetextButton', freetext)
-    doc.on('click', '.openItemButton', customItem)
-    doc.on('click', '.orderBoxTable tbody tr', itemRowClicked)
-    doc.on('click', '.voidButton', voidButtonClicked)
-    doc.on('dblclick', '.voidButton', voidLastItem)
-    doc.on('click', '.numpadButton', overrideQty)
-    doc.on('click', '.accumulateButton', () => toggleMode('accumulate'))
-    doc.on('click', '.changeCoverNumberButton', changeCoverNumberPrompt)
-    doc.on('click', '.showCoverSelectorButton', showCoverSelector)
-    doc.on('click', '.coverSelectorButton', coverSelected)
-    doc.on('change', '[name=print_override]', printGroupOverride)
+    $(document)
+        .on('click', '.nextButton', goToNextPage)
+        .on('click', '.prevButton', goToPrevPage)
+        .on('click', '.loadPageGroup', loadPageGroup)
+        .on('click', getElementsByAction('item'), itemButtonClicked)
+        .on('click', getElementsByAction('grid'), gridButtonClicked)
+        .on('click', '.closeGrid', hideGrids)
+        .on('click', '.freetextButton', freetext)
+        .on('click', '.openItemButton', customItem)
+        .on('click', '.orderBoxTable tbody tr', itemRowClicked)
+        .on('click', '.voidButton', voidButtonClicked)
+        .on('dblclick', '.voidButton', voidLastItem)
+        .on('click', '.numpadButton', overrideQty)
+        .on('click', '.accumulateButton', () => toggleMode('accumulate'))
+        .on('click', '.changeCoverNumberButton', changeCoverNumberPrompt)
+        .on('click', '.showCoverSelectorButton', showCoverSelector)
+        .on('click', '.coverSelectorButton', coverSelected)
+        .on('change', '[name=print_override]', printGroupOverride)
 
     turnOnMode('accumulate')
 
@@ -113,88 +113,128 @@ const navigatePage = (direction: number, button: JQuery) => {
     grid.get()[0].scrollLeft += grid.width() * direction
 }
 
+const getOrderBox = () => $('.orderBoxTable tbody')
 const goToNextPage = (e: JQuery.TriggeredEvent) => navigatePage(1, $(e.target))
 const goToPrevPage = (e: JQuery.TriggeredEvent) => navigatePage(-1, $(e.target))
 
-const addItemToOrderBox = (orderItem:orderItem) => {
-    const orderBox = $('.orderBoxTable tbody')
-    let selectedRows = orderBox.find('tr.selected')
-    let lastRow : JQuery = selectedRows.length ? getLastInstructionRow(selectedRows.first()) : orderBox.find('tr').last()
-    const existingRow = orderBox
-        .find('tr')
-        .filterByData('item', orderItem.item)
-        .filterByData('print_group', orderItem.print_group_id)
-        .filterByData('cover', orderItem.cover)
-        .last()
+const setItemQty = (orderItem: orderItem, qty: number) => {
+    const newItems = qty > 0
+        ? OrderScreen.order_items.map(existingOrderItem => {
+            if(existingOrderItem.id == orderItem.id){
+                existingOrderItem.qty = qty
+            }
+            return existingOrderItem
+        })
+        : array_remove(OrderScreen.order_items, orderItem)
 
-
-    //If accumulating, just increase the quantity of the existing row.
-    if(existingRow.length > 0 && isInMode('accumulate')){
-        incrementRowQty(existingRow, orderItem.qty)
-        scrollToElement(existingRow)
-        existingRow.pulse()
-    } else {
-        const newRow = createOrderRow(orderItem)
-        lastRow.length > 0
-            ? lastRow.after(newRow)
-            : orderBox.append(newRow)
-        scrollToElement(newRow)
-        newRow.pulse()
+    if(qty < 1){
+        OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
     }
 
-    deselectRow(orderBox.find('tr'))
+    setOrderItems(newItems)
 }
 
+const incrementItemQty = (orderItem:orderItem) => setItemQty(orderItem, orderItem.qty+1)
+const decrementItemQty = (orderItem:orderItem) => setItemQty(orderItem, orderItem.qty-1)
 
-const addInstructionToOrderBox = (instruction: orderItem) => {
-    const orderBox = $('.orderBoxTable tbody')
-    let selectedRows = orderBox.find('tr.selected')
-    const newRow = createOrderRow(instruction)
+const deselectAllRows = () => {
+    OrderScreen.selected_item_ids = []
+    $('tr.selected').removeClass('selected')
+}
 
-    //If no items are added, then you can't add an instruction row.
-    if(!orderBox.find('tr.itemRow').length) return
+const addOrderItemsToPulse = (id: number) => OrderScreen.pulse_order_item_ids = array_push(OrderScreen.pulse_order_item_ids, id)
+const removeOrderItemsToPulse = (id: number) => OrderScreen.pulse_order_item_ids = array_remove(OrderScreen.pulse_order_item_ids, id)
 
-    if(selectedRows.length > 0){
-        selectedRows.each( (_, row) => {
-            const selectedRow = $(row)
-            const parentRow = getParentRow(selectedRow)
-            if(parentRow.is(selectedRow) || !parentRow.hasClass('selected')) {
-                const newRow = createOrderRow(instruction)
-                getLastInstructionRow(selectedRow).after(newRow)
-                newRow
-                    .setColumnValue( lang('printgroup_header'), selectedRow.getColumnValue(lang('printgroup_header')) )
+const addItemToOrderBox = (newOrderItem:orderItem) => {
+    const existingItems = OrderScreen.order_items
+        .filter(existingOrderItem =>
+          existingOrderItem.item.id == newOrderItem.item.id
+          && existingOrderItem.print_group.id == newOrderItem.print_group.id
+          && existingOrderItem.cover == newOrderItem.cover
+        )
 
-
-                if(parentRow.hasClass('selected')){
-                    selectRow(newRow)
-                } else {
-                    newRow.pulse()
-                }
-
-                scrollToElement(newRow)
-            }
-        })
+    if(existingItems.length > 0 && isInMode('accumulate')) {
+        incrementItemQty(existingItems[0])
+        addOrderItemsToPulse(existingItems[0].id)
+    } else {
+        addOrderItemsToPulse(newOrderItem.id)
+        if(!OrderScreen.selected_item_ids.length) {
+            const newItems = array_push(OrderScreen.order_items, newOrderItem)
+            setOrderItems(newItems)
+        } else {
+            const newItems =
+                OrderScreen.order_items
+                    .collect(existingOrderItem => {
+                        const firstSelectedItemId = getLastInstructionItem(OrderScreen.selected_item_ids.first())?.id
+                        return firstSelectedItemId == existingOrderItem.id
+                            ? [existingOrderItem, newOrderItem]
+                            : [existingOrderItem]
+                    })
+            setOrderItems(newItems)
+        }
     }
 
-    const lastRow = orderBox.find('tr').last()
-    newRow
-        .setColumnValue(lang('printgroup_header'), lastRow.getColumnValue(lang('printgroup_header')))
-        .appendTo(orderBox)
-        .pulse()
-    scrollToElement(newRow)
+    deselectAllRows()
+}
+
+const getParentItem = (orderItemId: number) => {
+    const itemIndex = OrderScreen.order_items.findIndex(orderItem => orderItem.id === orderItemId);
+    if(OrderScreen.order_items[itemIndex].item.item_type == "item"){
+        return OrderScreen.order_items[itemIndex]
+    }
+    return OrderScreen.order_items
+            .filter((orderItem, index) => index < itemIndex && orderItem.item.item_type === 'item')
+            .last()
+}
+
+const getInstructionItems = (orderItemId: number) => {
+    const itemIndex = OrderScreen.order_items.findIndex(orderItem => orderItem.id === orderItemId);
+
+    if(!OrderScreen.order_items[itemIndex+1] || OrderScreen.order_items[itemIndex+1].item.item_type == "item")
+        return [OrderScreen.order_items[itemIndex]]
+
+    const nextItem =
+        OrderScreen.order_items
+            .filter((orderItem, index) => index > itemIndex && orderItem.item.item_type === 'item')
+            .first()
+    const nextItemIndex = OrderScreen.order_items.findIndex(orderItem => orderItem.id === nextItem.id);
+    return OrderScreen.order_items.slice(itemIndex, nextItemIndex)
+}
+
+const getLastInstructionItem = (orderItemId: number) => getInstructionItems(orderItemId).last()
+
+const addInstructionToOrderBox = (instruction: orderItem) => {
+    //If no items are added, then you can't add an instruction row.
+    if(!OrderScreen.order_items.length) return
+    const addAfter = OrderScreen.selected_item_ids.length
+        ? OrderScreen.selected_item_ids.map(selectedItemId => getLastInstructionItem(selectedItemId).id).unique()
+        : [getLastInstructionItem(OrderScreen.order_items.last().id).id]
+
+    const newItems = OrderScreen.order_items.collect(existingItem => {
+        const newInstruction = createNewOrderItem(instruction.item, instruction.qty, instruction.print_group)
+        addOrderItemsToPulse(newInstruction.id)
+        return addAfter.includes(existingItem.id)
+            ? [existingItem, newInstruction]
+            : [existingItem]
+    })
+    setOrderItems(newItems)
+}
+
+const createNewOrderItem = (item: item, qty: number, printGroup: print_group) : orderItem => {
+    return {
+        id: OrderScreen.order_item_id_generator.next().value,
+        item: clone(item),
+        qty: qty,
+        print_group: printGroup,
+        cover: OrderScreen.selected_cover,
+    }
 }
 
 
 const addNewItem = (item: item, qty = 1) => {
     const salesCategory = OrderScreen.sales_categories.where('id', item.sales_category_id)
     const printGroup = OrderScreen.print_group_override ?? OrderScreen.print_groups.where('id', salesCategory.print_group_id)
-    const orderItem : orderItem = {
-        id: OrderScreen.order_item_id_generator.next().value,
-        item: item,
-        qty: qty,
-        print_group_id: printGroup,
-        cover: OrderScreen.selected_cover,
-    }
+    const orderItem = createNewOrderItem(item, qty, printGroup)
 
     switch(item.item_type){
         case 'instruction':
@@ -207,54 +247,31 @@ const addNewItem = (item: item, qty = 1) => {
     }
 }
 
-const getLastInstructionRow = (row: JQuery) => {
-        let stopCounting = false
-        let finalRow = row
-        row.nextAll().each(function (index, activeRow){
-            if(!stopCounting){
-                if($(activeRow).hasClass('instructionRow')){
-                    finalRow = $(activeRow)
-                } else {
-                    stopCounting = true
-                }
-            }
-        })
-
-        return $(finalRow)
-}
-
-const getParentRow = (row: JQuery) =>
-    row.hasClass('instructionRow')
-        ? row.prevAll('.itemRow').first()
-        : row
-
-
-const incrementRowQty = (row: JQuery, qty: number) => {
-    const existingQty = Number(row.getColumnValue(lang('qty_header')))
-    const newQty = qty + existingQty
-    row.setColumnValue(lang('qty_header'), newQty)
-    calculateRowTotal(row)
-}
-
 const renderOrderBox = () => {
-    const orderBox = $('.orderBoxTable')
-    const tbody = orderBox.children('tbody')
+    const orderBox = getOrderBox()
     const newTbody = $('<tbody />')
     OrderScreen.order_items.forEach(orderItem => {
         const newRow = createOrderRow(orderItem)
         newTbody.append(newRow)
-        newRow.pulse()
+
         if(OrderScreen.selected_item_ids.includes(orderItem.id)){
-            selectRow(newRow)
+            newRow.addClass('selected')
+        }
+
+        if(OrderScreen.pulse_order_item_ids.includes(orderItem.id)){
+            newRow.pulse()
         }
     })
 
-    tbody.replaceWith(newTbody)
-    const element = orderBox.find('tbody tr').last().get()[0]
-    element.scrollIntoView()
-    OrderScreen.last_added_item = null
-    updateOrderBoxTotals()
+    orderBox.replaceWith(newTbody)
+    const element = newTbody.find('tr').last().get()[0]
+    if(element) {
+        element.scrollIntoView()
+    }
+        OrderScreen.last_added_item = null
+        updateOrderBoxTotals()
 }
+
 
 const setOrderItems = (orderItems: orderItem[]) => {
     OrderScreen.order_items = orderItems
@@ -271,10 +288,10 @@ const createOrderRow = (orderItem: orderItem) => {
         .setColumnValue(lang('price_header'), price)
         .setColumnValue(lang('id_header'), orderItem.item.id)
         .setColumnValue(lang('total_price_header'), price.multiply(orderItem.qty))
-        .setColumnValue(lang('printgroup_header'), orderItem.print_group_id?.name)
+        .setColumnValue(lang('printgroup_header'), orderItem.print_group?.name)
         .data('order-item-id', orderItem.id)
-        .data('order-item-id', orderItem.id)
-        .data('print_group', orderItem.print_group_id)
+        .data('order-item', orderItem)
+        .data('print_group', orderItem.print_group)
         .data('cover', orderItem.cover)
         .data('item', orderItem.item)
         .find('td.itemCell')
@@ -342,9 +359,10 @@ const gridHtmlGenerated = (gridData: {gridHtml:string, grid: grid}) => {
 
 const itemRowClicked = (e: JQuery.TriggeredEvent) => {
     const row = $(e.target).closest('tr')
+    const orderItem: orderItem = row.data('order-item')
 
     if(isInMode('void')){
-        voidRows(row)
+        voidOrderItems([orderItem.id])
         turnOffMode('void')
         return
     }
@@ -355,24 +373,23 @@ const itemRowClicked = (e: JQuery.TriggeredEvent) => {
 }
 
 const selectRow = (row: JQuery) => {
-    row.addClass('selected')
-    const instructionRows = row.nextUntil('.itemRow')
-
-    if(row.hasClass('itemRow') && instructionRows.length){
-        instructionRows.each((index, row) => {
-            selectRow($(row))
-        })
-    }
+    const orderItem: orderItem = row.addClass('selected').data('order-item')
+    OrderScreen.selected_item_ids = array_push(OrderScreen.selected_item_ids, orderItem.id)
 }
 
 const deselectRow = (row: JQuery) => {
     row.removeClass('selected')
     const instructionRows = row.nextUntil('.itemRow')
+    const orderItemToDeselect: orderItem = row.data('order-item')
+
+    OrderScreen.selected_item_ids = OrderScreen.selected_item_ids.filter(orderItemId => orderItemId != orderItemToDeselect.id)
 
     if(row.hasClass('itemRow') && instructionRows.length){
         deselectRow(instructionRows)
     }
 }
+
+
 
 const deleteRow = (row: JQuery) => row.find('*:not(.hidden)').slideUp('fast', () => row.remove())
 
@@ -381,31 +398,25 @@ const voidInstructionRow = (row: JQuery) => {
         deleteRow(row)
 }
 
-const voidItemRow = (row : JQuery) => decrementQty(row)
-
-const voidRow = (row: JQuery) => {
-    if(row.hasClass('itemRow')) voidItemRow(row)
-    else voidInstructionRow(row)
+const voidOrderItems = (orderItemIds: number[]) => {
+    orderItemIds.forEach(orderItemId => {
+        decrementItemQty(OrderScreen.order_items.find(item => item.id == orderItemId))
+    })
 }
 
-const voidRows = (rows: JQuery) => rows.each((index, row) => voidRow($(row)))
-
 const voidButtonClicked = () => {
-    const selectedRows = $('.orderBox tr.selected')
     if(isInMode('void')){
         turnOffMode('void')
-    } else if(selectedRows.length){
-        voidRows(selectedRows)
+    } else if(OrderScreen.selected_item_ids.length){
+        voidOrderItems(OrderScreen.selected_item_ids)
     } else {
         turnOnMode('void')
     }
 }
 
 const voidLastItem = () => {
-    const orderBox = $('.orderBoxTable tbody')
-    const allRows = orderBox.find('tr')
-    if(allRows.length < 1) return
-    voidRows(allRows.last())
+    if (OrderScreen.order_items.length)
+        decrementItemQty(OrderScreen.order_items.last())
 }
 
 const updateOrderBoxTotals = () => {

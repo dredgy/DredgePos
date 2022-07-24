@@ -186,14 +186,43 @@ const setElementVisibilityByMode = () => {
 
 const getPercentageOfPageContainerWidth = (pixels: number) => ( (pixels / $('#pageContainer').width()) * 100) + '%'
 
-const pulseElement = (element: JQuery) => element.addClass('pulse').on('animationend', () => element.removeClass('pulse'))
+const pulseElement = (element: JQuery) => {
+    const orderItem: orderItem = element.data('order-item')
+    removeOrderItemsToPulse(orderItem.id)
+    element
+        .addClass('pulse')
+        .on('animationend', () => element.removeClass('pulse'))
+}
+
+Array.prototype.collect = function<x>(this: x[], func: (item: x) => x[]) {
+    return this.map(func).flat(1)
+}
 
 Array.prototype.where = function<x>(this: x[], property: string, value: any) {
     return this.filter( item => (item as any)[property] === value)[0] || null
 }
+Array.prototype.first = function<x>(this: x[]) {
+    return this[0]
+}
+Array.prototype.last = function<x>(this: x[]) {
+    return this[this.length-1]
+}
+Array.prototype.unique = function<x>(this: x[]) {
+    return [... new Set(this)]
+}
+
+const clone = <x>(obj: x) => JSON.parse(JSON.stringify(obj)) as x
 
 const money = (amount: number, fromCents=true) => currency(amount, {fromCents: fromCents})
 const moneyFromString = (amount: string) => currency(amount)
+
+const array_push = <x>(array: x[], value: x) => {
+    let copy = array.slice()
+    return [...copy, value]
+};
+const array_remove = <x>(array: x[], valueToRemove: x) => array.filter(item => item != valueToRemove)
+const array_pop = <x>(array:x[]) => array.slice(0,-1);
+const array_unique = <x>(array:x[]) => [... new Set(array)]
 
 const toggle = (e: JQuery.TriggeredEvent) => {
     const button = $(e.target)

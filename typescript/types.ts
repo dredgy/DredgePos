@@ -10,7 +10,7 @@ interface order {
 interface orderItem {
     id: number
     qty: number
-    print_group_id: print_group
+    print_group: print_group
     item: item
     cover: number
 }
@@ -108,4 +108,8 @@ type sales_category = {
 
 interface Array<T> {
     where(property: string, value: any): T
+    first(): T
+    last(): T
+    unique(): this
+    collect(func: (item: T) => T[]): T[]
 }
