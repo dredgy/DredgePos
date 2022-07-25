@@ -117,30 +117,44 @@ const getOrderBox = () => $('.orderBoxTable tbody')
 const goToNextPage = (e: JQuery.TriggeredEvent) => navigatePage(1, $(e.target))
 const goToPrevPage = (e: JQuery.TriggeredEvent) => navigatePage(-1, $(e.target))
 
+const voidInstructionRow = (instructionId: number) => {
+    OrderScreen.order_items = OrderScreen.order_items.filter(orderItem => orderItem.id != instructionId)
+    OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, instructionId)
+    renderOrderBox()
+}
+
+const voidAllInstructions = (instructions: number[]) => instructions.forEach(voidInstructionRow)
+ 
 const setItemQty = (orderItem: orderItem, qty: number) => {
+    if(!orderItem || !OrderScreen.order_items.find(existingItem => orderItem.id == existingItem.id)) return;
+    
     const instructionIds = getInstructionItems(orderItem.id).map(orderItem => orderItem.id)
-    const newItems = qty > 0
-        ? OrderScreen.order_items.map(existingOrderItem => {
+    
+    if(qty < 1){
+        const newItems = OrderScreen.order_items.filter(existingOrderItem => existingOrderItem.id != orderItem.id)
+        
+        OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
+        if(orderItem.item.item_type == "item") {
+            const lastItem = newItems.filter(orderItem => orderItem.item.item_type == "item")?.last()
+            OrderScreen.last_added_item_ids = newItems.length > 0 ? [lastItem.id] : []
+        }
+        setOrderItems(newItems)
+        voidAllInstructions(instructionIds)
+        return;
+    }
+    
+    const newItems = OrderScreen.order_items.map(existingOrderItem => {
             if(existingOrderItem.id == orderItem.id){
                 existingOrderItem.qty = qty
             }
             return existingOrderItem
         })
-        : OrderScreen.order_items.filter(existingOrderItem => existingOrderItem.id != orderItem.id && !instructionIds.includes(existingOrderItem.id))
 
-    
-    if(qty < 1){
-        OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
-        const lastItem = newItems.filter(orderItem => orderItem.item.item_type == "item")?.last()
-        OrderScreen.last_added_item_ids = newItems.length > 0 ? [lastItem.id] : []
-    }
-    
     setOrderItems(newItems)
-    
 }
 
-const incrementItemQty = (orderItem:orderItem) => setItemQty(orderItem, orderItem.qty+1)
-const decrementItemQty = (orderItem:orderItem) => setItemQty(orderItem, orderItem.qty-1)
+const incrementItemQty = (orderItem:orderItem) => setItemQty(orderItem, orderItem?.qty+1)
+const decrementItemQty = (orderItem:orderItem) => setItemQty(orderItem, orderItem?.qty-1)
 
 const deselectAllRows = () => {
     OrderScreen.selected_item_ids = []
@@ -195,9 +209,13 @@ const getParentItem = (orderItemId: number) => {
 
 const getInstructionItems = (orderItemId: number) => {
     const itemIndex = OrderScreen.order_items.findIndex(orderItem => orderItem.id === orderItemId);
-    if(!OrderScreen.order_items[itemIndex+1] || OrderScreen.order_items[itemIndex+1].item.item_type == "item")
+    if(!OrderScreen.order_items[itemIndex+1] 
+        || OrderScreen.order_items[itemIndex+1].item.item_type == "item" 
+        || OrderScreen.order_items[itemIndex].item.item_type == "instruction"
+    )
         return [OrderScreen.order_items[itemIndex]]
-            
+    
+    
     const nextItem =
         OrderScreen.order_items
             .filter((orderItem, index) =>  index > itemIndex && orderItem.item.item_type === 'item')
@@ -376,40 +394,23 @@ const itemRowClicked = (e: JQuery.TriggeredEvent) => {
         return
     }
 
-    if(!row.hasClass('selected')) selectRow(row)
-    else deselectRow(row)
-
-}
-
-const selectRow = (row: JQuery) => {
-    const orderItem: orderItem = row.addClass('selected').data('order-item')
-    OrderScreen.selected_item_ids = array_push(OrderScreen.selected_item_ids, orderItem.id)
-}
-
-const deselectRow = (row: JQuery) => {
-    row.removeClass('selected')
-    const instructionRows = row.nextUntil('.itemRow')
-    const orderItemToDeselect: orderItem = row.data('order-item')
-
-    OrderScreen.selected_item_ids = OrderScreen.selected_item_ids.filter(orderItemId => orderItemId != orderItemToDeselect.id)
-
-    if(row.hasClass('itemRow') && instructionRows.length){
-        deselectRow(instructionRows)
+    if(!row.hasClass('selected')) {
+        OrderScreen.selected_item_ids = array_push(OrderScreen.selected_item_ids, orderItem.id)
+        getInstructionItems(orderItem.id).forEach(instruction => OrderScreen.selected_item_ids = array_push(OrderScreen.selected_item_ids, instruction.id))
     }
-}
-
-
-
-const deleteRow = (row: JQuery) => row.find('*:not(.hidden)').slideUp('fast', () => row.remove())
-
-const voidInstructionRow = (row: JQuery) => {
-    if(!row.prevAll('.itemRow').first().hasClass('selected'))
-        deleteRow(row)
+    else {
+        OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
+        getInstructionItems(orderItem.id).forEach(instruction => OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, instruction.id))
+    }
+    
+    renderOrderBox()
 }
 
 const voidOrderItems = (orderItemIds: number[]) => {
     orderItemIds.forEach(orderItemId => {
-        decrementItemQty(OrderScreen.order_items.find(item => item.id == orderItemId))
+        const orderItemToVoid = OrderScreen.order_items.find(item => item.id == orderItemId)
+        if(orderItemToVoid)
+            decrementItemQty(orderItemToVoid)
     })
 }
 
@@ -455,19 +456,6 @@ const calculateRowTotal = (row: JQuery) => {
     let price = getUnitPrice(row)
     let qty = getQty(row)
     row.setColumnValue(lang('total_price_header'), price.multiply(qty))
-}
-
-const decrementQty = (row: JQuery, qty=1) => {
-    const existingQty = getQty(row)
-
-    if(existingQty <= 1){
-        const childRows = row.nextUntil('.itemRow')
-        deleteRow(row)
-        deleteRow(childRows)
-        return
-    }
-    row.setColumnValue(lang('qty_header'), existingQty - qty)
-    calculateRowTotal(row)
 }
 
 const scrollToElement = (JQueryElement: JQuery) => {
@@ -600,7 +588,7 @@ const changeCoverNumberPrompt = () =>
 const changeCoverNumberPromptSubmitted = (value: string) => updateCoverNumbers(Number(value))
 
 const updateCoverNumbers = (covers: number) => {
-    let newTable = Object.assign({}, OrderScreen.table)
+    let newTable = clone(OrderScreen.table)
     newTable.default_covers = covers
     ajax('/order/updateCovers', newTable, 'post', coverNumbersUpdated, null, null)
 }
