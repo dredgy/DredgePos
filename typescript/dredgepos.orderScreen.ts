@@ -118,6 +118,7 @@ const goToNextPage = (e: JQuery.TriggeredEvent) => navigatePage(1, $(e.target))
 const goToPrevPage = (e: JQuery.TriggeredEvent) => navigatePage(-1, $(e.target))
 
 const setItemQty = (orderItem: orderItem, qty: number) => {
+    const instructionIds = getInstructionItems(orderItem.id).map(orderItem => orderItem.id)
     const newItems = qty > 0
         ? OrderScreen.order_items.map(existingOrderItem => {
             if(existingOrderItem.id == orderItem.id){
@@ -125,13 +126,17 @@ const setItemQty = (orderItem: orderItem, qty: number) => {
             }
             return existingOrderItem
         })
-        : array_remove(OrderScreen.order_items, orderItem)
+        : OrderScreen.order_items.filter(existingOrderItem => existingOrderItem.id != orderItem.id && !instructionIds.includes(existingOrderItem.id))
 
+    
     if(qty < 1){
         OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
+        const lastItem = newItems.filter(orderItem => orderItem.item.item_type == "item")?.last()
+        OrderScreen.last_added_item_ids = newItems.length > 0 ? [lastItem.id] : []
     }
-
+    
     setOrderItems(newItems)
+    
 }
 
 const incrementItemQty = (orderItem:orderItem) => setItemQty(orderItem, orderItem.qty+1)
@@ -214,9 +219,7 @@ const addInstructionToOrderBox = (instruction: orderItem) => {
     const addAfter = OrderScreen.selected_item_ids.length
         ? OrderScreen.selected_item_ids.map(selectedItemId => getLastInstructionItem(selectedItemId).id).unique()
         : OrderScreen.last_added_item_ids.map(itemId => getLastInstructionItem(itemId).id)
-
-    console.log(addAfter)
-    
+        
     const newItems = OrderScreen.order_items.collect(existingItem => {
         const newInstruction = createNewOrderItem(instruction.item, instruction.qty, instruction.print_group)
         addOrderItemsToPulse(newInstruction.id)

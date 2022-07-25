@@ -111,5 +111,5 @@ interface Array<T> {
     first(): T
     last(): T
     unique(): this
-    collect(func: (item: T) => any[]): any[]
+    collect<y>(func: (item: T) => y[]): y[]
 }

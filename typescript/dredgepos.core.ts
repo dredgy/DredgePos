@@ -194,7 +194,7 @@ const pulseElement = (element: JQuery) => {
         .on('animationend', () => element.removeClass('pulse'))
 }
 
-Array.prototype.collect = function<x>(this: x[], func: (item: x) => x[]) {
+Array.prototype.collect = function<x, y>(this: x[], func: (item: x) => y[]) {
     return this.map(func).flat(1)
 }
 
