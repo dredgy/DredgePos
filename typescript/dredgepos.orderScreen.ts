@@ -7,34 +7,34 @@ type OrderScreenData = {
 
 type OrderScreen = {
     order_screen_pages: order_screen_page[]
-    last_added_item: orderItem
     order_items: orderItem[]
     sales_categories: sales_category[]
     print_groups: print_group[]
     order_item_id_generator: Generator
     selected_item_ids: number[]
-    pulse_order_item_ids: number[]
+    order_item_ids_to_pulse: number[]
     qty_override: number
     print_group_override: print_group
     custom_item: item,
     selected_cover: number
     table: floorplan_table,
+    last_added_item_ids: number[]
 }
 
 let OrderScreen : OrderScreen = {
     order_screen_pages: null,
-    last_added_item: null,
     order_items: [],
     print_groups: [],
     sales_categories: [],
     order_item_id_generator: newestId(),
     selected_item_ids: [],
-    pulse_order_item_ids: [],
+    order_item_ids_to_pulse: [],
     qty_override: 1,
     print_group_override: null,
     custom_item: null,
     selected_cover: 0,
     table: null,
+    last_added_item_ids: [],
 }
 
 const loadPageGroup = (e: Event) => {
@@ -142,8 +142,8 @@ const deselectAllRows = () => {
     $('tr.selected').removeClass('selected')
 }
 
-const addOrderItemsToPulse = (id: number) => OrderScreen.pulse_order_item_ids = array_push(OrderScreen.pulse_order_item_ids, id)
-const removeOrderItemsToPulse = (id: number) => OrderScreen.pulse_order_item_ids = array_remove(OrderScreen.pulse_order_item_ids, id)
+const addOrderItemsToPulse = (id: number) => OrderScreen.order_item_ids_to_pulse = array_push(OrderScreen.order_item_ids_to_pulse, id)
+const removeOrderItemsToPulse = (id: number) => OrderScreen.order_item_ids_to_pulse = array_remove(OrderScreen.order_item_ids_to_pulse, id)
 
 const addItemToOrderBox = (newOrderItem:orderItem) => {
     const existingItems = OrderScreen.order_items
@@ -154,8 +154,9 @@ const addItemToOrderBox = (newOrderItem:orderItem) => {
         )
 
     if(existingItems.length > 0 && isInMode('accumulate')) {
-        incrementItemQty(existingItems[0])
         addOrderItemsToPulse(existingItems[0].id)
+        incrementItemQty(existingItems[0])
+        OrderScreen.last_added_item_ids = [existingItems[0].id]
     } else {
         addOrderItemsToPulse(newOrderItem.id)
         if(!OrderScreen.selected_item_ids.length) {
@@ -165,15 +166,15 @@ const addItemToOrderBox = (newOrderItem:orderItem) => {
             const newItems =
                 OrderScreen.order_items
                     .collect(existingOrderItem => {
-                        const firstSelectedItemId = getLastInstructionItem(OrderScreen.selected_item_ids.first())?.id
+                        const firstSelectedItemId = getLastInstructionItem(OrderScreen.selected_item_ids.first()).id
                         return firstSelectedItemId == existingOrderItem.id
                             ? [existingOrderItem, newOrderItem]
                             : [existingOrderItem]
                     })
             setOrderItems(newItems)
         }
+        OrderScreen.last_added_item_ids = [newOrderItem.id]
     }
-
     deselectAllRows()
 }
 
@@ -189,16 +190,19 @@ const getParentItem = (orderItemId: number) => {
 
 const getInstructionItems = (orderItemId: number) => {
     const itemIndex = OrderScreen.order_items.findIndex(orderItem => orderItem.id === orderItemId);
-
     if(!OrderScreen.order_items[itemIndex+1] || OrderScreen.order_items[itemIndex+1].item.item_type == "item")
         return [OrderScreen.order_items[itemIndex]]
-
+            
     const nextItem =
         OrderScreen.order_items
-            .filter((orderItem, index) => index > itemIndex && orderItem.item.item_type === 'item')
-            .first()
+            .filter((orderItem, index) =>  index > itemIndex && orderItem.item.item_type === 'item')
+            ?.first()
+    if(!nextItem) {
+        return OrderScreen.order_items.filter((orderItem, index) => index > itemIndex)
+    }
     const nextItemIndex = OrderScreen.order_items.findIndex(orderItem => orderItem.id === nextItem.id);
     return OrderScreen.order_items.slice(itemIndex, nextItemIndex)
+
 }
 
 const getLastInstructionItem = (orderItemId: number) => getInstructionItems(orderItemId).last()
@@ -206,10 +210,13 @@ const getLastInstructionItem = (orderItemId: number) => getInstructionItems(orde
 const addInstructionToOrderBox = (instruction: orderItem) => {
     //If no items are added, then you can't add an instruction row.
     if(!OrderScreen.order_items.length) return
+        
     const addAfter = OrderScreen.selected_item_ids.length
         ? OrderScreen.selected_item_ids.map(selectedItemId => getLastInstructionItem(selectedItemId).id).unique()
-        : [getLastInstructionItem(OrderScreen.order_items.last().id).id]
+        : OrderScreen.last_added_item_ids.map(itemId => getLastInstructionItem(itemId).id)
 
+    console.log(addAfter)
+    
     const newItems = OrderScreen.order_items.collect(existingItem => {
         const newInstruction = createNewOrderItem(instruction.item, instruction.qty, instruction.print_group)
         addOrderItemsToPulse(newInstruction.id)
@@ -258,7 +265,7 @@ const renderOrderBox = () => {
             newRow.addClass('selected')
         }
 
-        if(OrderScreen.pulse_order_item_ids.includes(orderItem.id)){
+        if(OrderScreen.order_item_ids_to_pulse.includes(orderItem.id)){
             newRow.pulse()
         }
     })
@@ -268,7 +275,6 @@ const renderOrderBox = () => {
     if(element) {
         element.scrollIntoView()
     }
-        OrderScreen.last_added_item = null
         updateOrderBoxTotals()
 }
 

@@ -8,7 +8,7 @@
         "removeComments":false,
         "preserveConstEnums":true,
         "outDir":"wwwroot/scripts",
-        "target":"ES2016",
+        "target":"ESNext",
         "sourceMap":true,
         "moduleResolution": "node"
     },
