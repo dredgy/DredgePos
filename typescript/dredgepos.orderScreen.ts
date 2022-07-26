@@ -116,14 +116,6 @@ const navigatePage = (direction: number, button: JQuery) => {
 const getOrderBox = () => $('.orderBoxTable tbody')
 const goToNextPage = (e: JQuery.TriggeredEvent) => navigatePage(1, $(e.target))
 const goToPrevPage = (e: JQuery.TriggeredEvent) => navigatePage(-1, $(e.target))
-
-const voidInstructionRow = (instructionId: number) => {
-    OrderScreen.order_items = OrderScreen.order_items.filter(orderItem => orderItem.id != instructionId)
-    OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, instructionId)
-    renderOrderBox()
-}
-
-const voidAllInstructions = (instructions: number[]) => instructions.forEach(voidInstructionRow)
  
 const setItemQty = (orderItem: orderItem, qty: number) => {
     if(!orderItem || !OrderScreen.order_items.find(existingItem => orderItem.id == existingItem.id)) return;
@@ -136,10 +128,9 @@ const setItemQty = (orderItem: orderItem, qty: number) => {
         OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
         if(orderItem.item.item_type == "item") {
             const lastItem = newItems.filter(orderItem => orderItem.item.item_type == "item")?.last()
-            OrderScreen.last_added_item_ids = newItems.length > 0 ? [lastItem.id] : []
+            OrderScreen.last_added_item_ids = newItems.length > 0 && lastItem ? [lastItem.id] : []
         }
         setOrderItems(newItems)
-        voidAllInstructions(instructionIds)
         return;
     }
     
@@ -197,12 +188,12 @@ const addItemToOrderBox = (newOrderItem:orderItem) => {
     deselectAllRows()
 }
 
-const getParentItem = (orderItemId: number) => {
-    const itemIndex = OrderScreen.order_items.findIndex(orderItem => orderItem.id === orderItemId);
-    if(OrderScreen.order_items[itemIndex].item.item_type == "item"){
-        return OrderScreen.order_items[itemIndex]
+const getParentItem = (orderItemId: number, itemList:orderItem[]) => {
+    const itemIndex = itemList.findIndex(orderItem => orderItem.id === orderItemId);
+    if(itemList[itemIndex].item.item_type == "item"){
+        return itemList[itemIndex]
     }
-    return OrderScreen.order_items
+    return itemList
             .filter((orderItem, index) => index < itemIndex && orderItem.item.item_type === 'item')
             .last()
 }
@@ -397,6 +388,7 @@ const itemRowClicked = (e: JQuery.TriggeredEvent) => {
     if(!row.hasClass('selected')) {
         OrderScreen.selected_item_ids = array_push(OrderScreen.selected_item_ids, orderItem.id)
         getInstructionItems(orderItem.id).forEach(instruction => OrderScreen.selected_item_ids = array_push(OrderScreen.selected_item_ids, instruction.id))
+        OrderScreen.selected_item_ids = OrderScreen.selected_item_ids.unique()
     }
     else {
         OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
@@ -407,10 +399,18 @@ const itemRowClicked = (e: JQuery.TriggeredEvent) => {
 }
 
 const voidOrderItems = (orderItemIds: number[]) => {
+    const originalOrderItemList = clone(OrderScreen.order_items)
+    const originalSelectedIds = clone(OrderScreen.selected_item_ids)
     orderItemIds.forEach(orderItemId => {
         const orderItemToVoid = OrderScreen.order_items.find(item => item.id == orderItemId)
-        if(orderItemToVoid)
-            decrementItemQty(orderItemToVoid)
+        if(orderItemToVoid) {
+            if(orderItemToVoid.item.item_type == "instruction") {
+                const parentItem = getParentItem(orderItemToVoid.id, originalOrderItemList)
+                if(originalSelectedIds.includes(parentItem.id) && parentItem.qty-1 < 1){
+                    decrementItemQty(orderItemToVoid)
+                }
+            } else decrementItemQty(orderItemToVoid)
+        }
     })
 }
 
