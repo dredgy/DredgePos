@@ -409,15 +409,13 @@ const voidOrderItems = (orderItemIds: number[]) => {
     const originalOrderItemList = clone(OrderScreen.order_items)
     const originalSelectedIds = clone(OrderScreen.selected_item_ids)
     orderItemIds.forEach(orderItemId => {
-        const orderItemToVoid = OrderScreen.order_items.find(item => item.id == orderItemId)
-        if(orderItemToVoid) {
-            if(orderItemToVoid.item.item_type == "instruction") {
-                const parentItem = getParentItem(orderItemToVoid.id, originalOrderItemList)
-                if(originalSelectedIds.includes(parentItem.id) && parentItem.qty-1 < 1 || !originalSelectedIds.includes(parentItem.id)){
-                    decrementItemQty(orderItemToVoid)
-                }
-            } else decrementItemQty(orderItemToVoid)
-        }
+        const orderItemToVoid = originalOrderItemList.find(item => item.id == orderItemId)
+        if(orderItemToVoid.item.item_type == "instruction") {
+            const parentItem = getParentItem(orderItemToVoid.id, originalOrderItemList)
+            if(originalSelectedIds.includes(parentItem.id) && parentItem.qty-1 < 1 || !originalSelectedIds.includes(parentItem.id)){
+                decrementItemQty(orderItemToVoid)
+            }
+        } else decrementItemQty(orderItemToVoid)
     })
 }
 
