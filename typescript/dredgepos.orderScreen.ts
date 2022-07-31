@@ -116,15 +116,15 @@ const navigatePage = (direction: number, button: JQuery) => {
 const getOrderBox = () => $('.orderBoxTable tbody')
 const goToNextPage = (e: JQuery.TriggeredEvent) => navigatePage(1, $(e.target))
 const goToPrevPage = (e: JQuery.TriggeredEvent) => navigatePage(-1, $(e.target))
- 
+
 const setItemQty = (orderItem: orderItem, qty: number) => {
     if(!orderItem || !OrderScreen.order_items.find(existingItem => orderItem.id == existingItem.id)) return;
-    
+
     const instructionIds = getInstructionItems(orderItem.id).map(orderItem => orderItem.id)
-    
+
     if(qty < 1){
         const newItems = OrderScreen.order_items.filter(existingOrderItem => existingOrderItem.id != orderItem.id)
-        
+
         OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
         if(orderItem.item.item_type == "item") {
             const lastItem = newItems.filter(orderItem => orderItem.item.item_type == "item")?.last()
@@ -133,7 +133,7 @@ const setItemQty = (orderItem: orderItem, qty: number) => {
         setOrderItems(newItems)
         return;
     }
-    
+
     const newItems = OrderScreen.order_items.map(existingOrderItem => {
             if(existingOrderItem.id == orderItem.id){
                 existingOrderItem.qty = qty
@@ -200,13 +200,13 @@ const getParentItem = (orderItemId: number, itemList:orderItem[]) => {
 
 const getInstructionItems = (orderItemId: number) => {
     const itemIndex = OrderScreen.order_items.findIndex(orderItem => orderItem.id === orderItemId);
-    if(!OrderScreen.order_items[itemIndex+1] 
-        || OrderScreen.order_items[itemIndex+1].item.item_type == "item" 
+    if(!OrderScreen.order_items[itemIndex+1]
+        || OrderScreen.order_items[itemIndex+1].item.item_type == "item"
         || OrderScreen.order_items[itemIndex].item.item_type == "instruction"
     )
         return [OrderScreen.order_items[itemIndex]]
-    
-    
+
+
     const nextItem =
         OrderScreen.order_items
             .filter((orderItem, index) =>  index > itemIndex && orderItem.item.item_type === 'item')
@@ -224,11 +224,18 @@ const getLastInstructionItem = (orderItemId: number) => getInstructionItems(orde
 const addInstructionToOrderBox = (instruction: orderItem) => {
     //If no items are added, then you can't add an instruction row.
     if(!OrderScreen.order_items.length) return
-        
+
     const addAfter = OrderScreen.selected_item_ids.length
-        ? OrderScreen.selected_item_ids.map(selectedItemId => getLastInstructionItem(selectedItemId).id).unique()
+        ? OrderScreen.selected_item_ids
+            .filter(selectedItemId => {
+                const orderItem = OrderScreen.order_items.find(orderItem => orderItem.id == selectedItemId)
+                const parentItem = getParentItem(selectedItemId, OrderScreen.order_items)
+                return !(orderItem.item.item_type == "instruction" && OrderScreen.selected_item_ids.includes(parentItem.id))
+            })
+            .map(selectedItemId => getLastInstructionItem(selectedItemId).id)
+            .unique()
         : OrderScreen.last_added_item_ids.map(itemId => getLastInstructionItem(itemId).id)
-        
+
     const newItems = OrderScreen.order_items.collect(existingItem => {
         const newInstruction = createNewOrderItem(instruction.item, instruction.qty, instruction.print_group)
         addOrderItemsToPulse(newInstruction.id)
@@ -394,7 +401,7 @@ const itemRowClicked = (e: JQuery.TriggeredEvent) => {
         OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
         getInstructionItems(orderItem.id).forEach(instruction => OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, instruction.id))
     }
-    
+
     renderOrderBox()
 }
 
