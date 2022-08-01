@@ -434,33 +434,25 @@ const voidLastItem = () => {
         decrementItemQty(OrderScreen.order_items.last())
 }
 
+const getSelectedTotals = () =>         
+    OrderScreen.selected_item_ids
+        .map(selectedId => OrderScreen.order_items.find(orderItem => orderItem.id == selectedId))
+        .reduce((resultSoFar, currentOrderItem) => {
+            return resultSoFar.add(currentOrderItem.item.price1 * currentOrderItem.qty)
+        }, money(0))
+
+const getTotals = () =>
+    OrderScreen.order_items
+        .reduce((resultSoFar, currentOrderItem) => {
+            return resultSoFar.add(currentOrderItem.item.price1 * currentOrderItem.qty)
+        }, money(0))
+
 const updateOrderBoxTotals = () => {
-    const allRows = $('.orderBoxTable tbody tr')
-    const selectedRows = $('.orderBoxTable tbody tr.selected')
-    const completeTotal = lang('totalPrice', getTotalOfRows(allRows))
-    const selectedTotal = lang('selectedPrice', getTotalOfRows(selectedRows))
+    const completeTotal = lang('totalPrice', getTotals().format())
+    const selectedTotal = lang('selectedPrice', getSelectedTotals().format())
 
     $('.orderBoxTotal').text(completeTotal)
     $('.orderBoxSelectedTotal').text(selectedTotal)
-}
-
-const getTotalOfRows = (rows: JQuery) => {
-    return money(rows
-        .find('td.totalPriceCell')
-        .get()
-        .map(cell => Number(cell.innerText))
-        .filter(number => !isNaN(number))
-        .reduce( (total, number) => total + number , 0), false)
-        .format()
-}
-
-const getQty = (row: JQuery) => Number(row.getColumnValue(lang('qty_header')))
-const getUnitPrice = (row: JQuery) => moneyFromString(row.getColumnValue(lang('price_header')))
-
-const calculateRowTotal = (row: JQuery) => {
-    let price = getUnitPrice(row)
-    let qty = getQty(row)
-    row.setColumnValue(lang('total_price_header'), price.multiply(qty))
 }
 
 const scrollToElement = (JQueryElement: JQuery) => {
