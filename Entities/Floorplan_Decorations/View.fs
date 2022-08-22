@@ -13,10 +13,10 @@ let decoratorItem (imageName, imageUrl) =
 let decoratorRow decoratorItems = div [_class "decoratorRow"] [yield! decoratorItems]
 
 let decorator (decorationRows: XmlNode[]) =
-    div [_id "decorator"] [
+    div [_id "decorator"; _class "modal"] [
         div [_id "decoratorHeader"] [
             h2 [] [lang "choose_decoration"]
-            a [_class "posButton hideDecorator"] [str "×"]
+            a [_class "posButton hideModals"] [str "×"]
         ]
         div [_id "decoratorContent"] [
             yield! decorationRows
