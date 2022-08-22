@@ -23,9 +23,7 @@ const lang = (key: string, replacements?: string[] | string) => {
 }
 
 /** Check if a variable is defined */
-const defined = (variable: any) => {
-    return typeof variable !== 'undefined'
-}
+const defined = (variable: any) => typeof variable !== 'undefined'
 
 /** Call an Ajax function asynchronously */
 const ajax = (endpoint: string, data: any, method = 'POST', successFunction: Function, errorFunction: Function, beforeFunction: any) => {
@@ -69,18 +67,17 @@ const ajaxSync = (endpoint: string, data?: any, method = 'POST') => {
 /* Redirect to a specific URL */
 const redirect = (url: string): void => location.assign(url)
 
-const resize = () => {
-    $('#pageContainer').height(window.innerHeight + "px");
-}
+const resize = () => $('#pageContainer').height(window.innerHeight + "px");
 
 const setupCore = (languageVars: Record<string, string>) => {
     Application.languageVars = languageVars
-    const doc = $(document)
-    doc.on('click', '#alertNo, #alertOk', hideAlerts)
-    doc.on('click', '.toggle', toggle)
+    $(document)
+        .on('click', '#alertNo, #alertOk', hideAlerts)
+        .on('click', '.toggle', toggle)
+        .on('click', '.hideModals', hideModals)
+    
     window.addEventListener('resize', resize)
     resize()
-
     setElementVisibilityByMode()
 }
 
@@ -117,6 +114,7 @@ const confirmation = (message: string, data: any, title = 'Confirm', submitFunct
 
 
 const hideAlerts = () => $('#alert').hide()
+const hideModals = () => $('.modal').hide()
 
 const turnOnMode = (mode: PosMode) => {
     Application.mode.push(mode)
