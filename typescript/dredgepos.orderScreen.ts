@@ -123,7 +123,9 @@ const setItemQty = (orderItem: orderItem, qty: number) => {
     const instructionIds = getInstructionItems(orderItem.id).map(orderItem => orderItem.id)
 
     if(qty < 1){
-        const newItems = OrderScreen.order_items.filter(existingOrderItem => existingOrderItem.id != orderItem.id)
+        const newItems = OrderScreen.order_items.filter(existingOrderItem =>
+            (existingOrderItem.id != orderItem.id) && !instructionIds.includes(existingOrderItem.id)
+        )
 
         OrderScreen.selected_item_ids = array_remove(OrderScreen.selected_item_ids, orderItem.id)
         if(orderItem.item.item_type == "item") {
@@ -434,7 +436,7 @@ const voidLastItem = () => {
         decrementItemQty(OrderScreen.order_items.last())
 }
 
-const getSelectedTotals = () =>         
+const getSelectedTotals = () =>
     OrderScreen.selected_item_ids
         .map(selectedId => OrderScreen.order_items.find(orderItem => orderItem.id == selectedId))
         .reduce((resultSoFar, currentOrderItem) => {
@@ -459,13 +461,13 @@ const scrollToElement = (JQueryElement: JQuery) => {
     const element = JQueryElement.get()[0]
     const container = JQueryElement.closest('.orderBox').get()[0]
     const containerTop = $(container).scrollTop()
-    const containerBottom = containerTop + $(container).height();
+    const containerBottom = containerTop + $(container).height()
     const elemTop = element.offsetTop
-    const elemBottom = elemTop + $(element).height();
+    const elemBottom = elemTop + $(element).height()
     if (elemTop < containerTop) {
-        $(container).scrollTop(elemTop);
+        $(container).scrollTop(elemTop)
     } else if (elemBottom > containerBottom) {
-        $(container).scrollTop(elemBottom - $(container).height());
+        $(container).scrollTop(elemBottom - $(container).height())
     }
 }
 

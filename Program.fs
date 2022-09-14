@@ -17,11 +17,14 @@ module Program =
         forward "/install" DredgePos.Installer.Router.router
     }
 
-    let app = application {
-        use_mime_types [(".woff", "application/font-woff")]
-        use_static "wwwroot"
-        use_router router
-        url "http://0.0.0.0:5001"
-    }
+    let app =
+        let ipAddress = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName()).AddressList[2];
+        printf $"DredgePOS is now running at http://{ipAddress}:5001\n"
+        application {
+            use_mime_types [(".woff", "application/font-woff")]
+            use_static "wwwroot"
+            use_router router
+            url "http://0.0.0.0:5001"
+        }
 
     run app
